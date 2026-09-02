@@ -10,6 +10,7 @@ import { mergeLiveNow, useCommunityLive } from "@/lib/use-community-live";
 import { usePlayer } from "@/lib/player-store";
 import { formatCount } from "@/lib/utils";
 import { FaceMarquee } from "@/components/face-marquee";
+import { StampCdj } from "@/components/stamp-cdj";
 import { LiveDot } from "@/components/live-dot";
 import { useMyBlocks } from "@/lib/use-blocks";
 import { formatChartWeek } from "@/lib/chart-week";
@@ -65,11 +66,7 @@ function Home() {
     <div className="enter-up">
       <section className="relative overflow-hidden rounded-lg border border-border bg-black">
         <div className="relative flex min-h-[26rem] flex-col items-center justify-center px-5 py-10 text-center md:min-h-[30rem] md:py-12">
-          <img
-            src="/art/brand/logo.png?v=exact"
-            alt="Filthfactory"
-            className="size-32 sm:size-36 md:size-48 lg:size-56"
-          />
+          <StampCdj />
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-live-fg">18+ · UK · free to listen</p>
           <h1 className="mt-2 font-display text-2xl font-semibold uppercase leading-none tracking-wide text-fg md:text-4xl">
             If it's filthy
