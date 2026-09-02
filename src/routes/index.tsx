@@ -66,7 +66,7 @@ function Home() {
       <section className="relative overflow-hidden rounded-lg border border-border bg-black">
         <div className="relative flex min-h-[28rem] flex-col items-center justify-end px-5 pb-8 pt-10 text-center md:min-h-[32rem] md:pb-12 lg:min-h-[36rem]">
           <img
-            src="/art/brand/logo.png?v=thick3"
+            src="/art/brand/logo.png?v=exact"
             alt="Filthfactory"
             className="size-36 sm:size-44 md:size-64 lg:size-80"
           />
