@@ -69,7 +69,7 @@ function Home() {
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/55 to-bg/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-black" />
         <div className="relative flex min-h-[28rem] flex-col items-center justify-end px-5 pb-8 pt-10 text-center md:min-h-[36rem] md:pb-12 lg:min-h-[42rem]">
           <img
             src="/art/brand/logo.png"
