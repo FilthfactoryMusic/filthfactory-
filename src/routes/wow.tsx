@@ -1,0 +1,86 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { FaceMarquee } from "@/components/face-marquee";
+import { WOW_GENRES, WOW_LABELS } from "@/lib/wow-scan";
+import { useWow } from "@/lib/use-wow";
+
+export const Route = createFileRoute("/wow")({
+  component: WowPage,
+  head: () => ({
+    meta: [
+      { title: "Who's On What — Filthfactory" },
+      {
+        name: "description",
+        content:
+          "Who's on what — UK garage, grime, bassline, 140, drum & bass, tech house. Real DJs and MCs. Last 90 days.",
+      },
+    ],
+  }),
+});
+
+function WowPage() {
+  const { digest, loading } = useWow();
+  const items = digest?.items ?? [];
+  const faces = items.filter((i) => i.kind === "artist" && i.thumb);
+  const labels = items.filter((i) => i.kind === "label");
+  const news = items.filter((i) => i.kind === "news" || i.kind === "mix");
+
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-[0.25em] text-live">WOW</p>
+      <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">Who's on what</h1>
+      <p className="mt-2 max-w-xl text-sm text-muted">
+        UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house. Faces scroll. Last 90 days. Tap a name.
+      </p>
+
+      {loading ? <p className="mt-10 text-sm text-muted">Pulling the last 90 days…</p> : null}
+
+      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">On the desk</h2>
+      <div className="mt-4">
+        <FaceMarquee faces={faces} />
+      </div>
+
+      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Labels</h2>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        {WOW_LABELS.map((lab) => {
+          const row = labels.find((l) => l.name === lab.name);
+          return (
+            <a
+              key={lab.name}
+              href={row?.url ?? `https://www.songkick.com/search?query=${encodeURIComponent(lab.name)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="min-w-0 text-center"
+            >
+              <img
+                src={row?.thumb || "/art/brand/logo.png"}
+                alt=""
+                className="mx-auto aspect-square w-full max-w-28 rounded-sm object-cover"
+              />
+              <p className="mt-2 truncate text-sm font-medium">{lab.name}</p>
+            </a>
+          );
+        })}
+      </div>
+
+      {WOW_GENRES.map((g) => {
+        const rows = news.filter((i) => i.genre === g.name);
+        if (!rows.length) return null;
+        return (
+          <section key={g.id} className="mt-10">
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide">{g.name}</h2>
+            <ul className="mt-3 space-y-2">
+              {rows.slice(0, 6).map((n) => (
+                <li key={n.id}>
+                  <a href={n.url} target="_blank" rel="noreferrer" className="text-sm hover:underline">
+                    {n.title}
+                  </a>
+                  <p className="text-xs text-muted">{n.blurb}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
