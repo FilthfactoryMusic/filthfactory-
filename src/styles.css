@@ -117,6 +117,76 @@
   animation: fade-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.stamp-stage {
+  perspective: 1100px;
+  width: min(88vw, 22rem);
+}
+@media (min-width: 640px) {
+  .stamp-stage {
+    width: min(78vw, 28rem);
+  }
+}
+@media (min-width: 768px) {
+  .stamp-stage {
+    width: min(64vw, 36rem);
+  }
+}
+@media (min-width: 1024px) {
+  .stamp-stage {
+    width: min(52vw, 42rem);
+  }
+}
+
+.stamp-disc {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: stamp-turn 8s ease-in-out infinite;
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.7));
+}
+
+.stamp-disc::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 68%
+  );
+  background-size: 240% 100%;
+  animation: stamp-shine 5.5s ease-in-out infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes stamp-turn {
+  0%,
+  100% {
+    transform: rotateY(-14deg) rotateX(7deg) translateZ(8px);
+  }
+  50% {
+    transform: rotateY(14deg) rotateX(-5deg) translateZ(18px);
+  }
+}
+
+@keyframes stamp-shine {
+  0% {
+    background-position: 130% 0;
+  }
+  100% {
+    background-position: -30% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-disc,
+  .stamp-disc::after {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .enter-up,
