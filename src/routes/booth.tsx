@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LiveDot } from "@/components/live-dot";
 import { useCurrentUser, useCurrentUserState } from "@/lib/auth/use-current-user";
-import { GROK_PROVIDERS, authEnabled, signIn } from "@/lib/auth/client";
 import { formatGbp } from "@/lib/utils";
 import { useMyBilling } from "@/lib/use-billing";
 
@@ -51,24 +50,15 @@ function BoothGate() {
       <img src="/art/brand/logo.png" alt="" className="mx-auto size-28" />
       <h1 className="mt-6 font-display text-3xl font-semibold uppercase tracking-wide">Go live in one tap</h1>
       <p className="mt-2 text-sm text-muted">
-        Sign in, camera on, you're on air. Mixcloud ease — factory floor energy.
+        Sign in with email, camera on, you're on air. Mixcloud ease — factory floor energy.
       </p>
-      {authEnabled ? (
-        <div className="mt-8 space-y-3">
-          {GROK_PROVIDERS.map((p) => (
-            <button
-              key={p.providerId}
-              type="button"
-              onClick={() => signIn(p.providerId, { callbackURL: "/booth" })}
-              className="h-12 w-full rounded-sm border border-border bg-surface text-sm font-medium hover:bg-raised"
-            >
-              Continue with {p.label}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-8 text-sm text-muted">Sign-in is disabled.</p>
-      )}
+      <Link
+        to="/login"
+        search={{ redirect: "/booth" }}
+        className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-sm bg-accent text-sm font-semibold text-accent-fg"
+      >
+        Sign in to go live
+      </Link>
     </div>
   );
 }
