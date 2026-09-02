@@ -63,14 +63,8 @@ function Home() {
 
   return (
     <div className="enter-up">
-      <section className="relative overflow-hidden rounded-lg border border-border bg-surface">
-        <img
-          src="/campaign/hero-night.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-black" />
-        <div className="relative flex min-h-[28rem] flex-col items-center justify-end px-5 pb-8 pt-10 text-center md:min-h-[36rem] md:pb-12 lg:min-h-[42rem]">
+      <section className="relative overflow-hidden rounded-lg border border-border bg-black">
+        <div className="relative flex min-h-[28rem] flex-col items-center justify-end px-5 pb-8 pt-10 text-center md:min-h-[32rem] md:pb-12 lg:min-h-[36rem]">
           <img
             src="/art/brand/logo.png"
             alt="Filthfactory"
