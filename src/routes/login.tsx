@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
+import { authClient, authEnabled } from "@/lib/auth/client";
 import { formatGbp } from "@/lib/utils";
 
 type Search = { redirect?: string };
@@ -17,7 +17,7 @@ function Login() {
   const callbackURL = redirect && redirect.startsWith("/") ? redirect : "/booth";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"in" | "up">("in");
+  const [mode, setMode] = useState<"in" | "up">("up");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ function Login() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign-in failed";
       if (/invalid origin/i.test(msg)) {
-        setError("This domain is not on the sign-in list yet. Add BETTER_AUTH_URL in Vercel.");
+        setError("Could not sign in from this page. Try again, or use a different email.");
       } else {
         setError(msg);
       }
@@ -106,17 +106,6 @@ function Login() {
           >
             {mode === "up" ? "Already have an account? Sign in" : "New here? Create an account"}
           </button>
-          <p className="pt-4 text-center text-xs uppercase tracking-widest text-faint">or</p>
-          {GROK_PROVIDERS.map((p) => (
-            <button
-              key={p.providerId}
-              type="button"
-              onClick={() => signIn(p.providerId, { callbackURL })}
-              className="h-12 w-full rounded-sm border border-border bg-surface text-sm font-medium hover:bg-raised"
-            >
-              Continue with {p.label}
-            </button>
-          ))}
         </div>
       ) : (
         <p className="mt-8 text-sm text-muted">Sign-in is disabled.</p>

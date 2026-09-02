@@ -177,7 +177,7 @@ async function readCache(): Promise<{ picks: LivePick[]; at: number } | null> {
 
 async function scanNow(): Promise<LivePick[]> {
   const [yt, mc] = await Promise.all([youtubeLives(), mixcloud()]);
-  const picks = [...yt, ...mc, ...TIKTOK];
+  const picks = [...yt, ...mc];
   await persist(picks);
   return picks;
 }
