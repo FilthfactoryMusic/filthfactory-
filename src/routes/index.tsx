@@ -66,9 +66,9 @@ function Home() {
       <section className="relative overflow-hidden rounded-lg border border-border bg-black">
         <div className="relative flex min-h-[28rem] flex-col items-center justify-end px-5 pb-8 pt-10 text-center md:min-h-[32rem] md:pb-12 lg:min-h-[36rem]">
           <img
-            src="/art/brand/logo.png?v=circle"
+            src="/art/brand/logo.png?v=ring"
             alt="Filthfactory"
-            className="size-36 rounded-full object-cover shadow-[0_12px_40px_rgba(0,0,0,0.55)] sm:size-44 md:size-64 lg:size-80"
+            className="size-36 sm:size-44 md:size-64 lg:size-80"
           />
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-live-fg">18+ · UK · free to listen</p>
           <h1 className="mt-2 font-display text-2xl font-semibold uppercase leading-none tracking-wide text-fg md:text-4xl">
