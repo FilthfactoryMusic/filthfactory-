@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     meta: [
-      { title: "Filthfactory — Put ya cans on" },
+      { title: "Filthfactory — If it's filthy it bangs" },
       {
         name: "description",
         content:
@@ -72,9 +72,9 @@ function Home() {
           />
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-live-fg">18+ · UK · free to listen</p>
           <h1 className="mt-2 font-display text-2xl font-semibold uppercase leading-none tracking-wide text-fg md:text-4xl">
-            Put ya cans on.
+            If it's filthy
             <br />
-            Turn it up.
+            it bangs!
           </h1>
           <p className="mx-auto mt-3 max-w-lg text-sm text-muted">
             Garage, grime, bassline, 140, DnB, tech house. Tap a room. That's it. Fiver a month if you wanna go live.

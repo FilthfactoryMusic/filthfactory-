@@ -27,7 +27,7 @@ const CAPTIONS = [
   "Not a playlist. A booth.",
   "Gift the DJ. They keep half. We keep the lights on.",
   "Kitchen, cellar, warehouse. We don't care. GO LIVE.",
-  "Put ya cans on. Turn it up.",
+  "If it's filthy it bangs!",
 ];
 
 function nextFridayTen() {
