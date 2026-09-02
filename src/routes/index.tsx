@@ -65,7 +65,7 @@ function Home() {
     <div className="enter-up">
       <section className="relative overflow-hidden rounded-lg border border-border bg-surface">
         <img
-          src="/campaign/hero-bg.jpg"
+          src="/campaign/hero-night.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
