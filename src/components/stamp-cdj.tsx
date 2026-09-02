@@ -1,5 +1,8 @@
 const TICKS = Array.from({ length: 72 }, (_, i) => i);
 
+const WAVE =
+  "M0 16 L3 9 L6 24 L9 7 L12 20 L15 12 L18 26 L21 5 L24 18 L27 11 L30 28 L33 8 L36 16 L39 6 L42 23 L45 10 L48 27 L51 14 L54 19 L57 4 L60 22 L63 12 L66 25 L69 9 L72 17 L75 7 L78 24 L81 13 L84 20 L87 5 L90 26 L93 15 L96 18 L99 8 L102 23 L105 11 L108 28 L111 10 L114 16 L117 6 L120 21 L123 13 L126 25 L129 9 L132 19 L135 7 L138 24 L141 14 L144 20 L147 11 L150 16";
+
 export function StampCdj() {
   return (
     <div className="stamp-cdj size-32 sm:size-36 md:size-48 lg:size-56" role="img" aria-label="Filthfactory">
@@ -10,20 +13,29 @@ export function StampCdj() {
             <span key={i} style={{ transform: `rotate(${i * 5}deg)` }} />
           ))}
         </div>
-        <svg className="stamp-cdj-wave" viewBox="0 0 200 36" preserveAspectRatio="none">
-          <path
-            d="M0 18 L4 10 L8 26 L12 8 L16 22 L20 14 L24 28 L28 6 L32 20 L36 12 L40 30 L44 9 L48 18 L52 7 L56 25 L60 11 L64 29 L68 15 L72 21 L76 5 L80 24 L84 13 L88 27 L92 10 L96 19 L100 8 L104 26 L108 14 L112 22 L116 6 L120 28 L124 16 L128 20 L132 9 L136 25 L140 12 L144 30 L148 11 L152 18 L156 7 L160 23 L164 14 L168 27 L172 10 L176 21 L180 8 L184 26 L188 15 L192 22 L196 12 L200 18"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <p className="stamp-cdj-time">03:42.18</p>
-        <p className="stamp-cdj-bpm">
-          132.0 <span>BPM</span>
-        </p>
-        <p className="stamp-cdj-cue">CUE</p>
+        <div className="stamp-cdj-readout">
+          <p className="stamp-cdj-cues">
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+          </p>
+          <p className="stamp-cdj-remain">REMAIN</p>
+          <p className="stamp-cdj-time">-3:42.1</p>
+          <div className="stamp-cdj-wavewrap">
+            <svg className="stamp-cdj-wave" viewBox="0 0 150 32" preserveAspectRatio="none">
+              <path d={WAVE} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+            <span className="stamp-cdj-needle" />
+          </div>
+          <p className="stamp-cdj-bpm">
+            132.00 <span>BPM</span>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -120,6 +120,7 @@
 .stamp-cdj {
   position: relative;
   flex-shrink: 0;
+  container-type: size;
 }
 
 .stamp-cdj-face {
@@ -134,16 +135,18 @@
   inset: 11%;
   overflow: hidden;
   border-radius: 50%;
-  background: #050505;
-  color: #f4f4f4;
+  background: #070707;
+  color: #f3f3f3;
   opacity: 0;
   animation: stamp-deck 16s ease-in-out infinite;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .stamp-cdj-ticks {
   position: absolute;
   inset: 0;
   animation: stamp-jog 18s linear infinite;
+  pointer-events: none;
 }
 
 .stamp-cdj-ticks span {
@@ -155,65 +158,128 @@
   margin-left: -0.5px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.55) 12%,
-    transparent 12%
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.5) 9%,
+    transparent 9%
   );
   transform-origin: 50% 100%;
 }
 
 .stamp-cdj-ticks span:nth-child(6n) {
-  background: linear-gradient(to bottom, #fff 0%, #fff 18%, transparent 18%);
+  background: linear-gradient(to bottom, #fff 0%, #fff 13%, transparent 13%);
+}
+
+.stamp-cdj-readout {
+  position: absolute;
+  inset: 16%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2.2cqmin;
+}
+
+.stamp-cdj-cues {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6cqmin;
+  margin: 0;
+}
+
+.stamp-cdj-cues i {
+  display: block;
+  width: 3.4cqmin;
+  height: 3.4cqmin;
+  border-radius: 0.4cqmin;
+  background: #ff7a18;
+}
+
+.stamp-cdj-cues i:nth-child(2) {
+  background: #3b82f6;
+}
+.stamp-cdj-cues i:nth-child(3) {
+  background: #22c55e;
+}
+.stamp-cdj-cues i:nth-child(4) {
+  background: #e11d2e;
+}
+.stamp-cdj-cues i:nth-child(5) {
+  background: #a855f7;
+}
+.stamp-cdj-cues i:nth-child(6) {
+  background: #f59e0b;
+}
+.stamp-cdj-cues i:nth-child(7) {
+  background: #06b6d4;
+}
+.stamp-cdj-cues i:nth-child(8) {
+  background: #f43f5e;
+}
+
+.stamp-cdj-remain {
+  margin: 0;
+  font-size: 5.2cqmin;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  padding-left: 0.38em;
+  opacity: 0.55;
+}
+
+.stamp-cdj-time {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 16.5cqmin;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.stamp-cdj-wavewrap {
+  position: relative;
+  width: 86%;
+  height: 11cqmin;
+  overflow: hidden;
 }
 
 .stamp-cdj-wave {
   position: absolute;
-  left: 10%;
-  top: 44%;
-  height: 20%;
-  width: 120%;
+  inset: 0;
+  width: 160%;
+  height: 100%;
   color: #fff;
   animation: stamp-wave 3.2s linear infinite;
 }
 
-.stamp-cdj-time {
+.stamp-cdj-needle {
   position: absolute;
-  top: 22%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.62em;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.2px;
+  margin-left: -0.6px;
+  background: #e11d2e;
+  box-shadow: 0 0 6px #e11d2e;
 }
 
 .stamp-cdj-bpm {
-  position: absolute;
-  bottom: 20%;
-  left: 0;
-  right: 0;
-  text-align: center;
+  margin: 0;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.52em;
-  letter-spacing: 0.18em;
+  font-size: 7.4cqmin;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
 }
 
 .stamp-cdj-bpm span {
-  opacity: 0.45;
+  margin-left: 0.35em;
+  font-size: 0.72em;
+  font-weight: 500;
   letter-spacing: 0.28em;
-}
-
-.stamp-cdj-cue {
-  position: absolute;
-  top: 8%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 0.42em;
-  font-weight: 600;
-  letter-spacing: 0.42em;
-  color: var(--color-live, #e11d2e);
+  opacity: 0.5;
 }
 
 @keyframes stamp-face {
