@@ -75,8 +75,15 @@ function MembershipPage() {
         return;
       }
       setError("Payment did not go through. Try again.");
-    } catch {
-      setError("Payment did not go through. Try again.");
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : "";
+      if (/unauthor/i.test(raw)) {
+        void navigate({ to: "/login", search: { redirect: "/membership" } });
+        return;
+      }
+      if (/CONSENT/i.test(raw)) setError("Tick every box to pay.");
+      else if (/STRIPE_UNAVAILABLE/i.test(raw)) setError("The till is not connected yet. Wait a minute and try again.");
+      else setError("Could not open Stripe. Sign in, tick the boxes, then Pay — Google Pay, PayPal or card.");
     } finally {
       setBusy(false);
     }
@@ -176,7 +183,9 @@ function MembershipPage() {
           {chosen.name} · {formatGbp(chosen.pence)} now, then each calendar month until you cancel. {VAT_NOTE}
         </p>
         <p className="mt-2 text-sm text-muted">
-          If you later install from Google Play, in-app digital purchases there use Google Play Billing.
+          Next screen is Stripe. Pay with <span className="text-fg">Google Pay</span>,{" "}
+          <span className="text-fg">Apple Pay</span>, <span className="text-fg">PayPal</span> or card. We never
+          see the card number.
         </p>
         <fieldset className="mt-4 space-y-3">
           <CheckRow checked={age} onChange={setAge}>
@@ -209,7 +218,7 @@ function MembershipPage() {
           {cta}
         </Button>
         <p className="mt-3 text-xs text-faint">
-          Receipt lands in Account. Cancel any time. Paid by Stripe. Gifts are not on sale yet.
+          Receipt lands in Account. Cancel any time. Google Pay, Apple Pay, PayPal or card via Stripe.
         </p>
       </div>
 
