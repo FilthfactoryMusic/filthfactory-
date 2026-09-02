@@ -227,6 +227,63 @@ export const startMembership = createServerFn({ method: "POST" })
     if (!data.ageConfirmed || !data.termsAccepted || !data.communityAccepted || !data.digitalWaiver) {
       throw new Error("CONSENT_REQUIRED");
     }
+    const { getStripe, publicOrigin } = await import("@/lib/stripe");
+    const stripe = getStripe();
+    const origin = publicOrigin();
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      client_reference_id: context.userId,
+      metadata: {
+        userId: context.userId,
+        plan: spec.id,
+      },
+      subscription_data: {
+        metadata: {
+          userId: context.userId,
+          plan: spec.id,
+        },
+      },
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "gbp",
+            unit_amount: spec.pence,
+            recurring: { interval: "month" },
+            product_data: {
+              name: `Filthfactory ${spec.name}`,
+              description:
+                spec.id === "featured"
+                  ? "Featured membership — booth, mixes, gifts and Discover placement while live."
+                  : "Resident membership — booth, mixes and live gifts. Listening stays free.",
+            },
+          },
+        },
+      ],
+      success_url: `${origin}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/membership`,
+    });
+    if (!session.url) throw new Error("STRIPE_UNAVAILABLE");
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    await writeConsents(sql, context.userId, ["age", "terms", "community", "digital_waiver"]);
+    return { url: session.url };
+  });
+
+export const fulfillMembership = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((d: { sessionId: string }) => d)
+  .handler(async ({ context, data }) => {
+    if (!data.sessionId.startsWith("cs_")) throw new Error("BAD_SESSION");
+    const { getStripe } = await import("@/lib/stripe");
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+    const paid = session.status === "complete" && session.payment_status === "paid";
+    if (!paid) throw new Error("UNPAID");
+    const userId = session.metadata?.userId || session.client_reference_id;
+    if (!userId || userId !== context.userId) throw new Error("SESSION_MISMATCH");
+    const planRaw = session.metadata?.plan;
+    const spec = PLANS.find((p) => p.id === planRaw) ?? PLANS[0];
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     await sql`
@@ -249,7 +306,6 @@ export const startMembership = createServerFn({ method: "POST" })
     await sql`
       update booth_lives set featured = ${spec.id === "featured"} where user_id = ${context.userId}
     `;
-    await writeConsents(sql, context.userId, ["age", "terms", "community", "digital_waiver"]);
     await writeInvoice(sql, {
       userId: context.userId,
       kind: "membership",

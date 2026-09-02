@@ -31,6 +31,7 @@ import { Route as DjIdRouteImport } from './routes/dj.$id'
 import { Route as GenreSlugRouteImport } from './routes/genre.$slug'
 import { Route as LiveIndexRouteImport } from './routes/live.index'
 import { Route as LiveIdRouteImport } from './routes/live.$id'
+import { Route as MembershipSuccessRouteImport } from './routes/membership.success'
 import { Route as MixIdRouteImport } from './routes/mix.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiRadioIdRouteImport } from './routes/api/radio.$id'
@@ -145,6 +146,11 @@ const LiveIdRoute = LiveIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => LiveRoute,
 } as any)
+const MembershipSuccessRoute = MembershipSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => MembershipRoute,
+} as any)
 const MixIdRoute = MixIdRouteImport.update({
   id: '/mix/$id',
   path: '/mix/$id',
@@ -171,7 +177,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/live': typeof LiveRouteWithChildren
   '/login': typeof LoginRoute
-  '/membership': typeof MembershipRoute
+  '/membership': typeof MembershipRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/dj/$id': typeof DjIdRoute
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
+  '/membership/success': typeof MembershipSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live/': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -197,7 +204,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/membership': typeof MembershipRoute
+  '/membership': typeof MembershipRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/dj/$id': typeof DjIdRoute
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
+  '/membership/success': typeof MembershipSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -225,7 +233,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/live': typeof LiveRouteWithChildren
   '/login': typeof LoginRoute
-  '/membership': typeof MembershipRoute
+  '/membership': typeof MembershipRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/dj/$id': typeof DjIdRoute
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
+  '/membership/success': typeof MembershipSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live/': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/dj/$id'
     | '/genre/$slug'
     | '/live/$id'
+    | '/membership/success'
     | '/mix/$id'
     | '/live/'
     | '/api/auth/$'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/dj/$id'
     | '/genre/$slug'
     | '/live/$id'
+    | '/membership/success'
     | '/mix/$id'
     | '/live'
     | '/api/auth/$'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/dj/$id'
     | '/genre/$slug'
     | '/live/$id'
+    | '/membership/success'
     | '/mix/$id'
     | '/live/'
     | '/api/auth/$'
@@ -335,7 +347,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   LiveRoute: typeof LiveRouteWithChildren
   LoginRoute: typeof LoginRoute
-  MembershipRoute: typeof MembershipRoute
+  MembershipRoute: typeof MembershipRouteWithChildren
   OpenRoute: typeof OpenRoute
   PrivacyRoute: typeof PrivacyRoute
   ReleasesRoute: typeof ReleasesRoute
@@ -507,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LiveIdRouteImport
       parentRoute: typeof LiveRoute
     }
+    '/membership/success': {
+      id: '/membership/success'
+      path: '/success'
+      fullPath: '/membership/success'
+      preLoaderRoute: typeof MembershipSuccessRouteImport
+      parentRoute: typeof MembershipRoute
+    }
     '/mix/$id': {
       id: '/mix/$id'
       path: '/mix/$id'
@@ -543,6 +562,18 @@ const LiveRouteChildren: LiveRouteChildren = {
 
 const LiveRouteWithChildren = LiveRoute._addFileChildren(LiveRouteChildren)
 
+interface MembershipRouteChildren {
+  MembershipSuccessRoute: typeof MembershipSuccessRoute
+}
+
+const MembershipRouteChildren: MembershipRouteChildren = {
+  MembershipSuccessRoute: MembershipSuccessRoute,
+}
+
+const MembershipRouteWithChildren = MembershipRoute._addFileChildren(
+  MembershipRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -553,7 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   LiveRoute: LiveRouteWithChildren,
   LoginRoute: LoginRoute,
-  MembershipRoute: MembershipRoute,
+  MembershipRoute: MembershipRouteWithChildren,
   OpenRoute: OpenRoute,
   PrivacyRoute: PrivacyRoute,
   ReleasesRoute: ReleasesRoute,

@@ -62,7 +62,7 @@ function MembershipPage() {
     setBusy(true);
     setError(null);
     try {
-      await startMembership({
+      const result = await startMembership({
         data: {
           plan: pick,
           ageConfirmed: age,
@@ -71,8 +71,11 @@ function MembershipPage() {
           digitalWaiver: waiver,
         },
       });
-      billing.refresh();
-      void navigate({ to: "/account" });
+      if (result.url) {
+        window.location.assign(result.url);
+        return;
+      }
+      setError("Payment did not go through. Try again.");
     } catch {
       setError("Payment did not go through. Try again.");
     } finally {
