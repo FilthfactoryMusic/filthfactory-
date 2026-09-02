@@ -60,7 +60,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "What we collect",
         p: [
-          "Account: display name, email and profile image from Google or X when you sign in.",
+          "Account: email and password you create on Filthfactory, or display name, email and profile image from Google or X when you use those buttons.",
           "Membership and money: plan, renewal date, invoices, and (when gifts are on sale) gifts sent or received, wallet balance and payout requests. Card payments are taken by Stripe. We do not store card numbers.",
           "Booth: show title, genre, city, whether camera is on, and mix titles you drop. Camera and microphone stay on your device to run the booth; we store the fact of a live, not a raw recording archive.",
           "Safety: reports, blocks, age confirmation and the legal consents you tick at checkout.",
