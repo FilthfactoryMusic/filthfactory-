@@ -1,11 +1,15 @@
-export const LEGAL_VERSION = "2026-09-01";
-export const LEGAL_CONTACT = "legal@filthfactory.uk";
-export const SUPPORT_CONTACT = "support@filthfactory.uk";
-export const OPERATOR = "Filthfactory";
+export const LEGAL_VERSION = "2026-09-02";
+export const LEGAL_CONTACT = "legal@filthfactory.co.uk";
+export const SUPPORT_CONTACT = "support@filthfactory.co.uk";
+export const OPERATOR = "Filth Factory Music";
+export const TRADING_AS = "Filthfactory";
 export const JURISDICTION = "England and Wales";
 export const MIN_AGE = 18;
 export const PAYOUT_MIN_PENCE = 2000;
-export const VAT_PERCENT = 20;
+/** Not VAT-registered. Do not print a VAT line until this is true. */
+export const VAT_REGISTERED = false;
+export const VAT_PERCENT = 0;
+export const GIFTS_ON_SALE = false;
 
 export const LEGAL_PATHS = ["/privacy", "/terms", "/community", "/cookies", "/safety"] as const;
 
@@ -14,6 +18,9 @@ export function isLegalPath(pathname: string) {
 }
 
 export function vatBreakdown(grossPence: number) {
+  if (!VAT_REGISTERED || VAT_PERCENT <= 0) {
+    return { gross: grossPence, vat: 0, net: grossPence };
+  }
   const vat = Math.round((grossPence * VAT_PERCENT) / (100 + VAT_PERCENT));
   return { gross: grossPence, vat, net: grossPence - vat };
 }
@@ -46,7 +53,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Who we are",
         p: [
-          `${OPERATOR} is a UK service for underground DJ mixes and live rooms. We are the controller of personal data for the app. Contact ${LEGAL_CONTACT}.`,
+          `${OPERATOR} is a sole trader in the United Kingdom, trading as ${TRADING_AS}. We are the controller of personal data for this service. Contact ${LEGAL_CONTACT}.`,
           "This policy is written for UK GDPR and the Data Protection Act 2018. If you install Filthfactory from Google Play, this policy also covers that listing.",
         ],
       },
@@ -54,7 +61,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "What we collect",
         p: [
           "Account: display name, email and profile image from Google or X when you sign in.",
-          "Membership and money: plan, renewal date, invoices, gifts sent or received, wallet balance and payout requests. We do not store card numbers.",
+          "Membership and money: plan, renewal date, invoices, and (when gifts are on sale) gifts sent or received, wallet balance and payout requests. Card payments are taken by Stripe. We do not store card numbers.",
           "Booth: show title, genre, city, whether camera is on, and mix titles you drop. Camera and microphone stay on your device to run the booth; we store the fact of a live, not a raw recording archive.",
           "Safety: reports, blocks, age confirmation and the legal consents you tick at checkout.",
           "Technical: session cookies needed to keep you signed in. We do not run advertising trackers.",
@@ -63,7 +70,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Why we use it",
         p: [
-          "Contract: to run your account, membership, gifts, booth and payouts.",
+          "Contract: to run your account, membership, booth and (when enabled) gifts and payouts.",
           "Legal obligation: tax records, safety duties and to respond to lawful requests.",
           "Legitimate interests: keeping the factory free of abuse, fraud and copyright theft.",
           "Consent: confirming you are 18 or over, and any non-essential cookies if we add them later.",
@@ -72,20 +79,20 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Sharing",
         p: [
-          "We do not sell your data. We share it with: sign-in providers (Google, X); hosting and database providers that run the app; Google Play if you buy membership or gifts inside a Play-distributed app (Google Play Billing); and authorities when the law requires it.",
+          "We do not sell your data. We share it with: sign-in providers (Google, X); Stripe (payments — Stripe processes cards and may process data in the United States under its UK GDPR terms and standard contractual clauses); hosting and database providers that run the app; Google Play if you buy membership inside a Play-distributed app (Google Play Billing); and authorities when the law requires it.",
           "DJs see the display name you chose when you send a gift or chat. They do not receive your email or payment details.",
         ],
       },
       {
         h: "How long we keep it",
         p: [
-          "Account data lasts while the account is open. Invoices and payout records are kept for six years for UK tax. Closed reports are kept as needed to handle repeats and legal claims. You can ask us to delete an account at legal@filthfactory.uk; we will keep what the law says we must.",
+          `Account data lasts while the account is open. Invoices and payout records are kept for six years for UK tax. Closed reports are kept as needed to handle repeats and legal claims. You can ask us to delete an account at ${LEGAL_CONTACT}; we will keep what the law says we must.`,
         ],
       },
       {
         h: "Your rights",
         p: [
-          "You can ask for a copy of your data, a correction, erasure, restriction, or to object. You can complain to the ICO (ico.org.uk). Email legal@filthfactory.uk.",
+          `You can ask for a copy of your data, a correction, erasure, restriction, or to object. You can complain to the ICO (ico.org.uk). Email ${LEGAL_CONTACT}.`,
         ],
       },
       {
@@ -97,7 +104,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "International",
         p: [
-          "Sign-in providers and hosting may process data outside the UK. We rely on UK adequacy decisions or standard contractual clauses those providers offer.",
+          "Sign-in providers, Stripe and hosting may process data outside the UK. We rely on UK adequacy decisions or standard contractual clauses those providers offer.",
         ],
       },
     ],
@@ -110,25 +117,24 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "The deal",
         p: [
-          `These terms are a contract between you and ${OPERATOR}, a UK digital service. English law and the courts of ${JURISDICTION} apply. You must be ${MIN_AGE} or over.`,
-          "Listening to mixes and live rooms is free. Going live, dropping mixes and sending gifts requires a paid membership.",
+          `These terms are a contract between you and ${OPERATOR}, a sole trader in the United Kingdom trading as ${TRADING_AS}. English law and the courts of ${JURISDICTION} apply. You must be ${MIN_AGE} or over.`,
+          "Listening to mixes, charts, Who's on what and linked live rooms is free. Going live from the booth and dropping mixes requires a paid membership.",
         ],
       },
       {
         h: "Membership",
         p: [
-          "Resident is £5.00 a calendar month. Featured is £15.00 a calendar month and advertises your live on Discover while you are on air. Prices are in GBP and include UK VAT at the prevailing rate.",
-          "Membership is a rolling digital subscription. It starts when you confirm pay and renews each calendar month until you cancel in Account. Cancel stops the next renewal and ends booth access immediately. We do not refund the current month once it has started, except where UK law says we must.",
+          "Resident is £5.00 a calendar month. Featured is £15.00 a calendar month and advertises your live on Discover while you are on air. Prices are in GBP. We are not VAT-registered, so no VAT is charged. If that changes, this page will say so.",
+          "Membership is a rolling digital subscription. It starts when Stripe confirms payment and renews each calendar month until you cancel in Account. Cancel stops the next renewal and ends booth access immediately. We do not refund the current month once it has started, except where UK law says we must.",
           "Consumer Contracts Regulations 2013 give you a 14-day cooling-off right for distance contracts. Digital content is supplied immediately when membership starts. By ticking the checkout box you consent to immediate supply and accept that you lose that cooling-off right for that period.",
-          "If you install Filthfactory from Google Play, digital purchases made inside that app use Google Play Billing, as Google requires. Web purchases are taken by Filthfactory in GBP.",
+          "Web purchases are taken by Stripe on behalf of Filth Factory Music. If you later install Filthfactory from Google Play, digital purchases made inside that app use Google Play Billing, as Google requires.",
         ],
       },
       {
         h: "Gifts",
         p: [
-          "Gifts are digital goods you buy from Filthfactory during a live. They are not cash transfers to the DJ. The DJ receives 50% as a talent / revenue share. Filthfactory retains 50% as the platform fee. Splits are calculated on the VAT-inclusive price in pence.",
-          "Once a gift is sent it is consumed. Gifts are not refundable, except where UK law requires. You cannot gift your own broadcast.",
-          "DJs are not employees or workers of Filthfactory. Gift income is theirs to declare to HMRC. We may hold a payout until identity checks are complete. Minimum payout is £20.00.",
+          "Live gifts and DJ payouts are not on sale yet. Buttons that look like gifts do not take money and do not pay DJs.",
+          "When gifts are switched on: they will be digital goods you buy from Filthfactory during a live, not cash transfers. The DJ will receive 50% as a talent / revenue share. Filthfactory will retain 50%. DJs are not employees or workers of Filthfactory. Gift income is theirs to declare to HMRC. Minimum payout will be £20.00. We may hold a payout until identity checks are complete.",
         ],
       },
       {
@@ -137,6 +143,13 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Filthfactory does not hold a blanket PRS, PPL or MCPS licence. You may only go live or drop a mix if you own the rights or have a licence that covers this platform. Playing someone else's records without a licence is your breach, not a feature.",
           "You grant Filthfactory a worldwide, non-exclusive licence to host, stream, cache and display your mixes, lives, titles, artwork and chat so the service can run, including advertising Featured lives on Discover.",
           "You warrant the content is yours to publish, is not illegal, and does not infringe anyone's rights. We will remove reported copyright material. Repeat infringement closes the account.",
+        ],
+      },
+      {
+        h: "Third-party stations, YouTube and Mixcloud",
+        p: [
+          "On air / Just gone live may show links, titles and artwork for independent UK stations and for public YouTube or Mixcloud rooms. Those broadcasts belong to the station or the DJ. We do not licence their catalogue. A play button on Filthfactory is a link or a technical wrap of the station's own stream so it can play on HTTPS — it is not Filthfactory radio.",
+          "Buy links on NEW RELEASES go to Beatport. We do not sell downloadable tracks and we do not run a Beatport affiliate programme.",
         ],
       },
       {
@@ -181,7 +194,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Enforcement",
         p: [
-          "We can remove content, strip Featured, suspend the booth or close the account. Appeals: legal@filthfactory.uk.",
+          `We can remove content, strip Featured, suspend the booth or close the account. Appeals: ${LEGAL_CONTACT}.`,
         ],
       },
     ],
@@ -196,6 +209,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         p: [
           "Filthfactory only sets cookies and local storage that are strictly necessary: the sign-in session, age confirmation (18+), and whether you have seen this notice. These are required to run the service under UK PECR and do not need a marketing opt-in.",
           "We do not currently use analytics, advertising or social pixels. If that changes, this page will say so and we will ask before any non-essential cookie is set.",
+          "Stripe sets its own cookies on checkout.stripe.com when you pay. That is Stripe's checkout, not a Filthfactory marketing cookie.",
         ],
       },
     ],
@@ -208,13 +222,13 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "18+",
         p: [
-          `You must be ${MIN_AGE} or over to use Filthfactory. The age gate is the first screen. Membership and gifts are adult digital purchases.`,
+          `You must be ${MIN_AGE} or over to use Filthfactory. The age gate is the first screen. Membership is an adult digital purchase.`,
         ],
       },
       {
         h: "User-generated content",
         p: [
-          "Lives, mixes, chat, comments and gifts are user-generated. We provide in-app Report and Block, written rules, and human review of open reports. Content that violates the law or these rules is removed.",
+          "Lives, mixes, chat, comments and (when enabled) gifts are user-generated. We provide in-app Report and Block, written rules, and human review of open reports. Content that violates the law or these rules is removed.",
           "This is a UK user-to-user service. We take reports of child sexual abuse material, terrorism, and other priority illegal content as an immediate takedown.",
         ],
       },

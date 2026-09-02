@@ -24,7 +24,7 @@ export const PLANS: Plan[] = [
       "Unlimited listening",
       "Go live from the booth",
       "Drop mixes to your crate",
-      "Gift live DJs — they keep 50%",
+      "Gift live DJs when gifts are on sale — they keep 50%",
     ],
   },
   {
@@ -58,8 +58,8 @@ export const PLAN_COMPARE: {
   { feature: "Mixes and live, UK-wide", listen: true, resident: true, featured: true },
   { feature: "Go live from the booth", listen: false, resident: true, featured: true },
   { feature: "Drop mixes to your crate", listen: false, resident: true, featured: true },
-  { feature: "Send live gifts", listen: false, resident: true, featured: true },
-  { feature: "DJ keeps 50% of every gift", listen: false, resident: true, featured: true },
+  { feature: "Send live gifts (not on sale yet)", listen: false, resident: false, featured: false },
+  { feature: "DJ keeps 50% of every gift (when on sale)", listen: false, resident: false, featured: false },
   { feature: "Advertised on Discover while live", listen: false, resident: false, featured: true },
 ];
 
@@ -71,8 +71,8 @@ export function giftBySku(sku: string) {
   return GIFT_SKUS.find((g) => g.sku === sku) ?? null;
 }
 
-export const VAT_NOTE = "Prices include UK VAT.";
-export const GIFT_SPLIT_NOTE = "The DJ receives 50%. Filthfactory receives 50%.";
+export const VAT_NOTE = "Prices are in GBP. We are not VAT-registered, so no VAT is charged.";
+export const GIFT_SPLIT_NOTE = "When gifts are on sale: the DJ receives 50%. Filthfactory receives 50%.";
 export const DIGITAL_WAIVER_NOTE =
   "I want immediate access and I accept that I lose my 14-day cooling-off right for this digital content.";
 

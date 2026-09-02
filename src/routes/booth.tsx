@@ -30,8 +30,8 @@ function BoothMemberGate() {
       <div className="mx-auto max-w-md py-8 text-center">
         <h1 className="font-display text-3xl font-semibold uppercase tracking-wide">Membership required</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Resident is {formatGbp(500)} a calendar month. Go live, drop mixes, gift the booth. Featured is{" "}
-          {formatGbp(1500)} and advertises your stream on Discover. DJs keep 50% of gifts.
+          Resident is {formatGbp(500)} a calendar month. Go live and drop mixes. Featured is{" "}
+          {formatGbp(1500)} and advertises your stream on Discover. Gifts are not on sale yet.
         </p>
         <Link
           to="/membership"

@@ -19,6 +19,7 @@ export const Route = createFileRoute("/api/radio/$id")({
           headers: {
             "Content-Type": up.headers.get("content-type") || "audio/mpeg",
             "Cache-Control": "no-store",
+            "X-Content-Source": "third-party-station",
           },
         });
       },

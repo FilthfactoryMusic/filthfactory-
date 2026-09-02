@@ -103,7 +103,7 @@ function AccountPage() {
         {plan ? (
           <>
             <p className="mt-3 font-display text-3xl tabular-nums">{formatGbp(plan.pence)}</p>
-            <p className="mt-1 text-sm">{plan.name} · per calendar month, VAT included</p>
+            <p className="mt-1 text-sm">{plan.name} · per calendar month</p>
             {billing.renewsAt ? (
               <p className="mt-1 text-sm text-muted">
                 Renews{" "}
@@ -188,7 +188,8 @@ function AccountPage() {
                 <span className="min-w-0">
                   <span className="block truncate">{inv.description}</span>
                   <span className="text-xs text-muted">
-                    {new Date(inv.createdAt).toLocaleDateString("en-GB")} · VAT {formatGbp(inv.vatPence)}
+                    {new Date(inv.createdAt).toLocaleDateString("en-GB")}
+                    {inv.vatPence > 0 ? ` · VAT ${formatGbp(inv.vatPence)}` : ""}
                   </span>
                 </span>
                 <span className="shrink-0 tabular-nums">{formatGbp(inv.amountPence)}</span>
@@ -196,7 +197,7 @@ function AccountPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-muted">No receipts yet. Membership and gifts land here.</p>
+          <p className="mt-2 text-sm text-muted">No receipts yet. Membership lands here.</p>
         )}
       </section>
 

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/open")({
   }),
 });
 
-const DM = `You're playing the rooms that never got a publicist. Filthfactory is the UK booth — live in one tap, gifts 50/50 with you, Resident £5/month. Factory Friday 10pm. I'll Boost you for 90 days if you go live weekly. Come through.`;
+const DM = `You're playing the rooms that never got a publicist. Filthfactory is the UK booth — live in one tap, Resident £5/month. Factory Friday 10pm. I'll Boost you for 90 days if you go live weekly. Come through.`;
 
 const CAPTIONS = [
   "Garage. Grime. Bassline. 140. DnB. Tech house. That's the room.",
@@ -90,7 +90,7 @@ function OpenTheFactory() {
           </h1>
           <p className="mt-3 max-w-xl text-sm text-muted">
             Mixes and live from the rooms that never got a publicist. Listening is free. Resident {formatGbp(500)}{" "}
-            / month inc VAT. Gifts 50/50.
+            / month. Gifts not on sale yet.
           </p>
           <p className="mt-2 font-display text-2xl uppercase tracking-wide text-fg">{left || "…"}</p>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -249,7 +249,7 @@ function OpenTheFactory() {
       ) : null}
 
       <p className="mt-10 text-xs text-faint">
-        18+ only. Paid ads must show the price inc VAT. Do not put unlicensed chart records in the films. Report
+        18+ only. Paid ads must show the real price in GBP. Do not put unlicensed chart records in the films. Report
         tools are on every live.
       </p>
     </div>

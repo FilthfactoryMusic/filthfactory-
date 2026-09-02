@@ -371,6 +371,8 @@ export const sendLiveGift = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const sku = GIFT_SKUS.find((g) => g.sku === data.sku);
     if (!sku) throw new Error("Unknown gift");
+    const { GIFTS_ON_SALE } = await import("@/lib/legal");
+    if (!GIFTS_ON_SALE) throw new Error("GIFTS_NOT_ON_SALE");
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     const sub = await activePlan(sql, context.userId);

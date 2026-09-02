@@ -108,7 +108,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs text-faint md:px-6 md:pb-10">
-        <p>Filthfactory · 18+ · UK · £5 / month · DJs keep half the gifts</p>
+        <p>Filth Factory Music trading as Filthfactory · sole trader · UK · 18+</p>
+        <p className="mt-1">Resident £5 / month. Gifts not on sale yet. legal@filthfactory.co.uk</p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
           <Link to="/open" className="hover:text-fg">
             Open the factory
