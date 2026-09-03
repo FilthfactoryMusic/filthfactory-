@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/" className="text-fg" aria-label="Filthfactory home">
             <Wordmark />
           </Link>
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden max-w-[calc(100%-12rem)] flex-wrap items-center gap-1 lg:flex">
             {NAV.map((item) => {
               const on =
                 pathname === item.to ||

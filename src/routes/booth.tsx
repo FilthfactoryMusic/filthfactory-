@@ -29,8 +29,15 @@ function BoothLoading({ copy }: { copy: string }) {
 function BoothPage() {
   const { user, isPending } = useCurrentUserState();
   const [mounted, setMounted] = useState(false);
+  const [waited, setWaited] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted || isPending) return <BoothLoading copy="Opening the booth…" />;
+  useEffect(() => {
+    const t = window.setTimeout(() => setWaited(true), 2500);
+    return () => window.clearTimeout(t);
+  }, []);
+  if (!mounted || (isPending && !waited)) {
+    return <BoothLoading copy="Opening the booth…" />;
+  }
   if (!user) return <BoothGate />;
   return <BoothMemberGate />;
 }
