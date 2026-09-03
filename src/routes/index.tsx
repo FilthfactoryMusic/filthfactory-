@@ -64,42 +64,44 @@ function Home() {
 
   return (
     <div className="enter-up">
-      <section className="relative overflow-hidden rounded-lg border border-border bg-black">
-        <div className="relative flex min-h-[34rem] flex-col items-center justify-center px-5 py-10 text-center md:min-h-[42rem] md:py-12">
+      <section className="relative overflow-hidden border border-border bg-black">
+        <div className="flex flex-col items-center gap-6 px-5 py-7 md:grid md:grid-cols-[auto_1fr] md:items-center md:gap-10 md:px-8 md:py-8 lg:gap-14">
           <StampCdj />
-          <p className="mt-3 text-xs uppercase tracking-[0.25em] text-live-fg">18+ · UK · free to listen</p>
-          <h1 className="mt-2 font-display text-2xl font-semibold uppercase leading-none tracking-wide text-fg md:text-4xl">
-            If it's filthy
-            <br />
-            it bangs!
-          </h1>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-muted">
-            Garage, grime, bassline, 140, DnB, tech house. Tap a room. That's it. Fiver a month if you wanna go live.
-          </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <Link
-              to="/live"
-              className="inline-flex h-11 items-center rounded-sm bg-live px-5 text-sm font-medium text-live-fg"
-            >
-              What's on now
-            </Link>
-            <Link
-              to="/wow"
-              className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
-            >
-              Who's on what
-            </Link>
-            <Link
-              to="/booth"
-              className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
-            >
-              Go live
-            </Link>
+          <div className="w-full max-w-xl text-center md:text-left">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-live-fg">18+ · UK · free to listen</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold uppercase leading-[0.88] tracking-tight text-fg sm:text-5xl lg:text-6xl">
+              If it's filthy
+              <br />
+              it bangs!
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted md:mx-0">
+              Garage, grime, bassline, 140, DnB, tech house. Tap a room. That's it. Fiver a month if you wanna go live.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+              <Link
+                to="/live"
+                className="inline-flex h-11 items-center rounded-sm bg-live px-5 text-sm font-medium text-live-fg"
+              >
+                What's on now
+              </Link>
+              <Link
+                to="/wow"
+                className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
+              >
+                Who's on what
+              </Link>
+              <Link
+                to="/booth"
+                className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
+              >
+                Go live
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-10">
+      <section className="mt-10 border-t border-border pt-8">
         <div className="mb-4 flex items-end justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-live">WOW</p>
