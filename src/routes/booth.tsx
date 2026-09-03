@@ -12,6 +12,7 @@ import { LiveDot } from "@/components/live-dot";
 import { useCurrentUser, useCurrentUserState } from "@/lib/auth/use-current-user";
 import { formatGbp } from "@/lib/utils";
 import { useMyBilling } from "@/lib/use-billing";
+import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -70,6 +71,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const startLiveLocal = useLibrary((s) => s.startLive);
   const stopLiveLocal = useLibrary((s) => s.stopLive);
   const ownLive = useLibrary((s) => s.ownLive);
+  useHostBroadcast(ownLive?.id ?? null);
   const setName = useLibrary((s) => s.setName);
   const playLive = usePlayer((s) => s.playLive);
   const stop = usePlayer((s) => s.stop);

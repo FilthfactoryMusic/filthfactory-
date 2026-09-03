@@ -103,7 +103,7 @@ function LiveShowPage() {
             hasCamera={Boolean(show.hasCamera)}
             artwork={show.artwork}
             title={show.title}
-            enabled={listening || isHost}
+            enabled={listening || isHost || booth}
             onNeedGesture={() => playLive(show.id)}
           />
         ) : (
