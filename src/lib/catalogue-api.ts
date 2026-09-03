@@ -42,6 +42,8 @@ export function cutFromTitle(title: string) {
   if (/mix|vip|dub|edit|remix|extended|instrumental|version|bootleg|refix|rework/i.test(cut)) return cut;
   return undefined;
 }
+
+export function beatportSearch(title: string, artist: string) {
   return `https://www.beatport.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`;
 }
 
