@@ -12,15 +12,15 @@ export type MerchSku = {
 };
 
 export const FACTORY_MERCH: MerchSku[] = [
-  { id: "tee-black", name: "Factory tee", blurb: "Black heavyweight. Circle stamp, left chest.", pence: 2800, image: "/art/merch/tee-black.jpg?v=onchest", kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "tee-black-center", name: "Factory tee", blurb: "Black heavyweight. Circle stamp, center.", pence: 2800, image: "/art/merch/tee-black-center.jpg?v=onchest", kind: "tee", color: "Black center", swatch: "#111111" },
-  { id: "tee-white", name: "Factory tee", blurb: "White heavyweight. Circle stamp, left chest.", pence: 2800, image: "/art/merch/tee-white.jpg?v=onchest", kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "tee-grey", name: "Factory tee", blurb: "Heather. Circle stamp.", pence: 2800, image: "/art/merch/tee-grey.jpg?v=onchest", kind: "tee", color: "Grey", swatch: "#8a8a86" },
-  { id: "tee-olive", name: "Factory tee", blurb: "Olive. Circle stamp.", pence: 2800, image: "/art/merch/tee-olive.jpg?v=onchest", kind: "tee", color: "Olive", swatch: "#4a5a32" },
-  { id: "hoodie-black", name: "Factory hoodie", blurb: "Black pullover. Circle stamp on the chest.", pence: 4800, image: "/art/merch/hoodie-black.jpg?v=onchest", kind: "hoodie", color: "Black", swatch: "#111111" },
-  { id: "beanie-black", name: "Stamp beanie", blurb: "Black rib. Stamp on the cuff.", pence: 1800, image: "/art/merch/beanie-black.jpg", kind: "beanie", color: "Black", swatch: "#111111" },
-  { id: "snapback-black", name: "Stamp snapback", blurb: "Black flat brim. Stamp on the front.", pence: 2200, image: "/art/merch/snapback-black.jpg", kind: "snapback", color: "Black", swatch: "#111111" },
-  { id: "keyring", name: "Stamp keyring", blurb: "Metal disc. The circle on your keys.", pence: 800, image: "/art/merch/keyring.jpg", kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
+  { id: "tee-black", name: "Factory tee", blurb: "Black heavyweight. Circle stamp, left chest.", pence: 2800, image: "/art/merch/tee-black.jpg?v=chrome3", kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "tee-black-center", name: "Factory tee", blurb: "Black heavyweight. Circle stamp, center.", pence: 2800, image: "/art/merch/tee-black-center.jpg?v=chrome3", kind: "tee", color: "Black center", swatch: "#111111" },
+  { id: "tee-white", name: "Factory tee", blurb: "White heavyweight. Circle stamp, left chest.", pence: 2800, image: "/art/merch/tee-white.jpg?v=chrome3", kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "tee-grey", name: "Factory tee", blurb: "Heather. Circle stamp.", pence: 2800, image: "/art/merch/tee-grey.jpg?v=chrome3", kind: "tee", color: "Grey", swatch: "#8a8a86" },
+  { id: "tee-olive", name: "Factory tee", blurb: "Olive. Circle stamp.", pence: 2800, image: "/art/merch/tee-olive.jpg?v=chrome3", kind: "tee", color: "Olive", swatch: "#4a5a32" },
+  { id: "hoodie-black", name: "Factory hoodie", blurb: "Black pullover. Circle stamp on the chest.", pence: 4800, image: "/art/merch/hoodie-black.jpg?v=chrome3", kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "beanie-black", name: "Stamp beanie", blurb: "Black rib. Stamp on the cuff.", pence: 1800, image: "/art/merch/beanie-black.jpg?v=chrome3", kind: "beanie", color: "Black", swatch: "#111111" },
+  { id: "snapback-black", name: "Stamp snapback", blurb: "Black flat brim. Stamp on the front.", pence: 2200, image: "/art/merch/snapback-black.jpg?v=chrome3", kind: "snapback", color: "Black", swatch: "#111111" },
+  { id: "keyring", name: "Stamp keyring", blurb: "Metal disc. The circle on your keys.", pence: 800, image: "/art/merch/keyring.jpg?v=chrome3", kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
 ];
 
 export const FACTORY_IG = "parosite";

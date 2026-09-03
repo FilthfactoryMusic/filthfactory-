@@ -20,6 +20,7 @@ const NAV = [
   { to: "/wow", label: "WOW" },
   { to: "/software", label: "Software" },
   { to: "/school", label: "School" },
+  { to: "/trade", label: "Trade" },
   { to: "/charts", label: "Charts" },
   { to: "/library", label: "Crate" },
   { to: "/booth", label: "Go live" },
@@ -127,6 +128,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <Link to="/school" className="hover:text-fg">
             School
+          </Link>
+          <Link to="/trade" className="hover:text-fg">
+            Trade
           </Link>
           <Link to="/wow" className="hover:text-fg">
             Who's On What

@@ -29,6 +29,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SoftwareRouteImport } from './routes/software'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TradeRouteImport } from './routes/trade'
 import { Route as WowRouteImport } from './routes/wow'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as DjIdRouteImport } from './routes/dj.$id'
@@ -141,6 +142,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TradeRoute = TradeRouteImport.update({
+  id: '/trade',
+  path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WowRoute = WowRouteImport.update({
   id: '/wow',
   path: '/wow',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
+  '/trade': typeof TradeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
+  '/trade': typeof TradeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -284,6 +292,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
+  '/trade': typeof TradeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/software'
     | '/terms'
+    | '/trade'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/software'
     | '/terms'
+    | '/trade'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/software'
     | '/terms'
+    | '/trade'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -418,6 +430,7 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   SoftwareRoute: typeof SoftwareRoute
   TermsRoute: typeof TermsRoute
+  TradeRoute: typeof TradeRoute
   WowRoute: typeof WowRoute
   CitySlugRoute: typeof CitySlugRoute
   DjIdRoute: typeof DjIdRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trade': {
+      id: '/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wow': {
       id: '/wow'
       path: '/wow'
@@ -704,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   SoftwareRoute: SoftwareRoute,
   TermsRoute: TermsRoute,
+  TradeRoute: TradeRoute,
   WowRoute: WowRoute,
   CitySlugRoute: CitySlugRoute,
   DjIdRoute: DjIdRoute,

@@ -32,5 +32,5 @@ export function mergeLiveNow(community: LiveShow[]): LiveShow[] {
   const seeded = liveNow();
   const ids = new Set(community.map((s) => s.id));
   const merged = [...community, ...seeded.filter((s) => !ids.has(s.id))];
-  return merged.sort((a, b) => Number(Boolean(b.advertised)) - Number(Boolean(a.advertised)));
+  return merged;
 }

@@ -29,8 +29,6 @@ function LivePage() {
   const live = mergeLiveNow(community).filter(
     (s) => !blocked.has(s.djId) && !blocked.has(s.hostUserId),
   );
-  const advertised = live.filter((s) => s.advertised);
-  const restLive = live.filter((s) => !s.advertised);
   const upcoming = liveUpcoming();
   const ownLive = useLibrary((s) => s.ownLive);
   const playLive = usePlayer((s) => s.playLive);
@@ -42,7 +40,7 @@ function LivePage() {
         <div>
           <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">On air</h1>
           <p className="mt-1 text-sm text-muted">
-            <BrandedText text="Groove London, Thames Delta, Radio Respect, Code Red, Rinse, Flex. Or jump on the booth yourself." />
+            <BrandedText text="Rinse, Flex, Code Red, Life FM, Groove London, Thames Delta, Radio Respect. Or jump on the booth yourself." />
           </p>
         </div>
         <Link to="/booth" className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg">
@@ -67,26 +65,9 @@ function LivePage() {
         </div>
       ) : null}
 
-      {advertised.length ? (
-        <>
-          <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Advertised</h2>
-          <p className="mt-1 text-sm text-muted">
-            Featured members.{" "}
-            <Link to="/membership" className="underline underline-offset-4">
-              Advertise your stream
-            </Link>
-          </p>
-          <div className="mt-4 grid gap-5 md:grid-cols-2">
-            {advertised.map((s) => (
-              <LiveCard key={s.id} show={s} />
-            ))}
-          </div>
-        </>
-      ) : null}
-
       <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">On air</h2>
       <div className="mt-4 grid gap-5 md:grid-cols-3">
-        {restLive.map((s) => (
+        {live.map((s) => (
           <LiveCard key={s.id} show={s} />
         ))}
       </div>

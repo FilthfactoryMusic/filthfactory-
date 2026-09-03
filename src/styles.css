@@ -231,16 +231,63 @@
   }
 }
 
+.ff-word {
+  background-image: linear-gradient(
+    105deg,
+    #8a8a86 0%,
+    #d8d8d4 28%,
+    #ffffff 42%,
+    #c4c4c0 50%,
+    #ffffff 58%,
+    #d8d8d4 72%,
+    #8a8a86 100%
+  );
+  background-size: 220% 100%;
+  background-position: 80% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    ff-word-in 0.9s ease-out both,
+    ff-word-sheen 16s ease-in-out 1s infinite;
+}
+
+@keyframes ff-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ff-word-sheen {
+  0%,
+  100% {
+    background-position: 85% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .enter-up,
   .wow-marquee,
   .stamp-cdj-face,
   .stamp-cdj-deck,
-  .stamp-cdj-platter {
+  .stamp-cdj-platter,
+  .ff-word {
     animation: none;
   }
   .stamp-cdj-deck {
     display: none;
+  }
+  .ff-word {
+    color: var(--color-fg);
+    background: none;
   }
 }

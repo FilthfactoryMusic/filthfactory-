@@ -20,6 +20,9 @@ export type LiveRow = {
   listeners: number;
   started_at: string;
   featured: boolean;
+  watch_url?: string | null;
+  embed_url?: string | null;
+  source?: string | null;
 };
 
 type MixRow = {
@@ -57,20 +60,24 @@ function asEngine(v: string): EngineGenre {
 }
 
 export function liveFromRow(row: LiveRow): LiveShow {
+  const source = row.source || "booth";
+  const urlLive = Boolean(row.watch_url);
   return {
     id: row.id,
     djId: `u:${row.user_id}`,
     title: row.title,
-    venue: "Filthfactory booth",
+    venue: urlLive ? (row.source || "Remote desk") : "Filthfactory booth",
     city: row.city,
     citySlug: row.city_slug,
-    artwork: row.photo || "/art/brand/logo.png",
+    artwork: row.photo || "/art/brand/logo.png?v=chrome3",
     genres: [row.genre],
     engine: asEngine(row.engine),
     bpm: row.bpm,
     listeners: row.listeners,
     durationMin: 180,
-    description: `${row.display_name} is live from the booth.`,
+    description: urlLive
+      ? `${row.display_name} listed a ${source} desk on Filthfactory.`
+      : `${row.display_name} is live from the booth.`,
     tracklist: [{ t: 0, title: `${row.display_name} — live` }],
     status: "live",
     seed: row.seed,
@@ -79,6 +86,8 @@ export function liveFromRow(row: LiveRow): LiveShow {
     hasCamera: row.has_camera,
     startsAt: row.started_at,
     advertised: Boolean(row.featured),
+    watchUrl: row.watch_url ?? undefined,
+    embedUrl: row.embed_url ?? undefined,
   };
 }
 
@@ -110,7 +119,7 @@ export const listBoothLives = createServerFn({ method: "GET" }).handler(async ()
   const { getSql } = await import("@/lib/db");
   const sql = await getSql();
   const rows = await sql<LiveRow>`
-    select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured
+    select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
     from booth_lives
     order by featured desc, started_at desc
     limit 24
@@ -153,7 +162,7 @@ export const startBoothLive = createServerFn({ method: "POST" })
       )
     `;
     const rows = await sql<LiveRow>`
-      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured
+      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
       from booth_lives where id = ${id}
     `;
     const row = rows[0];
@@ -245,4 +254,62 @@ export const listMyMixes = createServerFn({ method: "GET" })
       order by created_at desc
     `;
     return rows.map(mixFromRow);
+  });
+
+export const startUrlLive = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    (d: {
+      title: string;
+      genre: string;
+      url: string;
+      displayName: string;
+      photo?: string | null;
+      city?: string;
+      citySlug?: string;
+      rightsConfirmed: boolean;
+    }) => d,
+  )
+  .handler(async ({ context, data }) => {
+    const { parseLiveUrl } = await import("@/lib/live-url");
+    const parsed = parseLiveUrl(data.url);
+    if (!parsed) throw new Error("URL_NOT_ALLOWED");
+    if (!data.rightsConfirmed) throw new Error("RIGHTS_REQUIRED");
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    let sub = (
+      await sql<{ plan: string; status: string }>`
+        select plan, status from subscriptions where user_id = ${context.userId}
+      `
+    )[0];
+    if (!sub || sub.status !== "active") {
+      const { activatePaidPlan } = await import("@/lib/billing-api");
+      const recovered = await activatePaidPlan(context.userId);
+      if (!recovered) throw new Error("MEMBERSHIP_REQUIRED");
+      sub = { plan: recovered.plan, status: recovered.status };
+    }
+    const featured = sub.plan === "featured";
+    const title = data.title.trim() || `${parsed.label} desk`;
+    const genre = data.genre.trim() || "UK Garage";
+    const engine = genreToEngine(genre);
+    const id = `url-${context.userId.slice(0, 8)}-${Date.now().toString(36)}`;
+    const seed = hashString(id) % 99991;
+    const displayName = data.displayName.trim() || "Resident";
+    await sql`delete from booth_lives where user_id = ${context.userId}`;
+    await sql`
+      insert into booth_lives (
+        id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured, watch_url, embed_url, source
+      ) values (
+        ${id}, ${context.userId}, ${displayName}, ${data.photo ?? parsed.thumb}, ${title}, ${genre},
+        ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, false, 1, ${featured},
+        ${parsed.watchUrl}, ${parsed.embedUrl}, ${parsed.source}
+      )
+    `;
+    const rows = await sql<LiveRow>`
+      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
+      from booth_lives where id = ${id}
+    `;
+    const row = rows[0];
+    if (!row) throw new Error("Failed to list desk");
+    return liveFromRow(row);
   });

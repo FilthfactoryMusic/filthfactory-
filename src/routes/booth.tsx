@@ -13,6 +13,9 @@ import { useCurrentUser, useCurrentUserState } from "@/lib/auth/use-current-user
 import { formatGbp } from "@/lib/utils";
 import { useMyBilling } from "@/lib/use-billing";
 import { useHostBroadcast } from "@/hooks/use-host-broadcast";
+import { SimulcastPanel } from "@/components/simulcast-panel";
+import { UrlGatewayPanel } from "@/components/url-gateway-panel";
+import { ObsDesk } from "@/components/obs-desk";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -379,6 +382,10 @@ function BoothStudio({ featured }: { featured: boolean }) {
           )}
         </form>
       </div>
+
+      <SimulcastPanel liveId={ownLive?.id} />
+      <UrlGatewayPanel />
+      <ObsDesk liveId={ownLive?.id} />
 
       <form onSubmit={(e) => void onDrop(e)} className="mt-8 rounded-sm border border-border bg-surface p-5">
         <div className="flex items-center gap-2">

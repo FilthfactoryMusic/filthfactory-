@@ -10,7 +10,7 @@ export type Brand = {
 const EXTRA: Brand[] = [
   {
     name: "Filthfactory",
-    logo: "/art/brand/logo.png",
+    logo: "/art/brand/logo.png?v=chrome3",
     site: "/",
     aliases: ["filthfactory", "filth factory", "filth factory music"],
   },
@@ -31,6 +31,36 @@ const EXTRA: Brand[] = [
     logo: "/art/software/engine.png",
     site: "https://enginedj.com/news",
     aliases: ["engine dj"],
+  },
+  {
+    name: "Rinse FM",
+    logo: "/art/stations/rinse.jpg",
+    site: "https://rinse.fm/",
+    aliases: ["rinse fm", "rinse"],
+  },
+  {
+    name: "Flex FM",
+    logo: "/art/stations/flex-fm.jpg",
+    site: "https://flexfm.co.uk/",
+    aliases: ["flex fm", "flex"],
+  },
+  {
+    name: "Code Red",
+    logo: "/art/stations/code-red.jpg",
+    site: "https://www.youtube.com/channel/UCQRp7g7irivIUb4HdiU1KiQ",
+    aliases: ["code red", "code red radio"],
+  },
+  {
+    name: "Life FM",
+    logo: "/art/stations/life-fm.jpg",
+    site: "https://lifefmtv.squarespace.com/",
+    aliases: ["life fm"],
+  },
+  {
+    name: "Groove London",
+    logo: "/art/stations/groove-london.jpg",
+    site: "https://www.groovelondon.com/",
+    aliases: ["groove london"],
   },
 ];
 

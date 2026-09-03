@@ -190,7 +190,7 @@ export const loadBoothLive = createServerFn({ method: "POST" })
     const sql = await getSql();
     const { liveFromRow } = await import("@/lib/live-api");
     const rows = await sql<Parameters<typeof liveFromRow>[0]>`
-      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured
+      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
       from booth_lives where id = ${data.id}
     `;
     const row = rows[0];

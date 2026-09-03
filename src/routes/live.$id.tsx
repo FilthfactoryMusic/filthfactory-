@@ -7,6 +7,7 @@ import { CHAT_SEED, currentTrack, getDj, getLive, liveOffsetSec, mixesByDj } fro
 import { resolveLive, useLibrary, EMPTY_CHAT } from "@/lib/library-store";
 import { loadBoothLive } from "@/lib/stream-api";
 import { isBoothBroadcast } from "@/lib/viewer-id";
+import { embedFromWatch } from "@/lib/live-url";
 import { usePlayer } from "@/lib/player-store";
 import { MixCard } from "@/components/mix-card";
 import { MixGrid } from "@/components/section";
@@ -29,7 +30,7 @@ function LiveShowPage() {
   const [fetched, setFetched] = useState<LiveShow | null>(null);
 
   useEffect(() => {
-    if (!isBoothBroadcast(id)) return;
+    if (!id.startsWith("live-") && !id.startsWith("url-")) return;
     void loadBoothLive({ data: { id } })
       .then((row) => setFetched(row))
       .catch(() => setFetched(null));
@@ -53,6 +54,7 @@ function LiveShowPage() {
   const [listeners, setListeners] = useState(show?.listeners ?? 0);
   const isHost = ownLive?.id === id || Boolean(user && show?.hostUserId === user.id);
   const booth = Boolean(show && isBoothBroadcast(show.id));
+  const embed = show?.embedUrl || embedFromWatch(show?.watchUrl) || null;
   const listening = now?.kind === "live" && now.id === show?.id && playing;
 
   useEffect(() => {
@@ -108,10 +110,10 @@ function LiveShowPage() {
           />
         ) : (
           <div className="relative overflow-hidden rounded-sm bg-surface">
-            {show.embedUrl ? (
+            {embed ? (
               <iframe
                 title={show.title}
-                src={show.embedUrl}
+                src={embed}
                 className="aspect-video w-full bg-bg"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                 allowFullScreen
