@@ -17,7 +17,7 @@ export function LabelReel() {
             <img
               src={lab.logo}
               alt={lab.name}
-              className="aspect-square w-full rounded-sm bg-[#f4f4f0] object-contain p-1.5"
+              className="aspect-square w-full rounded-sm bg-black object-contain"
             />
             <p className="mt-2 truncate text-[11px] font-medium sm:text-xs">{lab.name}</p>
             <p className="truncate text-[9px] uppercase tracking-widest text-muted">{lab.genre}</p>
