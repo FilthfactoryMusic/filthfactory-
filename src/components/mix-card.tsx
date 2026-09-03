@@ -19,7 +19,7 @@ export function MixCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
     <article className="group min-w-0">
       <div className="relative overflow-hidden rounded-sm bg-surface">
         <Link to="/mix/$id" params={{ id: mix.id }} className="block aspect-square">
-          <img src={mix.artwork} alt="" className="size-full object-cover" />
+          <img src={mix.artwork} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
         </Link>
         <button
           type="button"

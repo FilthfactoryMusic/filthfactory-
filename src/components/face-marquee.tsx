@@ -17,6 +17,10 @@ export function FaceMarquee({ faces }: { faces: WowItem[] }) {
             <img
               src={it.thumb || "/art/brand/logo.png"}
               alt=""
+              width={128}
+              height={128}
+              loading={i < 6 ? "eager" : "lazy"}
+              decoding="async"
               className="aspect-square w-full rounded-full object-cover"
             />
             <p className="mt-2 truncate text-xs font-medium sm:text-sm">{it.title}</p>

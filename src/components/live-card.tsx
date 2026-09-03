@@ -21,7 +21,7 @@ export function LiveCard({ show }: { show: LiveShow }) {
         params={{ id: show.id }}
         className="relative block overflow-hidden rounded-sm bg-surface"
       >
-        <img src={show.artwork} alt="" className="aspect-video w-full bg-bg object-contain" />
+        <img src={show.artwork} alt="" loading="lazy" decoding="async" className="aspect-video w-full bg-bg object-contain" />
         <div className="absolute left-2 top-2 flex items-center gap-1">
           <LiveDot />
           {show.advertised ? (

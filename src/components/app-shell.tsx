@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 md:h-[4.5rem] md:px-6">
+        <div className="mx-auto flex h-24 max-w-7xl items-center gap-3 px-3 md:h-28 md:px-6">
           <Link to="/" className="text-fg" aria-label="Filthfactory home">
             <Wordmark />
           </Link>

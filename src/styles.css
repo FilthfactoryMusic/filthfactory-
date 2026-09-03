@@ -131,183 +131,96 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
-  animation: stamp-face 16s ease-in-out infinite;
+  opacity: 0;
+  animation: stamp-face 14s ease-in-out infinite;
 }
 
 .stamp-cdj-deck {
   position: absolute;
-  inset: 9%;
+  inset: 3%;
   overflow: hidden;
   border-radius: 50%;
-  background: #070707;
-  color: #f3f3f3;
-  opacity: 0;
-  animation: stamp-deck 16s ease-in-out infinite;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: #000;
+  opacity: 1;
+  animation: stamp-deck 14s ease-in-out infinite;
+  box-shadow:
+    inset 0 0 0 3px #111,
+    0 0 0 2px #f4f4f0;
 }
 
-.stamp-cdj-ticks {
+.stamp-cdj-platter {
   position: absolute;
   inset: 0;
-  animation: stamp-jog 18s linear infinite;
+  animation: stamp-jog 6s linear infinite;
+}
+
+.stamp-cdj-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
   pointer-events: none;
+  background: repeating-conic-gradient(#f4f4f0 0deg 1.1deg, transparent 1.1deg 4deg);
+  mask: radial-gradient(circle, transparent 64%, #000 65%, #000 78%, transparent 79%);
+  -webkit-mask: radial-gradient(circle, transparent 64%, #000 65%, #000 78%, transparent 79%);
 }
 
-.stamp-cdj-ticks span {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 1px;
-  height: 50%;
-  margin-left: -0.5px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.5) 9%,
-    transparent 9%
-  );
-  transform-origin: 50% 100%;
-}
-
-.stamp-cdj-ticks span:nth-child(6n) {
-  background: linear-gradient(to bottom, #fff 0%, #fff 13%, transparent 13%);
-}
-
-.stamp-cdj-readout {
-  position: absolute;
-  inset: 16%;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 2.2cqmin;
-}
-
-.stamp-cdj-cues {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.6cqmin;
-  margin: 0;
-}
-
-.stamp-cdj-cues i {
-  display: block;
-  width: 3.4cqmin;
-  height: 3.4cqmin;
-  border-radius: 0.4cqmin;
-  background: #ff7a18;
-}
-
-.stamp-cdj-cues i:nth-child(2) {
-  background: #3b82f6;
-}
-.stamp-cdj-cues i:nth-child(3) {
-  background: #22c55e;
-}
-.stamp-cdj-cues i:nth-child(4) {
-  background: #e11d2e;
-}
-.stamp-cdj-cues i:nth-child(5) {
-  background: #a855f7;
-}
-.stamp-cdj-cues i:nth-child(6) {
-  background: #f59e0b;
-}
-.stamp-cdj-cues i:nth-child(7) {
-  background: #06b6d4;
-}
-.stamp-cdj-cues i:nth-child(8) {
-  background: #f43f5e;
-}
-
-.stamp-cdj-remain {
-  margin: 0;
-  font-size: 5.2cqmin;
-  font-weight: 600;
-  letter-spacing: 0.38em;
-  padding-left: 0.38em;
-  opacity: 0.55;
-}
-
-.stamp-cdj-time {
-  margin: 0;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 16.5cqmin;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  line-height: 1;
-}
-
-.stamp-cdj-wavewrap {
-  position: relative;
-  width: 86%;
-  height: 11cqmin;
-  overflow: hidden;
-}
-
-.stamp-cdj-wave {
+.stamp-cdj-played {
   position: absolute;
   inset: 0;
-  width: 160%;
-  height: 100%;
-  color: #fff;
-  animation: stamp-wave 3.2s linear infinite;
+  border-radius: 50%;
+  background: conic-gradient(#ffffff 0deg 200deg, transparent 200deg 360deg);
+  mask: radial-gradient(circle, transparent 64%, #000 65%, #000 78%, transparent 79%);
+  -webkit-mask: radial-gradient(circle, transparent 64%, #000 65%, #000 78%, transparent 79%);
+  mix-blend-mode: screen;
 }
 
-.stamp-cdj-needle {
+.stamp-cdj-cue {
   position: absolute;
   left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1.2px;
-  margin-left: -0.6px;
-  background: #e11d2e;
-  box-shadow: 0 0 6px #e11d2e;
+  top: 20%;
+  width: 2%;
+  height: 10%;
+  margin-left: -1%;
+  background: #f4f4f0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
-.stamp-cdj-bpm {
-  margin: 0;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 7.4cqmin;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
-}
-
-.stamp-cdj-bpm span {
-  margin-left: 0.35em;
-  font-size: 0.72em;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  opacity: 0.5;
+.stamp-cdj-hub {
+  position: absolute;
+  inset: 32%;
+  z-index: 1;
+  border-radius: 50%;
+  background: #0a0a0a;
+  box-shadow:
+    0 0 0 3px #f4f4f0,
+    0 0 0 6px #0a0a0a,
+    inset 0 0 12px #000;
 }
 
 @keyframes stamp-face {
   0%,
-  28%,
-  88%,
-  100% {
+  22% {
+    opacity: 0;
+  }
+  38%,
+  86% {
     opacity: 1;
   }
-  40%,
-  76% {
+  100% {
     opacity: 0;
   }
 }
 
 @keyframes stamp-deck {
   0%,
-  28%,
-  88%,
-  100% {
+  22% {
+    opacity: 1;
+  }
+  38%,
+  86% {
     opacity: 0;
   }
-  40%,
-  76% {
+  100% {
     opacity: 1;
   }
 }
@@ -318,23 +231,13 @@
   }
 }
 
-@keyframes stamp-wave {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-25%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .enter-up,
   .wow-marquee,
   .stamp-cdj-face,
   .stamp-cdj-deck,
-  .stamp-cdj-ticks,
-  .stamp-cdj-wave {
+  .stamp-cdj-platter {
     animation: none;
   }
   .stamp-cdj-deck {

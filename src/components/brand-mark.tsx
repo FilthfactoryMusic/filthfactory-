@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export function BrandMark({
   name,
-  size = "sm",
+  size = "md",
   className,
 }: {
   name: string;
@@ -18,7 +18,7 @@ export function BrandMark({
 export function BrandChip({
   brand,
   label,
-  size = "sm",
+  size = "md",
   className,
 }: {
   brand: Brand;
@@ -26,7 +26,7 @@ export function BrandChip({
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const box = size === "lg" ? "size-8" : size === "md" ? "size-6" : "size-4";
+  const box = size === "lg" ? "size-10" : size === "md" ? "size-8" : "size-6";
   const round = brand.name === "Filthfactory" ? "rounded-full" : "rounded-sm";
   return (
     <span className={cn("inline-flex max-w-full items-center gap-1.5 align-middle", className)}>

@@ -24,7 +24,7 @@ export function ChartCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
     <article className="group min-w-0">
       <div className="relative overflow-hidden rounded-sm bg-surface">
         <Link to="/mix/$id" params={{ id: mix.id }} className="block">
-          <img src={mix.artwork} alt="" className="aspect-square w-full object-cover" />
+          <img src={mix.artwork} alt="" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
         </Link>
         <span className="absolute left-2 top-2 rounded-sm bg-bg/80 px-1.5 py-0.5 text-[10px] uppercase tracking-widest">
           30s

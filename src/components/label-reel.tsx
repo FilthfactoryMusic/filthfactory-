@@ -12,15 +12,18 @@ export function LabelReel() {
             href={lab.site}
             target="_blank"
             rel="noreferrer"
-            className="w-24 shrink-0 text-center sm:w-28"
+            className="w-28 shrink-0 text-center sm:w-32"
           >
             <img
               src={lab.logo}
               alt={lab.name}
+              width={128}
+              height={128}
+              loading={i < 8 ? "eager" : "lazy"}
+              decoding="async"
               className="aspect-square w-full rounded-sm bg-black object-contain"
             />
-            <p className="mt-2 truncate text-[11px] font-medium sm:text-xs">{lab.name}</p>
-            <p className="truncate text-[9px] uppercase tracking-widest text-muted">{lab.genre}</p>
+            <p className="mt-2 truncate font-display text-[11px] font-semibold uppercase tracking-wide sm:text-xs">{lab.name}</p>
           </a>
         ))}
       </div>

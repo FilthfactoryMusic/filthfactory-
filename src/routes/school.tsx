@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandedText } from "@/components/brand-mark";
 import { SchoolDiagram } from "@/components/school-diagrams";
-import { SCHOOL, SCHOOL_CREDIT } from "@/lib/school";
+import { SCHOOL } from "@/lib/school";
 
 export const Route = createFileRoute("/school")({
   component: SchoolPage,
@@ -24,13 +24,8 @@ function SchoolPage() {
         School
       </p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">Tips & tricks</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-        Instruction manual for the desk. Still pictures, numbered controls, short steps. Written here — not copied from
-        anyone’s scripts. Same topics a lot of DJs learn from{" "}
-        <a href={SCHOOL_CREDIT.url} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-          {SCHOOL_CREDIT.name}
-        </a>{" "}
-        on YouTube. Watch him for the moving version. This page is the paper version.
+      <p className="mt-3 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        All The Basics to get you started on your DJ Journey
       </p>
 
       <nav className="mt-8 flex flex-wrap gap-2">
