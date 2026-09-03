@@ -13,7 +13,7 @@ export const Route = createFileRoute("/releases")({
       { title: "NEW RELEASES — Filthfactory" },
       {
         name: "description",
-        content: "New UK garage, drum & bass, jungle, grime, bassline, techno. 30s previews. Buy WAV/MP3 on Beatport.",
+        content: "New UK garage, drum and bass, jungle, grime, bassline. 30s preview. One bag: WAV, MP3 or FLAC.",
       },
     ],
   }),
@@ -27,10 +27,10 @@ function ReleasesPage() {
 
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.25em] text-accent">UK crate · 30s preview</p>
+      <p className="text-xs uppercase tracking-[0.25em] text-accent">The desk · 30s · one bag</p>
       <h1 className="mt-1 font-display text-5xl font-semibold uppercase tracking-wide md:text-6xl">NEW RELEASES</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
-        Fresh UK electronic — preview here, buy WAV/MP3 on Beatport or Bandcamp. Last 90 days. No fillers.
+        Last 90 days. Preview here. Buy the file once — WAV, MP3 or FLAC. No paying twice for the same cut. Then go live next door.
       </p>
       <div className="mt-6 flex flex-wrap gap-2">
         {GENRE_CRATES.map((c) => (

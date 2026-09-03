@@ -49,6 +49,9 @@ export type Mix = {
   credit?: string;
   beatportUrl?: string;
   spotifyUrl?: string;
+  bandcampUrl?: string;
+  cut?: string;
+  label?: string;
 };
 
 export type Dj = {

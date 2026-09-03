@@ -35,7 +35,13 @@ export const GENRE_CRATES: {
   { slug: "industrial", name: "Industrial", q: "industrial techno", engine: "industrial" },
 ];
 
-export function beatportSearch(title: string, artist: string) {
+export function cutFromTitle(title: string) {
+  const m = title.match(/\(([^)]+)\)\s*$/);
+  if (!m) return undefined;
+  const cut = m[1].trim();
+  if (/mix|vip|dub|edit|remix|extended|instrumental|version|bootleg|refix|rework/i.test(cut)) return cut;
+  return undefined;
+}
   return `https://www.beatport.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`;
 }
 
@@ -63,6 +69,9 @@ export function trackToMix(
     const ts = Date.parse(released);
     if (Number.isFinite(ts) && Date.now() - ts > FRESH_MS) return null;
   }
+  const album = t.album?.title?.trim();
+  const cut = cutFromTitle(t.title);
+  const label = album && album.toLowerCase() !== t.title.toLowerCase() ? album : undefined;
   return {
     id: `${prefix}-${t.id}`,
     title: t.title,
@@ -78,16 +87,19 @@ export function trackToMix(
     plays: Math.max(0, 20000 - i * 113),
     likes: Math.max(0, 900 - i * 9),
     uploadedAt: released || new Date().toISOString(),
-    description: `${artist} — ${t.title}. 30-second licensed preview. Buy WAV/MP3 on Beatport or Bandcamp.`,
+    description: `${artist} — ${t.title}. 30-second licensed preview. One bag: WAV, MP3 or FLAC on Beatport or Bandcamp.`,
     tracklist: [{ t: 0, title: `${artist} — ${t.title}` }],
     comments: [],
     tags: [genre.toLowerCase(), "catalogue"],
     seed: t.id,
     streamUrl: t.preview,
-    credit: "30s preview via Deezer. Full release on Beatport / Spotify / Bandcamp.",
+    credit: "30s preview via Deezer. Full file on Beatport / Bandcamp — WAV, MP3 or FLAC, one bag.",
     featured: i < 4,
     beatportUrl: beatportSearch(t.title, artist),
     spotifyUrl: spotifySearch(t.title, artist),
+    bandcampUrl: bandcampSearch(t.title, artist),
+    cut,
+    label,
   };
 }
 

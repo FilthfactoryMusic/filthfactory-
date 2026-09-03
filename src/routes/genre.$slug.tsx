@@ -22,7 +22,7 @@ function GenrePage() {
       <p className="text-xs uppercase tracking-widest text-muted">Crate</p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">{name}</h1>
       <p className="mt-2 text-sm text-muted">
-        Real releases. 30s preview. Buy WAV/MP3 on Beatport. Last 90 days where the date is known.
+        Real releases. 30s preview. One bag: WAV, MP3 or FLAC. Last 90 days where the date is known.
       </p>
       <div className="mt-8">
         {mixes.length ? (

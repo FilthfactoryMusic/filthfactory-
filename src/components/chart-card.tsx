@@ -44,15 +44,17 @@ export function ChartCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
         {mix.title}
       </Link>
       <p className="truncate text-sm text-muted">{mix.show}</p>
-      <p className="mt-1 flex flex-wrap gap-x-2 text-xs text-faint">
+      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] uppercase tracking-wider text-faint">
+        {mix.cut ? <span className="text-muted">{mix.cut}</span> : null}
+        {mix.label ? <span className="truncate">{mix.label}</span> : null}
         {mix.beatportUrl ? (
           <a href={mix.beatportUrl} target="_blank" rel="noreferrer" className="hover:text-fg">
-            Buy WAV/MP3
+            WAV · MP3 · FLAC
           </a>
         ) : null}
-        {mix.spotifyUrl ? (
-          <a href={mix.spotifyUrl} target="_blank" rel="noreferrer" className="hover:text-fg">
-            Spotify
+        {mix.bandcampUrl ? (
+          <a href={mix.bandcampUrl} target="_blank" rel="noreferrer" className="hover:text-fg">
+            Bandcamp
           </a>
         ) : null}
       </p>

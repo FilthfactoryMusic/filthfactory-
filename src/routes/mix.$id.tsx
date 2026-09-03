@@ -63,6 +63,11 @@ function MixPage() {
             {mix.title}
           </h1>
           <p className="mt-4 text-lg">{mix.show}</p>
+          {mix.cut || mix.label ? (
+            <p className="mt-1 text-xs uppercase tracking-widest text-muted">
+              {[mix.cut, mix.label].filter(Boolean).join(" · ")}
+            </p>
+          ) : null}
           <p className="mt-3 text-sm text-muted">{mix.description}</p>
           <p className="mt-2 text-xs uppercase tracking-widest text-muted">{mixCredit(mix)}</p>
           <p className="mt-2 text-xs text-faint tabular-nums">{formatDuration(mix.duration)} preview</p>
@@ -100,7 +105,7 @@ function MixPage() {
                 rel="noreferrer"
                 className="inline-flex h-11 items-center rounded-md bg-live px-5 text-sm font-medium text-live-fg"
               >
-                Buy WAV/MP3
+                Buy WAV · MP3 · FLAC
               </a>
             ) : null}
             {mix.spotifyUrl ? (
