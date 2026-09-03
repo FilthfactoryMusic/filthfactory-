@@ -26,6 +26,7 @@ import { Route as ReleasesRouteImport } from './routes/releases'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SoftwareRouteImport } from './routes/software'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WowRouteImport } from './routes/wow'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
@@ -124,6 +125,11 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SoftwareRoute = SoftwareRouteImport.update({
+  id: '/software',
+  path: '/software',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/search'
     | '/shop'
+    | '/software'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/search'
     | '/shop'
+    | '/software'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/search'
     | '/shop'
+    | '/software'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -391,6 +403,7 @@ export interface RootRouteChildren {
   SafetyRoute: typeof SafetyRoute
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
+  SoftwareRoute: typeof SoftwareRoute
   TermsRoute: typeof TermsRoute
   WowRoute: typeof WowRoute
   CitySlugRoute: typeof CitySlugRoute
@@ -520,6 +533,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/software': {
+      id: '/software'
+      path: '/software'
+      fullPath: '/software'
+      preLoaderRoute: typeof SoftwareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -661,6 +681,7 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyRoute: SafetyRoute,
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
+  SoftwareRoute: SoftwareRoute,
   TermsRoute: TermsRoute,
   WowRoute: WowRoute,
   CitySlugRoute: CitySlugRoute,
