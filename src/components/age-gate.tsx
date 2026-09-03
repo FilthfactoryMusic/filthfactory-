@@ -48,6 +48,7 @@ function persistAge() {
 }
 
 export function AgeGate() {
+  const [ready, setReady] = useState(false);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
@@ -55,9 +56,10 @@ export function AgeGate() {
       memoryOk = true;
       setAllowed(true);
     }
+    setReady(true);
   }, []);
 
-  if (allowed) return null;
+  if (!ready || allowed) return null;
 
   function confirm() {
     persistAge();
