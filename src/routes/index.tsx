@@ -10,6 +10,7 @@ import { mergeLiveNow, useCommunityLive } from "@/lib/use-community-live";
 import { usePlayer } from "@/lib/player-store";
 import { formatCount } from "@/lib/utils";
 import { FaceMarquee } from "@/components/face-marquee";
+import { LabelReel } from "@/components/label-reel";
 import { StampCdj } from "@/components/stamp-cdj";
 import { LiveDot } from "@/components/live-dot";
 import { useMyBlocks } from "@/lib/use-blocks";
@@ -123,6 +124,10 @@ function Home() {
             faces={(wow.digest?.items ?? []).filter((i) => i.kind === "artist" && i.thumb)}
           />
         )}
+        <p className="mt-8 text-xs uppercase tracking-[0.25em] text-muted">Labels</p>
+        <div className="mt-3">
+          <LabelReel />
+        </div>
       </section>
 
       {lead ? (

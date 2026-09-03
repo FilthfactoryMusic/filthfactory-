@@ -48,10 +48,10 @@ export const WOW_ARTISTS: { name: string; genre: string; news: string; needles: 
   { name: "Prospa", genre: "Tech House", news: "Prospa DJ house UK", needles: ["prospa"], mixcloud: "Prospa", deezer: "Prospa" },
 ];
 
-export const WOW_LABELS: { name: string; news: string; needles: string[]; deezer: string }[] = [
-  { name: "Hospital Records", news: '"Hospital Records" drum OR bass OR London Elektricity', needles: ["hospital records", "hospitality"], deezer: "Hospital Records" },
-  { name: "V Recordings", news: '"V Recordings" drum AND bass', needles: ["v recordings"], deezer: "V Recordings" },
-  { name: "Born on Road", news: '"Born on Road" jungle OR "DJ Storm"', needles: ["born on road"], deezer: "Born on Road" },
+export const WOW_LABELS: { name: string; news: string; needles: string[]; deezer: string; logo?: string; site: string }[] = [
+  { name: "Hospital Records", news: '"Hospital Records" drum OR bass OR London Elektricity', needles: ["hospital records", "hospitality"], deezer: "Hospital Records", logo: "/art/labels/hospital.png", site: "https://www.hospitalrecords.com/" },
+  { name: "V Recordings", news: '"V Recordings" drum AND bass', needles: ["v recordings"], deezer: "V Recordings", logo: "/art/labels/v-recordings.png", site: "https://www.vrecordings.com/" },
+  { name: "Born on Road", news: '"Born on Road" jungle OR "DJ Storm"', needles: ["born on road"], deezer: "Born on Road", site: "https://www.bornonroad.com/" },
 ];
 
 export const WOW_GENRES: { id: string; name: string; news: string; needles: string[]; mixcloud: string; deezer: string }[] = [
@@ -258,10 +258,10 @@ async function scanNow(dayId: string): Promise<WowItem[]> {
         name: lab.name,
         title: hit?.title ?? lab.name,
         blurb: hit ? hit.source : "UK label desk",
-        url: hit?.link ?? faces[0]?.link ?? songkick(lab.name),
+        url: hit?.link ?? lab.site,
         source: hit?.source ?? "Label",
         publishedAt: hit?.date ?? dayId,
-        thumb: faces[0]?.picture_xl || faces[0]?.picture_medium,
+        thumb: lab.logo || faces[0]?.picture_xl || faces[0]?.picture_medium,
         genre: "Label",
       });
     } catch {

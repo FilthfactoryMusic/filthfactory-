@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FaceMarquee } from "@/components/face-marquee";
-import { WOW_GENRES, WOW_LABELS } from "@/lib/wow-scan";
+import { LabelReel } from "@/components/label-reel";
+import { WOW_GENRES } from "@/lib/wow-scan";
 import { useWow } from "@/lib/use-wow";
 
 export const Route = createFileRoute("/wow")({
@@ -21,7 +22,6 @@ function WowPage() {
   const { digest, loading } = useWow();
   const items = digest?.items ?? [];
   const faces = items.filter((i) => i.kind === "artist" && i.thumb);
-  const labels = items.filter((i) => i.kind === "label");
   const news = items.filter((i) => i.kind === "news" || i.kind === "mix");
 
   return (
@@ -40,26 +40,8 @@ function WowPage() {
       </div>
 
       <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Labels</h2>
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {WOW_LABELS.map((lab) => {
-          const row = labels.find((l) => l.name === lab.name);
-          return (
-            <a
-              key={lab.name}
-              href={row?.url ?? `https://www.songkick.com/search?query=${encodeURIComponent(lab.name)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="min-w-0 text-center"
-            >
-              <img
-                src={row?.thumb || "/art/brand/logo.png"}
-                alt=""
-                className="mx-auto aspect-square w-full max-w-28 rounded-sm object-cover"
-              />
-              <p className="mt-2 truncate text-sm font-medium">{lab.name}</p>
-            </a>
-          );
-        })}
+      <div className="mt-4">
+        <LabelReel />
       </div>
 
       {WOW_GENRES.map((g) => {
