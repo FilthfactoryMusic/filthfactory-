@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { UK_BASS_LABELS, WOW_NEWS_LABELS } from "@/lib/uk-bass-labels";
 
 export type WowKind = "artist" | "mix" | "news" | "label" | "festival";
 
@@ -48,11 +49,7 @@ export const WOW_ARTISTS: { name: string; genre: string; news: string; needles: 
   { name: "Prospa", genre: "Tech House", news: "Prospa DJ house UK", needles: ["prospa"], mixcloud: "Prospa", deezer: "Prospa" },
 ];
 
-export const WOW_LABELS: { name: string; news: string; needles: string[]; deezer: string; logo?: string; site: string }[] = [
-  { name: "Hospital Records", news: '"Hospital Records" drum OR bass OR London Elektricity', needles: ["hospital records", "hospitality"], deezer: "Hospital Records", logo: "/art/labels/hospital.png", site: "https://www.hospitalrecords.com/" },
-  { name: "V Recordings", news: '"V Recordings" drum AND bass', needles: ["v recordings"], deezer: "V Recordings", logo: "/art/labels/v-recordings.png", site: "https://www.vrecordings.com/" },
-  { name: "Born on Road", news: '"Born on Road" jungle OR "DJ Storm"', needles: ["born on road"], deezer: "Born on Road", site: "https://www.bornonroad.com/" },
-];
+export const WOW_LABELS = UK_BASS_LABELS;
 
 export const WOW_GENRES: { id: string; name: string; news: string; needles: string[]; mixcloud: string; deezer: string }[] = [
   { id: "ukg", name: "UK Garage", news: "UK garage DJ 2026", needles: ["garage", "ukg", "2-step"], mixcloud: "uk garage 2026", deezer: "UK garage" },
@@ -248,10 +245,10 @@ async function scanNow(dayId: string): Promise<WowItem[]> {
     }
   }
 
-  for (const lab of WOW_LABELS) {
+  for (const lab of WOW_NEWS_LABELS) {
     try {
-      const [faces, news] = await Promise.all([deezerArtists(lab.deezer), googleNews(lab.news)]);
-      const hit = news.find((n) => hits(n.title, lab.needles));
+      const [faces, news] = await Promise.all([deezerArtists(lab.deezer), googleNews(lab.news!)]);
+      const hit = news.find((n) => hits(n.title, lab.needles ?? []));
       push({
         id: `lab-${lab.name}`,
         kind: "label",

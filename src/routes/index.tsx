@@ -124,7 +124,7 @@ function Home() {
             faces={(wow.digest?.items ?? []).filter((i) => i.kind === "artist" && i.thumb)}
           />
         )}
-        <p className="mt-8 text-xs uppercase tracking-[0.25em] text-muted">Labels</p>
+        <p className="mt-8 text-xs uppercase tracking-[0.25em] text-muted">UK bass labels</p>
         <div className="mt-3">
           <LabelReel />
         </div>

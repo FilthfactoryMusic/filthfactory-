@@ -39,7 +39,7 @@ function WowPage() {
         <FaceMarquee faces={faces} />
       </div>
 
-      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Labels</h2>
+      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">UK bass labels</h2>
       <div className="mt-4">
         <LabelReel />
       </div>

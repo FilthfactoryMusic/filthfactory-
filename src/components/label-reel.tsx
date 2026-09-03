@@ -1,26 +1,26 @@
-import { WOW_LABELS } from "@/lib/wow-scan";
+import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 
 export function LabelReel() {
-  const items = WOW_LABELS.filter((l) => l.logo);
-  if (!items.length) return null;
-  const row = [...items, ...items, ...items, ...items];
+  const items = UK_BASS_LABELS;
+  const row = [...items, ...items];
   return (
     <div className="overflow-hidden">
-      <div className="wow-marquee flex w-max items-end gap-6 pr-6">
+      <div className="wow-marquee flex w-max items-end gap-5 pr-5">
         {row.map((lab, i) => (
           <a
             key={`${lab.name}-${i}`}
             href={lab.site}
             target="_blank"
             rel="noreferrer"
-            className="w-28 shrink-0 text-center sm:w-32"
+            className="w-24 shrink-0 text-center sm:w-28"
           >
             <img
               src={lab.logo}
               alt={lab.name}
-              className="aspect-square w-full rounded-sm bg-[#f4f4f0] object-contain p-2"
+              className="aspect-square w-full rounded-sm bg-[#f4f4f0] object-contain p-1.5"
             />
-            <p className="mt-2 truncate text-xs font-medium sm:text-sm">{lab.name}</p>
+            <p className="mt-2 truncate text-[11px] font-medium sm:text-xs">{lab.name}</p>
+            <p className="truncate text-[9px] uppercase tracking-widest text-muted">{lab.genre}</p>
           </a>
         ))}
       </div>
