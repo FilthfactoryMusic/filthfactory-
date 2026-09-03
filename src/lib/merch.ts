@@ -1,15 +1,25 @@
+export type MerchKind = "tee" | "hoodie" | "beanie" | "snapback" | "keyring";
+
 export type MerchSku = {
   id: string;
   name: string;
   blurb: string;
   pence: number;
   image: string;
+  kind: MerchKind;
+  color: string;
+  swatch: string;
 };
 
 export const FACTORY_MERCH: MerchSku[] = [
-  { id: "hoodie", name: "Stamp hoodie", blurb: "Black. Factory on the chest. The one in the photo.", pence: 4800, image: "/art/merch/hoodie.jpg" },
-  { id: "tee", name: "Stamp tee", blurb: "Black. White factory print.", pence: 2800, image: "/art/merch/tee.jpg" },
-  { id: "beanie", name: "Stamp beanie", blurb: "Black. Factory on the front.", pence: 1800, image: "/art/merch/beanie.jpg" },
+  { id: "tee-black", name: "Stamp tee", blurb: "Black cotton. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-black.jpg", kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "tee-white", name: "Stamp tee", blurb: "White cotton. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-white.jpg", kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "tee-grey", name: "Stamp tee", blurb: "Heather grey. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-grey.jpg", kind: "tee", color: "Grey", swatch: "#8a8a86" },
+  { id: "tee-olive", name: "Stamp tee", blurb: "Olive. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-olive.jpg", kind: "tee", color: "Olive", swatch: "#4a5a32" },
+  { id: "hoodie-black", name: "Stamp hoodie", blurb: "Black pullover. Stamp on the chest.", pence: 4800, image: "/art/merch/hoodie-black.jpg", kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "beanie-black", name: "Stamp beanie", blurb: "Black rib. Stamp on the cuff.", pence: 1800, image: "/art/merch/beanie-black.jpg", kind: "beanie", color: "Black", swatch: "#111111" },
+  { id: "snapback-black", name: "Stamp snapback", blurb: "Black flat brim. Stamp on the front.", pence: 2200, image: "/art/merch/snapback-black.jpg", kind: "snapback", color: "Black", swatch: "#111111" },
+  { id: "keyring", name: "Stamp keyring", blurb: "Metal disc. The circle on your keys.", pence: 800, image: "/art/merch/keyring.jpg", kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
 ];
 
 export const FACTORY_IG = "parosite";

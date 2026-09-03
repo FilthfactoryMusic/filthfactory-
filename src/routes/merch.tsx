@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, DROP_SHOT, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
 import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { startMerch } from "@/lib/merch-api";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,8 @@ export function MerchPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-muted">Shop / merch</p>
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Shop</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-        Hoodie, tee, beanie — the ones in the photo. Paid on Stripe, posted UK. Instagram{" "}
+        The circular stamp on blanks — tees in black, white, grey and olive, hoodie, beanie, snapback, keyring. Printed
+        to order, Stripe, UK post. Instagram{" "}
         <a href={instagramUrl(FACTORY_IG)} target="_blank" rel="noreferrer" className="underline underline-offset-2">
           @{FACTORY_IG}
         </a>
@@ -44,16 +45,16 @@ export function MerchPage() {
         <a href={`https://www.tiktok.com/@${FACTORY_TIKTOK}`} target="_blank" rel="noreferrer" className="underline underline-offset-2">
           @{FACTORY_TIKTOK}
         </a>
-        . We link those accounts. We do not scrape them. Other labels’ merch is bought from them, not from us.
+        .
       </p>
-      <img src={DROP_SHOT} alt="Filthfactory hoodie, tee and beanie" className="mt-8 w-full max-w-3xl rounded-lg border border-border object-cover" />
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {FACTORY_MERCH.map((item) => (
           <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
-            <img src={item.image} alt={item.name} className="aspect-[9/11] w-full object-cover" />
+            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
             <div className="p-4">
               <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
+              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
               <p className="mt-1 text-sm text-muted">{item.blurb}</p>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
@@ -93,7 +94,7 @@ export function MerchPage() {
         })}
       </div>
       <p className="mt-8 text-xs text-faint">
-        Photos from the @{FACTORY_IG} reel of the actual drop.{" "}
+        Catalog mockups of the circular stamp on blanks.{" "}
         <Link to="/terms" className="underline underline-offset-2">
           Terms
         </Link>
