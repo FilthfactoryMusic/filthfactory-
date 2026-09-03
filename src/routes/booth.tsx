@@ -16,26 +16,58 @@ import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
+function BoothLoading({ copy }: { copy: string }) {
+  return (
+    <div className="mx-auto max-w-md py-16 text-center">
+      <img src="/art/brand/logo.png" alt="" className="mx-auto size-28" />
+      <h1 className="mt-6 font-display text-3xl font-semibold uppercase tracking-wide">The booth</h1>
+      <p className="mt-3 font-display text-sm font-semibold uppercase tracking-wide text-muted">{copy}</p>
+    </div>
+  );
+}
+
 function BoothPage() {
-  const { user } = useCurrentUserState();
+  const { user, isPending } = useCurrentUserState();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || isPending) return <BoothLoading copy="Opening the booth…" />;
   if (!user) return <BoothGate />;
   return <BoothMemberGate />;
 }
 
 function BoothMemberGate() {
   const billing = useMyBilling();
-  if (billing.loading) return <div className="h-64 animate-pulse rounded-sm bg-surface" />;
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockErr, setUnlockErr] = useState<string | null>(null);
+  if (billing.loading || unlocking) return <BoothLoading copy="Checking your membership…" />;
   if (!billing.member) {
     return (
       <div className="mx-auto max-w-md py-8 text-center">
         <h1 className="font-display text-3xl font-semibold uppercase tracking-wide">Membership required</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Resident is {formatGbp(500)} a calendar month. Go live and drop mixes. Featured is{" "}
-          {formatGbp(1500)} and advertises your stream on Discover. Gifts are not on sale yet.
+          Resident is {formatGbp(500)} a calendar month. If you already paid, unlock the booth — Stripe keeps the £5 even if this page glitched.
         </p>
+        {unlockErr ? <p className="mt-3 text-sm text-live">{unlockErr}</p> : null}
+        <button
+          type="button"
+          className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-sm bg-live px-5 text-sm font-semibold text-live-fg"
+          onClick={() => {
+            setUnlocking(true);
+            setUnlockErr(null);
+            void import("@/lib/billing-api")
+              .then(({ recoverMembership }) => recoverMembership())
+              .then(() => billing.refresh())
+              .catch(() =>
+                setUnlockErr("Sign in with the same email you paid with, then tap unlock again."),
+              )
+              .finally(() => setUnlocking(false));
+          }}
+        >
+          I already paid — unlock
+        </button>
         <Link
           to="/membership"
-          className="mt-6 inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
+          className="mt-4 inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
         >
           View membership
         </Link>
@@ -86,6 +118,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const [previewOn, setPreviewOn] = useState(false);
   const [liveRights, setLiveRights] = useState(false);
   const [dropRights, setDropRights] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
 
   const displayName = user?.displayName || "Resident";
   const photo = user?.profileImageUrl ?? null;
@@ -101,55 +134,48 @@ function BoothStudio({ featured }: { featured: boolean }) {
   }, [setUploads]);
 
   useEffect(() => {
-    let cancelled = false;
-    async function open() {
-      stopBoothStream();
-      try {
-        const s = await navigator.mediaDevices.getUserMedia({
-          video: camOn ? { facingMode: "user", width: { ideal: 1280 } } : false,
-          audio: micOn,
-        });
-        if (cancelled) {
-          s.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        setBoothStream(s);
-        setPreviewOn(true);
-        setMediaError(null);
-        if (videoRef.current) {
-          videoRef.current.srcObject = s;
-          await videoRef.current.play().catch(() => {});
-        }
-      } catch {
-        if (!cancelled) setMediaError("Camera or mic blocked — you can still go live audio-only.");
-      }
-    }
-    void open();
-    return () => {
-      cancelled = true;
-    };
-  }, [camOn, micOn]);
-
-  useEffect(() => {
-    return () => {
-      if (!useLibrary.getState().ownLive) stopBoothStream();
-    };
-  }, []);
-
-  useEffect(() => {
     const existing = getBoothStream();
     if (existing && videoRef.current) {
       videoRef.current.srcObject = existing;
+      setPreviewOn(true);
       void videoRef.current.play().catch(() => {});
     }
   }, []);
 
+  async function openMedia(wantCam: boolean) {
+    stopBoothStream();
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: wantCam ? { facingMode: "user", width: { ideal: 1280 } } : false,
+        audio: true,
+      });
+      setBoothStream(s);
+      setPreviewOn(true);
+      setMediaError(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+        await videoRef.current.play().catch(() => {});
+      }
+      return s;
+    } catch {
+      setMediaError("Allow camera and mic when the phone asks — then tap Enable again.");
+      return null;
+    }
+  }
+
   async function onLive(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (going) return;
-    if (!liveRights) return;
+    if (!liveRights) {
+      setLiveError("Tick the rights box first.");
+      return;
+    }
     setGoing(true);
+    setLiveError(null);
     try {
+      if (!getBoothStream()) {
+        await openMedia(camOn);
+      }
       const fd = new FormData(e.currentTarget);
       const genre = String(fd.get("lgenre") ?? "UK Garage");
       const show = await startBoothLive({
@@ -171,6 +197,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
         void navigate({ to: "/membership" });
         return;
       }
+      setLiveError(msg && !/unauthorized/i.test(msg) ? msg : "Could not go live. Sign in on www, then try again.");
     } finally {
       setGoing(false);
     }
@@ -238,8 +265,15 @@ function BoothStudio({ featured }: { featured: boolean }) {
               style={{ transform: "scaleX(-1)" }}
             />
             {!previewOn ? (
-              <div className="absolute inset-0 grid place-items-center">
-                <img src="/art/brand/logo.png" alt="" className="size-28 opacity-80" />
+              <div className="absolute inset-0 grid place-items-center gap-3 bg-bg/80 p-4">
+                <img src="/art/brand/logo.png" alt="" className="size-24 opacity-80" />
+                <button
+                  type="button"
+                  onClick={() => void openMedia(camOn)}
+                  className="inline-flex h-12 items-center rounded-sm bg-live px-5 text-sm font-semibold text-live-fg"
+                >
+                  Enable camera & mic
+                </button>
               </div>
             ) : null}
             {ownLive ? (
@@ -252,7 +286,11 @@ function BoothStudio({ featured }: { featured: boolean }) {
                 <button
                   type="button"
                   aria-label={camOn ? "Camera off" : "Camera on"}
-                  onClick={() => setCamOn((v) => !v)}
+                  onClick={() => {
+                    const next = !camOn;
+                    setCamOn(next);
+                    if (previewOn) void openMedia(next);
+                  }}
                   className="flex size-11 items-center justify-center rounded-full bg-raised/90"
                 >
                   {camOn ? <Camera className="size-4" /> : <CameraOff className="size-4 text-muted" />}
@@ -326,9 +364,10 @@ function BoothStudio({ featured }: { featured: boolean }) {
                   I have the rights to this broadcast. Filthfactory does not hold a blanket PRS or PPL licence.
                 </span>
               </label>
-              <Button type="submit" variant="live" className="mt-5 w-full" disabled={going}>
+              <Button type="submit" variant="live" className="mt-5 w-full h-14 text-base" disabled={going}>
                 {going ? "Going live…" : "Go live"}
               </Button>
+              {liveError ? <p className="mt-2 text-sm text-live">{liveError}</p> : null}
             </>
           )}
         </form>

@@ -24,10 +24,16 @@ export function useMyBilling() {
     if (!user) {
       setData(empty);
       setLoading(false);
-      return;
+      return Promise.resolve();
     }
     setLoading(true);
-    void getMyBilling()
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      setLoading(false);
+    }, 6000);
+    return getMyBilling()
       .then(async (row) => {
         if (row.plan) return row;
         try {
@@ -37,9 +43,17 @@ export function useMyBilling() {
           return row;
         }
       })
-      .then(setData)
-      .catch(() => setData(empty))
-      .finally(() => setLoading(false));
+      .then((row) => {
+        if (!settled) setData(row);
+      })
+      .catch(() => {
+        if (!settled) setData(empty);
+      })
+      .finally(() => {
+        settled = true;
+        clearTimeout(timer);
+        setLoading(false);
+      });
   }, [user]);
 
   useEffect(() => {

@@ -29,8 +29,8 @@ function WowPage() {
     <div>
       <p className="text-xs uppercase tracking-[0.25em] text-live">WOW</p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">Who's on what</h1>
-      <p className="mt-2 max-w-xl text-sm text-muted">
-        UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house, trance, hard house. Faces scroll. Last 90 days. Tap a name.
+      <p className="mt-2 max-w-xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house, trance, hard house. Keep up with your favourite UK underground artists in one place.
       </p>
 
       {loading ? <p className="mt-10 text-sm text-muted">Pulling the last 90 days…</p> : null}

@@ -75,7 +75,7 @@ function Home() {
               <br />
               it bangs!
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted md:mx-0">
+            <p className="mx-auto mt-4 max-w-md font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted md:mx-0">
               Garage, grime, bassline, 140, DnB, tech house. Tap a room. That's it. Fiver a month if you wanna go live.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 md:items-start">
@@ -88,19 +88,19 @@ function Home() {
               <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
                 <Link
                   to="/live"
-                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
+                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 font-display text-sm font-semibold uppercase tracking-wide hover:border-accent"
                 >
                   What's on now
                 </Link>
                 <Link
                   to="/shop"
-                  className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
+                  className="inline-flex h-11 items-center rounded-sm bg-accent px-5 font-display text-sm font-semibold uppercase tracking-wide text-accent-fg"
                 >
                   Shop
                 </Link>
                 <Link
                   to="/wow"
-                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
+                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 font-display text-sm font-semibold uppercase tracking-wide hover:border-accent"
                 >
                   Who's on what
                 </Link>
@@ -115,7 +115,9 @@ function Home() {
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-live">WOW</p>
             <h2 className="font-display text-3xl font-semibold uppercase tracking-wide">Who's on what</h2>
-            <p className="mt-1 text-sm text-muted">UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house. Faces scroll. Tap one.</p>
+            <p className="mt-1 font-display text-sm font-semibold uppercase tracking-wide text-muted">
+              UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house, trance, hard house. Keep up with your favourite UK underground artists in one place.
+            </p>
           </div>
           <Link to="/wow" className="hidden text-sm text-muted hover:text-fg sm:block">
             Full desk

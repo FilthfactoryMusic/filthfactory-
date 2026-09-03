@@ -76,9 +76,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "rounded-sm px-3 py-2 text-sm",
-                    big &&
-                      "px-4 py-2 font-display text-base font-semibold uppercase tracking-wide",
+                    "rounded-sm px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide",
+                    big && "px-4 py-2 text-base",
                     big && on && "bg-accent text-accent-fg",
                     big && !on && "bg-raised text-fg hover:bg-accent hover:text-accent-fg",
                     !big && (on ? "text-fg" : "text-muted hover:text-fg"),
@@ -200,7 +199,7 @@ function MobileLink({
     <Link
       to={to}
       className={cn(
-        "flex h-16 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[10px] leading-tight",
+        "flex h-16 flex-col items-center justify-center gap-0.5 px-0.5 text-center font-display text-[10px] font-semibold uppercase leading-tight tracking-wide",
         big && "bg-accent/15 font-display font-semibold uppercase tracking-wide",
         active && big && "bg-accent text-accent-fg",
         active && !big && "text-fg",
