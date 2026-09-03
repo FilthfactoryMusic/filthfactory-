@@ -154,6 +154,12 @@ async function writeConsents(
   }
 }
 
+export const getTillStatus = createServerFn({ method: "GET" }).handler(async () => {
+  const stripe = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+  const database = Boolean(process.env.DATABASE_URL?.trim());
+  return { stripe, database };
+});
+
 export const getMyBilling = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<BillingSnapshot> => {

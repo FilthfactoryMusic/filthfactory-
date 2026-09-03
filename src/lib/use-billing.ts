@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getMyBilling, type BillingSnapshot } from "@/lib/billing-api";
+import { getMyBilling, getTillStatus, type BillingSnapshot } from "@/lib/billing-api";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 const empty: BillingSnapshot = {
@@ -38,4 +38,14 @@ export function useMyBilling() {
   }, [refresh]);
 
   return { ...data, loading, refresh, member: Boolean(data.plan) };
+}
+
+export function useTillStatus() {
+  const [till, setTill] = useState({ stripe: false, database: false, loaded: false });
+  useEffect(() => {
+    void getTillStatus()
+      .then((d) => setTill({ ...d, loaded: true }))
+      .catch(() => setTill({ stripe: false, database: false, loaded: true }));
+  }, []);
+  return till;
 }

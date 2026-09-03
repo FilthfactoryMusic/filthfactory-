@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { Check, Minus } from "lucide-react";
 import { DIGITAL_WAIVER_NOTE, PLAN_COMPARE, PLANS, VAT_NOTE, type PlanId } from "@/lib/billing";
 import { startMembership } from "@/lib/billing-api";
-import { useMyBilling } from "@/lib/use-billing";
+import { useMyBilling, useTillStatus } from "@/lib/use-billing";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
@@ -38,6 +38,7 @@ const FAQ = [
 function MembershipPage() {
   const user = useCurrentUser();
   const billing = useMyBilling();
+  const till = useTillStatus();
   const navigate = useNavigate();
   const [pick, setPick] = useState<PlanId>("resident");
   const [busy, setBusy] = useState(false);
@@ -105,6 +106,13 @@ function MembershipPage() {
         Resident is {formatGbp(500)} a calendar month. Featured is {formatGbp(1500)} and advertises your live
         on Discover. Listening stays free. {VAT_NOTE}
       </p>
+
+      {till.loaded && (!till.stripe || !till.database) ? (
+        <p className="mt-4 rounded-sm border border-live/40 bg-raised px-3 py-2 text-sm">
+          The till is not fully connected on this site yet. You can still sign in and tick the boxes — Pay
+          will light up once the live keys are on.
+        </p>
+      ) : null}
 
       {billing.plan ? (
         <p className="mt-4 text-sm">
