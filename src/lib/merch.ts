@@ -7,12 +7,14 @@ export type MerchSku = {
 };
 
 export const FACTORY_MERCH: MerchSku[] = [
-  { id: "tee", name: "Stamp tee", blurb: "Black. The circle on the chest. Printed to order in the UK.", pence: 2800, image: "/art/merch/tee.png" },
-  { id: "hoodie", name: "Stamp hoodie", blurb: "Heavyweight black. Stamp on the front.", pence: 4800, image: "/art/merch/hoodie.png" },
-  { id: "tote", name: "Crate tote", blurb: "Natural canvas. Holds records.", pence: 1500, image: "/art/merch/tote.png" },
-  { id: "slipmat", name: "Stamp slipmat", blurb: "12-inch felt. The circle on the platter.", pence: 1800, image: "/art/merch/slipmat.png" },
-  { id: "stickers", name: "Stamp pack", blurb: "Three circle stickers. Phone, case, flyer.", pence: 600, image: "/art/merch/stickers.png" },
+  { id: "hoodie", name: "Stamp hoodie", blurb: "Black. Factory on the chest. The one in the photo.", pence: 4800, image: "/art/merch/hoodie.jpg" },
+  { id: "tee", name: "Stamp tee", blurb: "Black. White factory print.", pence: 2800, image: "/art/merch/tee.jpg" },
+  { id: "beanie", name: "Stamp beanie", blurb: "Black. Factory on the front.", pence: 1800, image: "/art/merch/beanie.jpg" },
 ];
+
+export const FACTORY_IG = "parosite";
+export const FACTORY_TIKTOK = "filthfactorymusic";
+export const DROP_SHOT = "/art/merch/drop.jpg";
 
 export function merchById(id: string) {
   return FACTORY_MERCH.find((m) => m.id === id) ?? null;

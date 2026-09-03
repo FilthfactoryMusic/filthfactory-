@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { FACTORY_MERCH, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, DROP_SHOT, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
 import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { startMerch } from "@/lib/merch-api";
 import { Button } from "@/components/ui/button";
@@ -36,10 +36,17 @@ function MerchPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-muted">Merch</p>
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">The drop</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-        Filthfactory merch only — printed to order in the UK, paid on Stripe, posted to a UK address. We do not scrape
-        Instagram. We do not sell another label’s stock off their photos. Their shops and Instagram sit below. Tap
-        through and buy from them.
+        Hoodie, tee, beanie — the ones in the photo. Paid on Stripe, posted UK. Instagram{" "}
+        <a href={instagramUrl(FACTORY_IG)} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+          @{FACTORY_IG}
+        </a>
+        . TikTok{" "}
+        <a href={`https://www.tiktok.com/@${FACTORY_TIKTOK}`} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+          @{FACTORY_TIKTOK}
+        </a>
+        . We link those accounts. We do not scrape them. Other labels’ merch is bought from them, not from us.
       </p>
+      <img src={DROP_SHOT} alt="Filthfactory hoodie, tee and beanie" className="mt-8 w-full max-w-3xl rounded-lg border border-border object-cover" />
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {FACTORY_MERCH.map((item) => (
@@ -86,8 +93,7 @@ function MerchPage() {
         })}
       </div>
       <p className="mt-8 text-xs text-faint">
-        Want Filthfactory merch shots from your Instagram on this page? Send the handle. We pin official posts. We
-        still will not scrape.{" "}
+        Photos from the @{FACTORY_IG} reel of the actual drop.{" "}
         <Link to="/terms" className="underline underline-offset-2">
           Terms
         </Link>
