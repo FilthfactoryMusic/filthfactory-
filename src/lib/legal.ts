@@ -141,7 +141,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "Merch",
         p: [
           "Filthfactory merch on this site is sold by Filth Factory Music. It is printed to order and posted to UK addresses. You pay Stripe at checkout. We do not store card numbers.",
-          "We do not scrape Instagram. We do not sell another label's merchandise from their photos. Links to a label shop or Instagram go to that label. Their goods, their contract.",
+          "We do not scrape Instagram. We do not sell another label's merchandise. Mockups of a label mark on a blank are so you can find their shop. Their goods, their contract, their till.",
           "Unused, unused-condition merch may be returned within 14 days of delivery under the Consumer Contracts Regulations 2013. Print-to-order goods that are personalised may be exempt. Email " + SUPPORT_CONTACT + ".",
         ],
       },

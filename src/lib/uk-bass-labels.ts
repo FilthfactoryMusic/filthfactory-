@@ -20,6 +20,12 @@ function logoPath(name: string) {
   return `/art/labels/${slug(name)}.png`;
 }
 
+export function labelMerchSlug(name: string) {
+  if (name === "Hospital Records") return "hospital";
+  if (name === "V Recordings") return "v-recordings";
+  return slug(name);
+}
+
 function bp(q: string) {
   return `https://www.beatport.com/search?q=${encodeURIComponent(q)}`;
 }

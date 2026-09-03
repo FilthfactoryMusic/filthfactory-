@@ -1,3 +1,5 @@
+import { UK_BASS_LABELS, labelMerchSlug } from "@/lib/uk-bass-labels";
+
 export type MerchKind = "tee" | "hoodie" | "beanie" | "snapback" | "keyring";
 
 export type MerchSku = {
@@ -29,6 +31,27 @@ export const DROP_SHOT = "/art/merch/drop.jpg";
 export function merchById(id: string) {
   return FACTORY_MERCH.find((m) => m.id === id) ?? null;
 }
+
+export type LabelDrop = {
+  name: string;
+  site: string;
+  tee: string;
+  hoodie: string;
+  teePence: number;
+  hoodiePence: number;
+};
+
+export const LABEL_DROPS: LabelDrop[] = UK_BASS_LABELS.map((lab) => {
+  const s = labelMerchSlug(lab.name);
+  return {
+    name: lab.name,
+    site: lab.site,
+    tee: `/art/merch/labels/${s}-tee.jpg`,
+    hoodie: `/art/merch/labels/${s}-hoodie.jpg`,
+    teePence: 2800,
+    hoodiePence: 4800,
+  };
+});
 
 /** Public Instagram profiles we link to. We do not scrape posts or sell their stock. */
 export const LABEL_INSTAGRAM: Record<string, string> = {
