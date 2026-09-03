@@ -86,16 +86,16 @@ function Home() {
                 What's on now
               </Link>
               <Link
-                to="/wow"
+                to="/shop"
                 className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
               >
-                Who's on what
+                Shop
               </Link>
               <Link
-                to="/booth"
+                to="/wow"
                 className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
               >
-                Go live
+                Who's on what
               </Link>
             </div>
           </div>

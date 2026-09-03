@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Compass, Disc3, Radio, Search, Sparkles, type LucideIcon } from "lucide-react";
+import { Compass, Disc3, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
 import { useEffect, type FormEvent, type ReactNode } from "react";
 import { PlayerBar } from "@/components/player-bar";
 import { Wordmark } from "@/components/wordmark";
@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/", label: "Home" },
   { to: "/releases", label: "NEW RELEASES", big: true },
+  { to: "/shop", label: "SHOP", big: true },
   { to: "/live", label: "On air" },
   { to: "/wow", label: "WOW" },
   { to: "/charts", label: "Charts" },
   { to: "/library", label: "Crate" },
   { to: "/booth", label: "Go live" },
   { to: "/open", label: "Open" },
-  { to: "/merch", label: "Merch" },
   { to: "/membership", label: "£5" },
 ] as const;
 
@@ -64,7 +64,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <nav className="hidden items-center gap-1 lg:flex">
             {NAV.map((item) => {
-              const on = pathname === item.to || (item.to === "/releases" && (pathname.startsWith("/genre") || pathname.startsWith("/charts")));
+              const on =
+                pathname === item.to ||
+                (item.to === "/releases" && (pathname.startsWith("/genre") || pathname.startsWith("/charts"))) ||
+                (item.to === "/shop" && pathname.startsWith("/merch"));
               const big = "big" in item && item.big;
               return (
                 <Link
@@ -112,8 +115,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p>Filth Factory Music trading as Filthfactory · sole trader · UK · 18+</p>
         <p className="mt-1">Resident £5 / month. Gifts not on sale yet. legal@filthfactory.co.uk</p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-          <Link to="/open" className="hover:text-fg">
-            Open the factory
+          <Link to="/shop" className="hover:text-fg">
+            Shop
           </Link>
           <Link to="/wow" className="hover:text-fg">
             Who's On What
@@ -142,13 +145,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!legal ? <CookieNotice /> : null}
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           <MobileLink to="/" label="Home" icon={Compass} active={pathname === "/"} />
           <MobileLink
             to="/releases"
             label="NEW RELEASES"
             icon={Disc3}
             active={pathname.startsWith("/releases") || pathname.startsWith("/charts") || pathname.startsWith("/genre")}
+            big
+          />
+          <MobileLink
+            to="/shop"
+            label="SHOP"
+            icon={ShoppingBag}
+            active={pathname.startsWith("/shop") || pathname.startsWith("/merch")}
             big
           />
           <MobileLink to="/live" label="On air" icon={Radio} active={pathname.startsWith("/live")} />
@@ -176,7 +186,7 @@ function MobileLink({
   active,
   big,
 }: {
-  to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases";
+  to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases" | "/shop";
   label: string;
   icon: LucideIcon;
   active: boolean;
@@ -195,7 +205,7 @@ function MobileLink({
       )}
     >
       <Icon className="size-5" />
-      {big ? (
+      {big && label === "NEW RELEASES" ? (
         <span className="leading-[1.05]">
           NEW
           <br />

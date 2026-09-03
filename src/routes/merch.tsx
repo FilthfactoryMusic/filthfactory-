@@ -8,7 +8,7 @@ import { formatGbp } from "@/lib/utils";
 
 export const Route = createFileRoute("/merch")({ component: MerchPage });
 
-function MerchPage() {
+export function MerchPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +33,8 @@ function MerchPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-      <p className="text-xs uppercase tracking-[0.25em] text-muted">Merch</p>
-      <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">The drop</h1>
+      <p className="text-xs uppercase tracking-[0.25em] text-muted">Shop / merch</p>
+      <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Shop</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
         Hoodie, tee, beanie — the ones in the photo. Paid on Stripe, posted UK. Instagram{" "}
         <a href={instagramUrl(FACTORY_IG)} target="_blank" rel="noreferrer" className="underline underline-offset-2">

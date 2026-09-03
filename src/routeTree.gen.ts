@@ -19,11 +19,13 @@ import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MembershipRouteImport } from './routes/membership'
+import { Route as MerchRouteImport } from './routes/merch'
 import { Route as OpenRouteImport } from './routes/open'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReleasesRouteImport } from './routes/releases'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WowRouteImport } from './routes/wow'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
@@ -32,6 +34,7 @@ import { Route as GenreSlugRouteImport } from './routes/genre.$slug'
 import { Route as LiveIndexRouteImport } from './routes/live.index'
 import { Route as LiveIdRouteImport } from './routes/live.$id'
 import { Route as MembershipSuccessRouteImport } from './routes/membership.success'
+import { Route as MerchSuccessRouteImport } from './routes/merch.success'
 import { Route as MixIdRouteImport } from './routes/mix.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiRadioIdRouteImport } from './routes/api/radio.$id'
@@ -86,6 +89,11 @@ const MembershipRoute = MembershipRouteImport.update({
   path: '/membership',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpenRoute = OpenRouteImport.update({
   id: '/open',
   path: '/open',
@@ -109,6 +117,11 @@ const SafetyRoute = SafetyRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -151,6 +164,11 @@ const MembershipSuccessRoute = MembershipSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => MembershipRoute,
 } as any)
+const MerchSuccessRoute = MerchSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => MerchRoute,
+} as any)
 const MixIdRoute = MixIdRouteImport.update({
   id: '/mix/$id',
   path: '/mix/$id',
@@ -178,11 +196,13 @@ export interface FileRoutesByFullPath {
   '/live': typeof LiveRouteWithChildren
   '/login': typeof LoginRoute
   '/membership': typeof MembershipRouteWithChildren
+  '/merch': typeof MerchRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
+  '/shop': typeof ShopRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -190,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
   '/membership/success': typeof MembershipSuccessRoute
+  '/merch/success': typeof MerchSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live/': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -205,11 +226,13 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/membership': typeof MembershipRouteWithChildren
+  '/merch': typeof MerchRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
+  '/shop': typeof ShopRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -217,6 +240,7 @@ export interface FileRoutesByTo {
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
   '/membership/success': typeof MembershipSuccessRoute
+  '/merch/success': typeof MerchSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -234,11 +258,13 @@ export interface FileRoutesById {
   '/live': typeof LiveRouteWithChildren
   '/login': typeof LoginRoute
   '/membership': typeof MembershipRouteWithChildren
+  '/merch': typeof MerchRouteWithChildren
   '/open': typeof OpenRoute
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
   '/search': typeof SearchRoute
+  '/shop': typeof ShopRoute
   '/terms': typeof TermsRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
@@ -246,6 +272,7 @@ export interface FileRoutesById {
   '/genre/$slug': typeof GenreSlugRoute
   '/live/$id': typeof LiveIdRoute
   '/membership/success': typeof MembershipSuccessRoute
+  '/merch/success': typeof MerchSuccessRoute
   '/mix/$id': typeof MixIdRoute
   '/live/': typeof LiveIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -264,11 +291,13 @@ export interface FileRouteTypes {
     | '/live'
     | '/login'
     | '/membership'
+    | '/merch'
     | '/open'
     | '/privacy'
     | '/releases'
     | '/safety'
     | '/search'
+    | '/shop'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -276,6 +305,7 @@ export interface FileRouteTypes {
     | '/genre/$slug'
     | '/live/$id'
     | '/membership/success'
+    | '/merch/success'
     | '/mix/$id'
     | '/live/'
     | '/api/auth/$'
@@ -291,11 +321,13 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/membership'
+    | '/merch'
     | '/open'
     | '/privacy'
     | '/releases'
     | '/safety'
     | '/search'
+    | '/shop'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -303,6 +335,7 @@ export interface FileRouteTypes {
     | '/genre/$slug'
     | '/live/$id'
     | '/membership/success'
+    | '/merch/success'
     | '/mix/$id'
     | '/live'
     | '/api/auth/$'
@@ -319,11 +352,13 @@ export interface FileRouteTypes {
     | '/live'
     | '/login'
     | '/membership'
+    | '/merch'
     | '/open'
     | '/privacy'
     | '/releases'
     | '/safety'
     | '/search'
+    | '/shop'
     | '/terms'
     | '/wow'
     | '/city/$slug'
@@ -331,6 +366,7 @@ export interface FileRouteTypes {
     | '/genre/$slug'
     | '/live/$id'
     | '/membership/success'
+    | '/merch/success'
     | '/mix/$id'
     | '/live/'
     | '/api/auth/$'
@@ -348,11 +384,13 @@ export interface RootRouteChildren {
   LiveRoute: typeof LiveRouteWithChildren
   LoginRoute: typeof LoginRoute
   MembershipRoute: typeof MembershipRouteWithChildren
+  MerchRoute: typeof MerchRouteWithChildren
   OpenRoute: typeof OpenRoute
   PrivacyRoute: typeof PrivacyRoute
   ReleasesRoute: typeof ReleasesRoute
   SafetyRoute: typeof SafetyRoute
   SearchRoute: typeof SearchRoute
+  ShopRoute: typeof ShopRoute
   TermsRoute: typeof TermsRoute
   WowRoute: typeof WowRoute
   CitySlugRoute: typeof CitySlugRoute
@@ -435,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembershipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/open': {
       id: '/open'
       path: '/open'
@@ -468,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -526,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembershipSuccessRouteImport
       parentRoute: typeof MembershipRoute
     }
+    '/merch/success': {
+      id: '/merch/success'
+      path: '/success'
+      fullPath: '/merch/success'
+      preLoaderRoute: typeof MerchSuccessRouteImport
+      parentRoute: typeof MerchRoute
+    }
     '/mix/$id': {
       id: '/mix/$id'
       path: '/mix/$id'
@@ -574,6 +633,16 @@ const MembershipRouteWithChildren = MembershipRoute._addFileChildren(
   MembershipRouteChildren,
 )
 
+interface MerchRouteChildren {
+  MerchSuccessRoute: typeof MerchSuccessRoute
+}
+
+const MerchRouteChildren: MerchRouteChildren = {
+  MerchSuccessRoute: MerchSuccessRoute,
+}
+
+const MerchRouteWithChildren = MerchRoute._addFileChildren(MerchRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -585,11 +654,13 @@ const rootRouteChildren: RootRouteChildren = {
   LiveRoute: LiveRouteWithChildren,
   LoginRoute: LoginRoute,
   MembershipRoute: MembershipRouteWithChildren,
+  MerchRoute: MerchRouteWithChildren,
   OpenRoute: OpenRoute,
   PrivacyRoute: PrivacyRoute,
   ReleasesRoute: ReleasesRoute,
   SafetyRoute: SafetyRoute,
   SearchRoute: SearchRoute,
+  ShopRoute: ShopRoute,
   TermsRoute: TermsRoute,
   WowRoute: WowRoute,
   CitySlugRoute: CitySlugRoute,
