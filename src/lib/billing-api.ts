@@ -154,6 +154,67 @@ async function writeConsents(
   }
 }
 
+async function grantPaidPlan(
+  sql: {
+    <T = Record<string, unknown>>(strings: TemplateStringsArray, ...values: unknown[]): Promise<T[]>;
+  },
+  userId: string,
+  planId: string,
+  pence: number,
+) {
+  const spec = PLANS.find((p) => p.id === planId) ?? PLANS[0];
+  await sql`
+    insert into subscriptions (user_id, plan, status, amount_pence, started_at, renews_at, cancelled_at)
+    values (
+      ${userId}, ${spec.id}, 'active', ${pence}, now(), now() + interval '1 month', null
+    )
+    on conflict (user_id) do update set
+      plan = excluded.plan,
+      status = 'active',
+      amount_pence = excluded.amount_pence,
+      renews_at = now() + interval '1 month',
+      cancelled_at = null
+  `;
+  await sql`
+    insert into wallets (user_id, available_pence, lifetime_pence)
+    values (${userId}, 0, 0)
+    on conflict (user_id) do nothing
+  `;
+  await sql`
+    update booth_lives set featured = ${spec.id === "featured"} where user_id = ${userId}
+  `;
+  await writeInvoice(sql, {
+    userId,
+    kind: "membership",
+    description: `${spec.name} membership — one calendar month`,
+    amountPence: pence,
+  });
+  return spec;
+}
+
+/** If Stripe already took the money, write the membership even if the success tab was lost. */
+export async function activatePaidPlan(userId: string) {
+  const { getSql } = await import("@/lib/db");
+  const sql = await getSql();
+  const have = await activePlan(sql, userId);
+  if (have) return have;
+  const { getStripe } = await import("@/lib/stripe");
+  const stripe = getStripe();
+  const listed = await stripe.checkout.sessions.list({ limit: 40 });
+  const session = listed.data.find(
+    (row) =>
+      row.mode === "subscription" &&
+      row.status === "complete" &&
+      row.payment_status === "paid" &&
+      (row.metadata?.userId === userId || row.client_reference_id === userId),
+  );
+  if (!session) return null;
+  const planRaw = session.metadata?.plan;
+  const spec = PLANS.find((p) => p.id === planRaw) ?? PLANS[0];
+  await grantPaidPlan(sql, userId, spec.id, spec.pence);
+  return { plan: spec.id, status: "active", amount_pence: spec.pence, renews_at: "" };
+}
+
 export const getTillStatus = createServerFn({ method: "GET" }).handler(async () => {
   const stripe = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
   const database = Boolean(process.env.DATABASE_URL?.trim());
@@ -271,33 +332,16 @@ export const fulfillMembership = createServerFn({ method: "POST" })
     const spec = PLANS.find((p) => p.id === planRaw) ?? PLANS[0];
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
-    await sql`
-      insert into subscriptions (user_id, plan, status, amount_pence, started_at, renews_at, cancelled_at)
-      values (
-        ${context.userId}, ${spec.id}, 'active', ${spec.pence}, now(), now() + interval '1 month', null
-      )
-      on conflict (user_id) do update set
-        plan = excluded.plan,
-        status = 'active',
-        amount_pence = excluded.amount_pence,
-        renews_at = now() + interval '1 month',
-        cancelled_at = null
-    `;
-    await sql`
-      insert into wallets (user_id, available_pence, lifetime_pence)
-      values (${context.userId}, 0, 0)
-      on conflict (user_id) do nothing
-    `;
-    await sql`
-      update booth_lives set featured = ${spec.id === "featured"} where user_id = ${context.userId}
-    `;
-    await writeInvoice(sql, {
-      userId: context.userId,
-      kind: "membership",
-      description: `${spec.name} membership — one calendar month`,
-      amountPence: spec.pence,
-    });
+    await grantPaidPlan(sql, context.userId, spec.id, spec.pence);
     return { plan: spec.id, amountPence: spec.pence };
+  });
+
+export const recoverMembership = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    const row = await activatePaidPlan(context.userId);
+    if (!row) throw new Error("NO_PAID_SESSION");
+    return { plan: row.plan, amountPence: row.amount_pence, recovered: true };
   });
 
 export const cancelMembership = createServerFn({ method: "POST" })

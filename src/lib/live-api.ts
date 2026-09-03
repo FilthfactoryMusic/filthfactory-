@@ -125,13 +125,16 @@ export const startBoothLive = createServerFn({ method: "POST" })
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     if (!data.rightsConfirmed) throw new Error("RIGHTS_REQUIRED");
-    const sub = (
+    let sub = (
       await sql<{ plan: string; status: string }>`
         select plan, status from subscriptions where user_id = ${context.userId}
       `
     )[0];
     if (!sub || sub.status !== "active") {
-      throw new Error("MEMBERSHIP_REQUIRED");
+      const { activatePaidPlan } = await import("@/lib/billing-api");
+      const recovered = await activatePaidPlan(context.userId);
+      if (!recovered) throw new Error("MEMBERSHIP_REQUIRED");
+      sub = { plan: recovered.plan, status: recovered.status };
     }
     const featured = sub.plan === "featured";
     const title = data.title.trim() || "Live from the factory";
@@ -196,12 +199,17 @@ export const dropBoothMix = createServerFn({ method: "POST" })
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     if (!data.rightsConfirmed) throw new Error("RIGHTS_REQUIRED");
-    const sub = (
+    let sub = (
       await sql<{ status: string }>`
         select status from subscriptions where user_id = ${context.userId}
       `
     )[0];
-    if (!sub || sub.status !== "active") throw new Error("MEMBERSHIP_REQUIRED");
+    if (!sub || sub.status !== "active") {
+      const { activatePaidPlan } = await import("@/lib/billing-api");
+      const recovered = await activatePaidPlan(context.userId);
+      if (!recovered) throw new Error("MEMBERSHIP_REQUIRED");
+      sub = { status: recovered.status };
+    }
     const title = data.title.trim();
     if (!title) throw new Error("Title required");
     const genre = data.genre.trim() || "UK Garage";

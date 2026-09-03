@@ -78,25 +78,33 @@ function Home() {
             <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted md:mx-0">
               Garage, grime, bassline, 140, DnB, tech house. Tap a room. That's it. Fiver a month if you wanna go live.
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+            <div className="mt-6 flex flex-col items-center gap-3 md:items-start">
               <Link
-                to="/live"
-                className="inline-flex h-11 items-center rounded-sm bg-live px-5 text-sm font-medium text-live-fg"
+                to="/booth"
+                className="inline-flex h-14 w-full max-w-sm items-center justify-center rounded-sm bg-live px-8 font-display text-xl font-semibold uppercase tracking-[0.2em] text-live-fg"
               >
-                What's on now
+                Go live
               </Link>
-              <Link
-                to="/shop"
-                className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
-              >
-                Shop
-              </Link>
-              <Link
-                to="/wow"
-                className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
-              >
-                Who's on what
-              </Link>
+              <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+                <Link
+                  to="/live"
+                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
+                >
+                  What's on now
+                </Link>
+                <Link
+                  to="/shop"
+                  className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
+                >
+                  Shop
+                </Link>
+                <Link
+                  to="/wow"
+                  className="inline-flex h-11 items-center rounded-sm border border-border px-5 text-sm font-medium hover:border-accent"
+                >
+                  Who's on what
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -128,6 +136,15 @@ function Home() {
         <div className="mt-3">
           <LabelReel />
         </div>
+      </section>
+
+      <section className="mt-10 flex justify-center border border-live/50 bg-live/10 px-4 py-8">
+        <Link
+          to="/booth"
+          className="inline-flex h-16 w-full max-w-md items-center justify-center rounded-sm bg-live px-8 font-display text-2xl font-semibold uppercase tracking-[0.25em] text-live-fg"
+        >
+          Go live
+        </Link>
       </section>
 
       {lead ? (

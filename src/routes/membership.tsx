@@ -117,6 +117,10 @@ function MembershipPage() {
       {billing.plan ? (
         <p className="mt-4 text-sm">
           You are on <span className="font-medium">{billing.plan === "featured" ? "Featured" : "Resident"}</span>.{" "}
+          <Link to="/booth" className="underline underline-offset-4">
+            Open the booth
+          </Link>
+          .{" "}
           <Link to="/account" className="underline underline-offset-4">
             Manage account
           </Link>

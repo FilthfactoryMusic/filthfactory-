@@ -45,7 +45,7 @@ function LivePage() {
             <BrandedText text="Groove London, Thames Delta, Radio Respect, Code Red, Rinse, Flex. Or jump on the booth yourself." />
           </p>
         </div>
-        <Link to="/booth" className="hidden h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg sm:flex">
+        <Link to="/booth" className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg">
           Go live
         </Link>
       </div>

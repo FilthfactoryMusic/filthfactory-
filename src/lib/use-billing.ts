@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getMyBilling, getTillStatus, type BillingSnapshot } from "@/lib/billing-api";
+import { getMyBilling, getTillStatus, recoverMembership, type BillingSnapshot } from "@/lib/billing-api";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 const empty: BillingSnapshot = {
@@ -28,6 +28,15 @@ export function useMyBilling() {
     }
     setLoading(true);
     void getMyBilling()
+      .then(async (row) => {
+        if (row.plan) return row;
+        try {
+          await recoverMembership();
+          return await getMyBilling();
+        } catch {
+          return row;
+        }
+      })
       .then(setData)
       .catch(() => setData(empty))
       .finally(() => setLoading(false));

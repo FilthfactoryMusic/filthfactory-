@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Compass, Cpu, Disc3, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
+import { BookOpen, Compass, Cpu, Disc3, Mic, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
 import { useEffect, type FormEvent, type ReactNode } from "react";
 import { PlayerBar } from "@/components/player-bar";
 import { Wordmark } from "@/components/wordmark";
@@ -176,16 +176,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <MobileLink to="/school" label="School" icon={BookOpen} active={pathname.startsWith("/school")} />
           <MobileLink to="/live" label="On air" icon={Radio} active={pathname.startsWith("/live")} />
           <MobileLink to="/wow" label="WOW" icon={Sparkles} active={pathname.startsWith("/wow")} />
-          <Link
-            to="/membership"
-            className={cn(
-              "flex h-16 flex-col items-center justify-center gap-0.5 text-xs",
-              pathname.startsWith("/membership") ? "text-fg" : "text-muted",
-            )}
-          >
-            <span className="text-sm font-medium leading-none">£5</span>
-            Join
-          </Link>
+          <MobileLink to="/booth" label="Go live" icon={Mic} active={pathname.startsWith("/booth")} />
         </div>
       </nav>
     </div>

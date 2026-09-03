@@ -4,8 +4,12 @@ const LIVE_ORIGIN = "https://www.filthfactory.co.uk";
 const PAY_DOMAINS = ["www.filthfactory.co.uk", "filthfactory.co.uk"];
 
 export function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
+  let key = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1).trim();
+  }
+  key = key.replace(/^STRIPE_SECRET_KEY\s*=\s*/i, "").trim();
+  if (!key || key.startsWith("pk_")) {
     throw new Error("STRIPE_UNAVAILABLE");
   }
   return new Stripe(key);
