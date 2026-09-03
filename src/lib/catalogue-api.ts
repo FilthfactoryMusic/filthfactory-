@@ -33,6 +33,8 @@ export const GENRE_CRATES: {
   { slug: "electro", name: "Electro", q: "electro", engine: "electro" },
   { slug: "broken-beat", name: "Broken Beat", q: "broken beat", engine: "breaks" },
   { slug: "industrial", name: "Industrial", q: "industrial techno", engine: "industrial" },
+  { slug: "trance", name: "Trance", q: "trance", engine: "trance" },
+  { slug: "hard-house", name: "Hard House", q: "hard house", engine: "hardhouse" },
 ];
 
 export function cutFromTitle(title: string) {

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/wow")({
       {
         name: "description",
         content:
-          "Who's on what — UK garage, grime, bassline, 140, drum & bass, tech house. Real DJs and MCs. Last 90 days.",
+          "Who's on what — UK garage, grime, bassline, 140, drum & bass, tech house, trance, hard house. Real DJs and MCs. Last 90 days.",
       },
     ],
   }),
@@ -30,7 +30,7 @@ function WowPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-live">WOW</p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">Who's on what</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
-        UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house. Faces scroll. Last 90 days. Tap a name.
+        UK DJs and MCs — garage, grime, bassline, 140, DnB, tech house, trance, hard house. Faces scroll. Last 90 days. Tap a name.
       </p>
 
       {loading ? <p className="mt-10 text-sm text-muted">Pulling the last 90 days…</p> : null}

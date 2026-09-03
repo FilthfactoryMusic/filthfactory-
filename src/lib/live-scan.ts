@@ -27,6 +27,8 @@ const MIX_QUERIES = [
   { q: "drum and bass live", genre: "Drum & Bass" },
   { q: "jungle live uk", genre: "Jungle" },
   { q: "bassline uk live", genre: "Bassline" },
+  { q: "trance live", genre: "Trance" },
+  { q: "hard house live", genre: "Hard House" },
 ];
 
 const TIKTOK: LivePick[] = [

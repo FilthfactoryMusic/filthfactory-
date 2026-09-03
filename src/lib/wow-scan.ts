@@ -47,6 +47,25 @@ export const WOW_ARTISTS: { name: string; genre: string; news: string; needles: 
   { name: "Selecta J-Man", genre: "Drum & Bass", news: '"Selecta J-Man" OR "J Man" jungle', needles: ["j-man", "j man"], mixcloud: "Selecta J-Man", deezer: "Selecta J-Man" },
   { name: "Eats Everything", genre: "Tech House", news: '"Eats Everything" DJ', needles: ["eats everything"], mixcloud: "Eats Everything", deezer: "Eats Everything" },
   { name: "Prospa", genre: "Tech House", news: "Prospa DJ house UK", needles: ["prospa"], mixcloud: "Prospa", deezer: "Prospa" },
+  { name: "Above & Beyond", genre: "Trance", news: '"Above & Beyond" trance', needles: ["above & beyond", "above and beyond"], mixcloud: "Above & Beyond", deezer: "Above & Beyond" },
+  { name: "Armin van Buuren", genre: "Trance", news: '"Armin van Buuren"', needles: ["armin van buuren"], mixcloud: "Armin van Buuren", deezer: "Armin van Buuren" },
+  { name: "Ferry Corsten", genre: "Trance", news: '"Ferry Corsten"', needles: ["ferry corsten"], mixcloud: "Ferry Corsten", deezer: "Ferry Corsten" },
+  { name: "Gareth Emery", genre: "Trance", news: '"Gareth Emery"', needles: ["gareth emery"], mixcloud: "Gareth Emery", deezer: "Gareth Emery" },
+  { name: "John O'Callaghan", genre: "Trance", news: '"John O\'Callaghan" trance', needles: ["john o'callaghan", "ocallaghan"], mixcloud: "John O'Callaghan", deezer: "John O'Callaghan" },
+  { name: "Bryan Kearney", genre: "Trance", news: '"Bryan Kearney"', needles: ["bryan kearney"], mixcloud: "Bryan Kearney", deezer: "Bryan Kearney" },
+  { name: "Solarstone", genre: "Trance", news: "Solarstone trance", needles: ["solarstone"], mixcloud: "Solarstone", deezer: "Solarstone" },
+  { name: "Will Atkinson", genre: "Trance", news: '"Will Atkinson" trance', needles: ["will atkinson"], mixcloud: "Will Atkinson", deezer: "Will Atkinson" },
+  { name: "Craig Connelly", genre: "Trance", news: '"Craig Connelly" trance', needles: ["craig connelly"], mixcloud: "Craig Connelly", deezer: "Craig Connelly" },
+  { name: "Lisa Lashes", genre: "Hard House", news: '"Lisa Lashes"', needles: ["lisa lashes"], mixcloud: "Lisa Lashes", deezer: "Lisa Lashes" },
+  { name: "BK", genre: "Hard House", news: '"BK" hard house', needles: ["bk hard house"], mixcloud: "BK hard house", deezer: "BK" },
+  { name: "The Tidy Boys", genre: "Hard House", news: '"Tidy Boys"', needles: ["tidy boys"], mixcloud: "Tidy Boys", deezer: "Tidy Boys" },
+  { name: "Anne Savage", genre: "Hard House", news: '"Anne Savage" DJ', needles: ["anne savage"], mixcloud: "Anne Savage", deezer: "Anne Savage" },
+  { name: "Andy Farley", genre: "Hard House", news: '"Andy Farley" hard house', needles: ["andy farley"], mixcloud: "Andy Farley", deezer: "Andy Farley" },
+  { name: "Ed Real", genre: "Hard House", news: '"Ed Real" hard house', needles: ["ed real"], mixcloud: "Ed Real", deezer: "Ed Real" },
+  { name: "Nick Sentience", genre: "Hard House", news: '"Nick Sentience"', needles: ["nick sentience"], mixcloud: "Nick Sentience", deezer: "Nick Sentience" },
+  { name: "Rachel Auburn", genre: "Hard House", news: '"Rachel Auburn"', needles: ["rachel auburn"], mixcloud: "Rachel Auburn", deezer: "Rachel Auburn" },
+  { name: "Kutski", genre: "Hard House", news: "Kutski hard dance", needles: ["kutski"], mixcloud: "Kutski", deezer: "Kutski" },
+  { name: "Paul Glazby", genre: "Hard House", news: '"Paul Glazby"', needles: ["paul glazby"], mixcloud: "Paul Glazby", deezer: "Paul Glazby" },
 ];
 
 export const WOW_LABELS = UK_BASS_LABELS;
@@ -59,6 +78,8 @@ export const WOW_GENRES: { id: string; name: string; news: string; needles: stri
   { id: "140", name: "140", news: "140 UK bass 2026", needles: ["140"], mixcloud: "140 bass uk", deezer: "140 bass" },
   { id: "tech-house", name: "Tech House", news: "tech house UK 2026", needles: ["tech house"], mixcloud: "tech house uk 2026", deezer: "tech house" },
   { id: "jungle", name: "Jungle", news: "jungle music UK 2026", needles: ["jungle"], mixcloud: "jungle uk 2026", deezer: "jungle" },
+  { id: "trance", name: "Trance", news: "trance DJ 2026", needles: ["trance"], mixcloud: "trance 2026", deezer: "trance" },
+  { id: "hard-house", name: "Hard House", news: "hard house UK 2026", needles: ["hard house", "hard dance"], mixcloud: "hard house uk", deezer: "hard house" },
 ];
 
 const DENY = ["nhs", "hse", "medical", "hospital trust", "hallucination", "clancy", "football", "premier league"];
@@ -71,7 +92,7 @@ function londonDayId(now = new Date()) {
     day: "2-digit",
   }).formatToParts(now);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  return `${get("year")}-${get("month")}-${get("day")}-v4`;
+  return `${get("year")}-${get("month")}-${get("day")}-v5`;
 }
 
 export function isFresh(dateStr?: string) {
@@ -307,7 +328,7 @@ async function scanNow(dayId: string): Promise<WowItem[]> {
     }
   }
 
-  return items.slice(0, 60);
+  return items.slice(0, 80);
 }
 
 async function persist(dayId: string, items: WowItem[]) {

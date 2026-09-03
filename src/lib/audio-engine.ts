@@ -24,6 +24,8 @@ const BPM_DEFAULT: Record<EngineGenre, number> = {
   disco: 122,
   electro: 128,
   industrial: 138,
+  trance: 138,
+  hardhouse: 145,
 };
 
 function midi(n: number) {

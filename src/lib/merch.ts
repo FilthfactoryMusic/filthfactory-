@@ -58,6 +58,16 @@ export const LABEL_INSTAGRAM: Record<string, string> = {
   "White Peach": "whitepeachrecords",
   "Local Action": "localactionrecords",
   Playaz: "playaz",
+  Anjunabeats: "anjunabeats",
+  Anjunadeep: "anjunadeep",
+  "Armada Music": "armadamusic",
+  "A State of Trance": "asot",
+  "Black Hole Recordings": "blackholerecordings",
+  "Enhanced Music": "enhancedmusic",
+  Vandit: "vanditrecords",
+  Perfecto: "perfectorecords",
+  "Tidy Trax": "tidyofficial",
+  Nukleuz: "nukleuz",
 };
 
 export function instagramUrl(handle: string) {

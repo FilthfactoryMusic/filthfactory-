@@ -10,7 +10,9 @@ export type EngineGenre =
   | "funky"
   | "disco"
   | "electro"
-  | "industrial";
+  | "industrial"
+  | "trance"
+  | "hardhouse";
 
 export type Track = {
   t: number;
