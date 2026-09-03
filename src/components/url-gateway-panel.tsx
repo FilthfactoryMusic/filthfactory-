@@ -10,7 +10,7 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 export function UrlGatewayPanel() {
   const user = useCurrentUser();
-  const setOwnLive = useLibrary((s) => s.setOwnLive);
+  const startLive = useLibrary((s) => s.startLive);
   const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
@@ -38,7 +38,7 @@ export function UrlGatewayPanel() {
           rightsConfirmed: form.get("urights") === "on",
         },
       });
-      setOwnLive(show);
+      startLive(show);
       void navigate({ to: "/live/$id", params: { id: show.id } });
     } catch (error) {
       const msg = error instanceof Error ? error.message : "";
