@@ -78,3 +78,52 @@ export async function createMembershipCheckout(
   }
   throw last instanceof Error ? last : new Error("STRIPE_UNAVAILABLE");
 }
+
+export async function createMerchCheckout(
+  stripe: Stripe,
+  opts: {
+    sku: string;
+    name: string;
+    description: string;
+    pence: number;
+    origin: string;
+  },
+) {
+  const payload = {
+    mode: "payment" as const,
+    metadata: { kind: "merch", sku: opts.sku },
+    billing_address_collection: "required" as const,
+    shipping_address_collection: { allowed_countries: ["GB" as const] },
+    phone_number_collection: { enabled: true },
+    locale: "en-GB" as const,
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "gbp",
+          unit_amount: opts.pence,
+          product_data: { name: opts.name, description: opts.description },
+        },
+      },
+    ],
+    success_url: `${opts.origin}/merch/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${opts.origin}/merch`,
+  };
+
+  const methodSets: Stripe.Checkout.SessionCreateParams.PaymentMethodType[][] = [
+    ["card", "paypal", "link"],
+    ["card", "paypal"],
+    ["card", "link"],
+    ["card"],
+  ];
+
+  let last: unknown;
+  for (const payment_method_types of methodSets) {
+    try {
+      return await stripe.checkout.sessions.create({ ...payload, payment_method_types });
+    } catch (err) {
+      last = err;
+    }
+  }
+  throw last instanceof Error ? last : new Error("STRIPE_UNAVAILABLE");
+}

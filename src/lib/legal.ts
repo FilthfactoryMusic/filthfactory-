@@ -1,4 +1,4 @@
-export const LEGAL_VERSION = "2026-09-02";
+export const LEGAL_VERSION = "2026-09-03";
 export const LEGAL_CONTACT = "legal@filthfactory.co.uk";
 export const SUPPORT_CONTACT = "support@filthfactory.co.uk";
 export const OPERATOR = "Filth Factory Music";
@@ -61,7 +61,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "What we collect",
         p: [
           "Account: email and password you create on Filthfactory, or display name, email and profile image from Google or X when you use those buttons.",
-          "Membership and money: plan, renewal date, invoices, and (when gifts are on sale) gifts sent or received, wallet balance and payout requests. Card payments are taken by Stripe. We do not store card numbers.",
+          "Membership and money: plan, renewal date, invoices, merch orders (name, UK shipping address and phone, taken by Stripe), and (when gifts are on sale) gifts sent or received, wallet balance and payout requests. Card payments are taken by Stripe. We do not store card numbers.",
           "Booth: show title, genre, city, whether camera is on, and mix titles you drop. Camera and microphone stay on your device to run the booth; we store the fact of a live, not a raw recording archive.",
           "Safety: reports, blocks, age confirmation and the legal consents you tick at checkout.",
           "Technical: session cookies needed to keep you signed in. We do not run advertising trackers.",
@@ -135,6 +135,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
         p: [
           "Live gifts and DJ payouts are not on sale yet. Buttons that look like gifts do not take money and do not pay DJs.",
           "When gifts are switched on: they will be digital goods you buy from Filthfactory during a live, not cash transfers. The DJ will receive 50% as a talent / revenue share. Filthfactory will retain 50%. DJs are not employees or workers of Filthfactory. Gift income is theirs to declare to HMRC. Minimum payout will be £20.00. We may hold a payout until identity checks are complete.",
+        ],
+      },
+      {
+        h: "Merch",
+        p: [
+          "Filthfactory merch on this site is sold by Filth Factory Music. It is printed to order and posted to UK addresses. You pay Stripe at checkout. We do not store card numbers.",
+          "We do not scrape Instagram. We do not sell another label's merchandise from their photos. Links to a label shop or Instagram go to that label. Their goods, their contract.",
+          "Unused, unused-condition merch may be returned within 14 days of delivery under the Consumer Contracts Regulations 2013. Print-to-order goods that are personalised may be exempt. Email " + SUPPORT_CONTACT + ".",
         ],
       },
       {
