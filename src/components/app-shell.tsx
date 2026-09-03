@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Compass, Cpu, Disc3, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
+import { BookOpen, Compass, Cpu, Disc3, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
 import { useEffect, type FormEvent, type ReactNode } from "react";
 import { PlayerBar } from "@/components/player-bar";
 import { Wordmark } from "@/components/wordmark";
@@ -19,6 +19,7 @@ const NAV = [
   { to: "/live", label: "On air" },
   { to: "/wow", label: "WOW" },
   { to: "/software", label: "Software" },
+  { to: "/school", label: "School" },
   { to: "/charts", label: "Charts" },
   { to: "/library", label: "Crate" },
   { to: "/booth", label: "Go live" },
@@ -122,6 +123,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/software" className="hover:text-fg">
             DJ software
           </Link>
+          <Link to="/school" className="hover:text-fg">
+            School
+          </Link>
           <Link to="/wow" className="hover:text-fg">
             Who's On What
           </Link>
@@ -149,7 +153,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!legal ? <CookieNotice /> : null}
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-8">
           <MobileLink to="/" label="Home" icon={Compass} active={pathname === "/"} />
           <MobileLink
             to="/releases"
@@ -166,6 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             big
           />
           <MobileLink to="/software" label="SOFT" icon={Cpu} active={pathname.startsWith("/software")} />
+          <MobileLink to="/school" label="School" icon={BookOpen} active={pathname.startsWith("/school")} />
           <MobileLink to="/live" label="On air" icon={Radio} active={pathname.startsWith("/live")} />
           <MobileLink to="/wow" label="WOW" icon={Sparkles} active={pathname.startsWith("/wow")} />
           <Link
@@ -191,7 +196,7 @@ function MobileLink({
   active,
   big,
 }: {
-  to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases" | "/shop" | "/software";
+  to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases" | "/shop" | "/software" | "/school";
   label: string;
   icon: LucideIcon;
   active: boolean;

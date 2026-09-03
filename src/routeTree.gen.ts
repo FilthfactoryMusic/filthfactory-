@@ -24,6 +24,7 @@ import { Route as OpenRouteImport } from './routes/open'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReleasesRouteImport } from './routes/releases'
 import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as SchoolRouteImport } from './routes/school'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SoftwareRouteImport } from './routes/software'
@@ -113,6 +114,11 @@ const ReleasesRoute = ReleasesRouteImport.update({
 const SafetyRoute = SafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolRoute = SchoolRouteImport.update({
+  id: '/school',
+  path: '/school',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
+  '/school': typeof SchoolRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
+  '/school': typeof SchoolRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/releases': typeof ReleasesRoute
   '/safety': typeof SafetyRoute
+  '/school': typeof SchoolRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/software': typeof SoftwareRoute
@@ -305,6 +314,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/releases'
     | '/safety'
+    | '/school'
     | '/search'
     | '/shop'
     | '/software'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/releases'
     | '/safety'
+    | '/school'
     | '/search'
     | '/shop'
     | '/software'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/releases'
     | '/safety'
+    | '/school'
     | '/search'
     | '/shop'
     | '/software'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReleasesRoute: typeof ReleasesRoute
   SafetyRoute: typeof SafetyRoute
+  SchoolRoute: typeof SchoolRoute
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
   SoftwareRoute: typeof SoftwareRoute
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       path: '/safety'
       fullPath: '/safety'
       preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school': {
+      id: '/school'
+      path: '/school'
+      fullPath: '/school'
+      preLoaderRoute: typeof SchoolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -679,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReleasesRoute: ReleasesRoute,
   SafetyRoute: SafetyRoute,
+  SchoolRoute: SchoolRoute,
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
   SoftwareRoute: SoftwareRoute,

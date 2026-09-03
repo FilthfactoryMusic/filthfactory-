@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SOFT_DESKS } from "@/lib/software-scan";
 import { useSoftware } from "@/lib/use-software";
 
@@ -25,7 +25,11 @@ function SoftwarePage() {
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">DJ software</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
         rekordbox, Serato, Engine DJ — official updates and news, pulled daily. Logos and download links. Tap through
-        to the maker.
+        to the maker. Control maps live in{" "}
+        <Link to="/school" className="underline underline-offset-2">
+          School
+        </Link>
+        .
       </p>
       {loading ? <p className="mt-8 text-sm text-muted">Checking the three desks…</p> : null}
 
