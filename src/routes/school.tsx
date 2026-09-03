@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandedText } from "@/components/brand-mark";
 import { SchoolDiagram } from "@/components/school-diagrams";
 import { SCHOOL, SCHOOL_CREDIT } from "@/lib/school";
 
@@ -18,7 +19,10 @@ export const Route = createFileRoute("/school")({
 function SchoolPage() {
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.25em] text-muted">School</p>
+      <p className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-muted">
+        <img src="/art/brand/logo.png" alt="" className="size-5 rounded-full object-cover" />
+        School
+      </p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">Tips & tricks</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
         Instruction manual for the desk. Still pictures, numbered controls, short steps. Written here — not copied from
@@ -46,7 +50,9 @@ function SchoolPage() {
           <section key={l.id} id={l.id} className="scroll-mt-24">
             <p className="text-xs uppercase tracking-[0.25em] text-faint">Lesson {l.n}</p>
             <h2 className="mt-1 font-display text-2xl font-semibold uppercase tracking-wide">{l.title}</h2>
-            <p className="mt-1 max-w-xl text-sm text-muted">{l.blurb}</p>
+            <p className="mt-1 max-w-xl text-sm text-muted">
+              <BrandedText text={l.blurb} />
+            </p>
             <div className="mt-5 grid gap-6 lg:grid-cols-2">
               <div className="overflow-hidden rounded-sm border border-border">
                 <SchoolDiagram kind={l.diagram} />
@@ -57,7 +63,9 @@ function SchoolPage() {
                     <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-fg">
                       {i + 1}
                     </span>
-                    <span>{s}</span>
+                    <span>
+                      <BrandedText text={s} />
+                    </span>
                   </li>
                 ))}
               </ol>

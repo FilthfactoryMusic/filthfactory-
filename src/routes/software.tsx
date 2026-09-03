@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandedText } from "@/components/brand-mark";
 import { SOFT_DESKS } from "@/lib/software-scan";
 import { useSoftware } from "@/lib/use-software";
 
@@ -24,8 +25,8 @@ function SoftwarePage() {
       <p className="text-xs uppercase tracking-[0.25em] text-muted">Software</p>
       <h1 className="mt-1 font-display text-4xl font-semibold uppercase tracking-wide">DJ software</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
-        rekordbox, Serato, Engine DJ — official updates and news, pulled daily. Logos and download links. Tap through
-        to the maker. Control maps live in{" "}
+        <BrandedText text="rekordbox, Serato, Engine DJ — official updates and news, pulled daily." /> Logos and download
+        links. Tap through to the maker. Control maps live in{" "}
         <Link to="/school" className="underline underline-offset-2">
           School
         </Link>
@@ -53,9 +54,11 @@ function SoftwarePage() {
                 {rows.slice(0, 6).map((n) => (
                   <li key={n.id}>
                     <a href={n.url} target="_blank" rel="noreferrer" className="text-sm hover:underline">
-                      {n.title}
+                      <BrandedText text={n.title} />
                     </a>
-                    <p className="text-xs text-muted">{n.blurb}</p>
+                    <p className="text-xs text-muted">
+                      <BrandedText text={n.blurb} />
+                    </p>
                   </li>
                 ))}
                 {!loading && !rows.length ? <li className="text-sm text-muted">No fresh notes this sweep.</li> : null}

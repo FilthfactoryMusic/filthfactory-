@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { BrandMark, BrandedText } from "@/components/brand-mark";
 import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
 import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { startMerch } from "@/lib/merch-api";
@@ -78,7 +79,9 @@ export function MerchPage() {
           return (
             <article key={lab.name} className="rounded-sm border border-border bg-surface p-3">
               <img src={lab.logo} alt="" className="aspect-square w-full rounded-sm bg-black object-contain" />
-              <p className="mt-2 truncate text-sm font-medium">{lab.name}</p>
+              <p className="mt-2 truncate text-sm font-medium">
+                <BrandMark name={lab.name} size="md" />
+              </p>
               <p className="flex flex-wrap gap-x-2 text-xs">
                 <a href={lab.site} target="_blank" rel="noreferrer" className="underline underline-offset-2">
                   Shop
@@ -94,7 +97,7 @@ export function MerchPage() {
         })}
       </div>
       <p className="mt-8 text-xs text-faint">
-        Filthfactory drop is ours. Label shops are theirs.{" "}
+        <BrandedText text="Filthfactory drop is ours. Label shops are theirs." />{" "}
         <Link to="/terms" className="underline underline-offset-2">
           Terms
         </Link>

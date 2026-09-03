@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
 import { LiveDot } from "@/components/live-dot";
+import { BrandedText } from "@/components/brand-mark";
 import { getDj } from "@/lib/catalog";
 import { usePlayer } from "@/lib/player-store";
 import type { LiveShow } from "@/lib/types";
@@ -47,10 +48,10 @@ export function LiveCard({ show }: { show: LiveShow }) {
             params={{ id: show.id }}
             className="block truncate text-sm font-medium hover:underline"
           >
-            {show.title}
+            <BrandedText text={show.title} />
           </Link>
           <p className="truncate text-xs text-muted">
-            {dj?.name ?? show.hostName ?? "Resident"} · {show.venue}
+            <BrandedText text={`${dj?.name ?? show.hostName ?? "Resident"} · ${show.venue}`} />
           </p>
           {show.streamUrl ? (
             <button

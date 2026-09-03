@@ -32,7 +32,7 @@ export function CookieNotice() {
   }
 
   return (
-    <div className="fixed inset-x-0 top-14 z-40 px-3 md:top-16">
+    <div className="fixed inset-x-0 top-16 z-40 px-3 md:top-[4.5rem]">
       <div className="mx-auto flex max-w-2xl flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center">
         <p className="flex-1 text-sm text-muted">
           Essential cookies only — sign-in and age. No ads.{" "}

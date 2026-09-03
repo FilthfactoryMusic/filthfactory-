@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandedText } from "@/components/brand-mark";
 import { LiveCard } from "@/components/live-card";
 import { LiveDot } from "@/components/live-dot";
 import { getDj, liveUpcoming } from "@/lib/catalog";
@@ -41,7 +42,7 @@ function LivePage() {
         <div>
           <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">On air</h1>
           <p className="mt-1 text-sm text-muted">
-            Groove London, Thames Delta, Radio Respect, Code Red, Rinse, Flex. Or jump on the booth yourself.
+            <BrandedText text="Groove London, Thames Delta, Radio Respect, Code Red, Rinse, Flex. Or jump on the booth yourself." />
           </p>
         </div>
         <Link to="/booth" className="hidden h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg sm:flex">
@@ -113,8 +114,12 @@ function LivePage() {
                 <p className="text-[10px] uppercase tracking-widest text-muted">
                   {p.source} · {p.genre}
                 </p>
-                <p className="mt-1 truncate text-sm font-medium group-hover:underline">{p.title}</p>
-                <p className="truncate text-xs text-muted">{p.dj}</p>
+                <p className="mt-1 truncate text-sm font-medium group-hover:underline">
+                  <BrandedText text={p.title} />
+                </p>
+                <p className="truncate text-xs text-muted">
+                  <BrandedText text={p.dj} />
+                </p>
                 <p className="mt-1 line-clamp-2 text-xs text-faint">{p.description}</p>
               </div>
             </a>

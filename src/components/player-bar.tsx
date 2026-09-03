@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Heart, Pause, Play, Radio, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useEffect } from "react";
+import { BrandedText } from "@/components/brand-mark";
 import { Waveform } from "@/components/waveform";
 import { getDj, getLive } from "@/lib/catalog";
 import { getChartMix } from "@/lib/chart-cache";
@@ -62,9 +63,11 @@ export function PlayerBar() {
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 truncate text-sm font-medium">
               {now.kind === "live" ? <Radio className="size-3.5 shrink-0 text-live" /> : null}
-              {title}
+              <BrandedText text={title} />
             </span>
-            <span className="block truncate text-xs text-muted">{dj?.name ?? mix?.show}</span>
+            <span className="block truncate text-xs text-muted">
+              <BrandedText text={dj?.name ?? mix?.show ?? ""} />
+            </span>
           </span>
         </Link>
 

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BrandedText } from "@/components/brand-mark";
 import { FaceMarquee } from "@/components/face-marquee";
 import { LabelReel } from "@/components/label-reel";
 import { WOW_GENRES } from "@/lib/wow-scan";
@@ -54,9 +55,11 @@ function WowPage() {
               {rows.slice(0, 6).map((n) => (
                 <li key={n.id}>
                   <a href={n.url} target="_blank" rel="noreferrer" className="text-sm hover:underline">
-                    {n.title}
+                    <BrandedText text={n.title} />
                   </a>
-                  <p className="text-xs text-muted">{n.blurb}</p>
+                  <p className="text-xs text-muted">
+                    <BrandedText text={n.blurb} />
+                  </p>
                 </li>
               ))}
             </ul>

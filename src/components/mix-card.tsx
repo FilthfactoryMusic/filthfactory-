@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Pause, Play } from "lucide-react";
+import { BrandedText } from "@/components/brand-mark";
 import { getDj } from "@/lib/catalog";
 import { usePlayer } from "@/lib/player-store";
 import type { Mix } from "@/lib/types";
@@ -38,7 +39,7 @@ export function MixCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
           params={{ id: mix.id }}
           className="block truncate text-sm font-medium text-fg hover:underline"
         >
-          {mix.title}
+          <BrandedText text={mix.title} />
         </Link>
         {dj ? (
           <Link
@@ -49,7 +50,9 @@ export function MixCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
             {dj.name}
           </Link>
         ) : (
-          <p className="mt-0.5 truncate text-sm text-muted">{mix.show}</p>
+          <p className="mt-0.5 truncate text-sm text-muted">
+            <BrandedText text={mix.show} />
+          </p>
         )}
         <p className="mt-0.5 text-xs text-faint tabular-nums">
           {formatCount(mix.plays)} plays · {formatDuration(mix.duration)}

@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 md:h-16 md:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 md:h-[4.5rem] md:px-6">
           <Link to="/" className="text-fg" aria-label="Filthfactory home">
             <Wordmark />
           </Link>
@@ -114,7 +114,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs text-faint md:px-6 md:pb-10">
-        <p>Filth Factory Music trading as Filthfactory · sole trader · UK · 18+</p>
+        <p className="flex items-center gap-2">
+          <img src="/art/brand/logo.png" alt="" className="size-5 rounded-full object-cover" />
+          Filth Factory Music trading as Filthfactory · sole trader · UK · 18+
+        </p>
         <p className="mt-1">Resident £5 / month. Gifts not on sale yet. legal@filthfactory.co.uk</p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
           <Link to="/shop" className="hover:text-fg">

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Pause, Play } from "lucide-react";
+import { BrandMark, BrandedText } from "@/components/brand-mark";
 import { rememberCharts } from "@/lib/chart-cache";
 import { usePlayer } from "@/lib/player-store";
 import type { Mix } from "@/lib/types";
@@ -41,12 +42,14 @@ export function ChartCard({ mix, queue }: { mix: Mix; queue?: string[] }) {
         </button>
       </div>
       <Link to="/mix/$id" params={{ id: mix.id }} className="mt-2 block truncate text-sm font-medium hover:underline">
-        {mix.title}
+        <BrandedText text={mix.title} />
       </Link>
-      <p className="truncate text-sm text-muted">{mix.show}</p>
+      <p className="truncate text-sm text-muted">
+        <BrandedText text={mix.show} />
+      </p>
       <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] uppercase tracking-wider text-faint">
         {mix.cut ? <span className="text-muted">{mix.cut}</span> : null}
-        {mix.label ? <span className="truncate">{mix.label}</span> : null}
+        {mix.label ? <BrandMark name={mix.label} className="truncate text-fg" /> : null}
         {mix.beatportUrl ? (
           <a href={mix.beatportUrl} target="_blank" rel="noreferrer" className="hover:text-fg">
             WAV · MP3 · FLAC
