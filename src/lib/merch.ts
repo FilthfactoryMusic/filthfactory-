@@ -1,5 +1,3 @@
-import { UK_BASS_LABELS, labelMerchSlug } from "@/lib/uk-bass-labels";
-
 export type MerchKind = "tee" | "hoodie" | "beanie" | "snapback" | "keyring";
 
 export type MerchSku = {
@@ -14,11 +12,12 @@ export type MerchSku = {
 };
 
 export const FACTORY_MERCH: MerchSku[] = [
-  { id: "tee-black", name: "Stamp tee", blurb: "Black cotton. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-black.jpg", kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "tee-white", name: "Stamp tee", blurb: "White cotton. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-white.jpg", kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "tee-grey", name: "Stamp tee", blurb: "Heather grey. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-grey.jpg", kind: "tee", color: "Grey", swatch: "#8a8a86" },
-  { id: "tee-olive", name: "Stamp tee", blurb: "Olive. Circular stamp on the chest.", pence: 2800, image: "/art/merch/tee-olive.jpg", kind: "tee", color: "Olive", swatch: "#4a5a32" },
-  { id: "hoodie-black", name: "Stamp hoodie", blurb: "Black pullover. Stamp on the chest.", pence: 4800, image: "/art/merch/hoodie-black.jpg", kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "tee-black", name: "Factory tee", blurb: "Black heavyweight. Small left-chest factory.", pence: 2800, image: "/art/merch/tee-black.jpg", kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "tee-black-center", name: "Factory tee", blurb: "Black heavyweight. Center factory print.", pence: 2800, image: "/art/merch/tee-black-center.jpg", kind: "tee", color: "Black center", swatch: "#111111" },
+  { id: "tee-white", name: "Factory tee", blurb: "White heavyweight. Small left-chest factory.", pence: 2800, image: "/art/merch/tee-white.jpg", kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "tee-grey", name: "Factory tee", blurb: "Heather. Small left-chest factory.", pence: 2800, image: "/art/merch/tee-grey.jpg", kind: "tee", color: "Grey", swatch: "#8a8a86" },
+  { id: "tee-olive", name: "Factory tee", blurb: "Olive. Small left-chest factory.", pence: 2800, image: "/art/merch/tee-olive.jpg", kind: "tee", color: "Olive", swatch: "#4a5a32" },
+  { id: "hoodie-black", name: "Factory hoodie", blurb: "Black pullover. Factory on the chest.", pence: 4800, image: "/art/merch/hoodie-black.jpg", kind: "hoodie", color: "Black", swatch: "#111111" },
   { id: "beanie-black", name: "Stamp beanie", blurb: "Black rib. Stamp on the cuff.", pence: 1800, image: "/art/merch/beanie-black.jpg", kind: "beanie", color: "Black", swatch: "#111111" },
   { id: "snapback-black", name: "Stamp snapback", blurb: "Black flat brim. Stamp on the front.", pence: 2200, image: "/art/merch/snapback-black.jpg", kind: "snapback", color: "Black", swatch: "#111111" },
   { id: "keyring", name: "Stamp keyring", blurb: "Metal disc. The circle on your keys.", pence: 800, image: "/art/merch/keyring.jpg", kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
@@ -31,27 +30,6 @@ export const DROP_SHOT = "/art/merch/drop.jpg";
 export function merchById(id: string) {
   return FACTORY_MERCH.find((m) => m.id === id) ?? null;
 }
-
-export type LabelDrop = {
-  name: string;
-  site: string;
-  tee: string;
-  hoodie: string;
-  teePence: number;
-  hoodiePence: number;
-};
-
-export const LABEL_DROPS: LabelDrop[] = UK_BASS_LABELS.map((lab) => {
-  const s = labelMerchSlug(lab.name);
-  return {
-    name: lab.name,
-    site: lab.site,
-    tee: `/art/merch/labels/${s}-tee.jpg`,
-    hoodie: `/art/merch/labels/${s}-hoodie.jpg`,
-    teePence: 2800,
-    hoodiePence: 4800,
-  };
-});
 
 /** Public Instagram profiles we link to. We do not scrape posts or sell their stock. */
 export const LABEL_INSTAGRAM: Record<string, string> = {

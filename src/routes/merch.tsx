@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, LABEL_DROPS, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { FACTORY_MERCH, FACTORY_IG, FACTORY_TIKTOK, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { startMerch } from "@/lib/merch-api";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
@@ -35,8 +36,8 @@ export function MerchPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-muted">Shop / merch</p>
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Shop</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-        The circular stamp on blanks — tees in black, white, grey and olive, hoodie, beanie, snapback, keyring. Printed
-        to order, Stripe, UK post. Instagram{" "}
+        Factory print — chimneys, drips, FILTHFACTORY. Left-chest and center. Hoodie, beanie, snapback, keyring. Stripe,
+        UK post. Instagram{" "}
         <a href={instagramUrl(FACTORY_IG)} target="_blank" rel="noreferrer" className="underline underline-offset-2">
           @{FACTORY_IG}
         </a>
@@ -69,40 +70,31 @@ export function MerchPage() {
 
       <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">UK bass labels</h2>
       <p className="mt-2 max-w-2xl text-sm text-muted">
-        Same blanks, their mark. Tee {formatGbp(2800)}, hoodie {formatGbp(4800)}. We do not print or take the card —
-        tap through and buy from the label.
+        Their merch, their till. We just link it.
       </p>
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {LABEL_DROPS.map((lab) => {
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {UK_BASS_LABELS.map((lab) => {
           const ig = LABEL_INSTAGRAM[lab.name];
           return (
-            <article key={lab.name} className="overflow-hidden rounded-lg border border-border bg-surface">
-              <div className="grid grid-cols-2">
-                <img src={lab.tee} alt={`${lab.name} tee`} className="aspect-square w-full bg-white object-contain" />
-                <img src={lab.hoodie} alt={`${lab.name} hoodie`} className="aspect-square w-full bg-white object-contain" />
-              </div>
-              <div className="p-4">
-                <h3 className="font-display text-lg font-semibold uppercase tracking-wide">{lab.name}</h3>
-                <p className="mt-1 text-sm text-muted">
-                  Tee {formatGbp(lab.teePence)} · Hoodie {formatGbp(lab.hoodiePence)}
-                </p>
-                <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm">
-                  <a href={lab.site} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-                    Buy from label
+            <article key={lab.name} className="rounded-sm border border-border bg-surface p-3">
+              <img src={lab.logo} alt="" className="aspect-square w-full rounded-sm bg-black object-contain" />
+              <p className="mt-2 truncate text-sm font-medium">{lab.name}</p>
+              <p className="flex flex-wrap gap-x-2 text-xs">
+                <a href={lab.site} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                  Shop
+                </a>
+                {ig ? (
+                  <a href={instagramUrl(ig)} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                    Instagram
                   </a>
-                  {ig ? (
-                    <a href={instagramUrl(ig)} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-                      Instagram
-                    </a>
-                  ) : null}
-                </p>
-              </div>
+                ) : null}
+              </p>
             </article>
           );
         })}
       </div>
       <p className="mt-8 text-xs text-faint">
-        Filthfactory stamp is ours and goes through Stripe. Label marks belong to the labels.{" "}
+        Filthfactory drop is ours. Label shops are theirs.{" "}
         <Link to="/terms" className="underline underline-offset-2">
           Terms
         </Link>
