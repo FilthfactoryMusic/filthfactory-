@@ -127,7 +127,7 @@ function AccountPage() {
                 </Button>
               ) : null}
               <Button variant={confirmCancel ? "live" : "outline"} disabled={busy} onClick={() => void cancel()}>
-                {confirmCancel ? "Confirm cancel" : "Cancel membership"}
+                {confirmCancel ? "Yes, unsubscribe" : "Unsubscribe"}
               </Button>
               {confirmCancel ? (
                 <Button variant="ghost" disabled={busy} onClick={() => setConfirmCancel(false)}>

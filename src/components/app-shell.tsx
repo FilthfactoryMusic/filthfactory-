@@ -150,6 +150,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/safety" className="hover:text-fg">
             Safety
           </Link>
+          <Link to="/unsubscribe" className="hover:text-fg">
+            Unsubscribe
+          </Link>
         </nav>
       </footer>
 

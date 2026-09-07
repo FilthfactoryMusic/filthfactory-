@@ -355,6 +355,19 @@ export const cancelMembership = createServerFn({ method: "POST" })
       where user_id = ${context.userId}
     `;
     await sql`update booth_lives set featured = false where user_id = ${context.userId}`;
+    try {
+      const { getStripe } = await import("@/lib/stripe");
+      const stripe = getStripe();
+      const pages = await stripe.subscriptions.list({ status: "active", limit: 100 });
+      for (const sub of pages.data) {
+        if (sub.metadata?.userId === context.userId) {
+          await stripe.subscriptions.cancel(sub.id);
+        }
+      }
+    } catch {
+      /* local cancel still stands if Stripe is down */
+    }
+    return { ok: true as const };
   });
 
 export const requestPayout = createServerFn({ method: "POST" })

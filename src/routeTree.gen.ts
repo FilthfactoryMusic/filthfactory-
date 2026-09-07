@@ -30,6 +30,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SoftwareRouteImport } from './routes/software'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as WowRouteImport } from './routes/wow'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as DjIdRouteImport } from './routes/dj.$id'
@@ -147,6 +148,11 @@ const TradeRoute = TradeRouteImport.update({
   path: '/trade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WowRoute = WowRouteImport.update({
   id: '/wow',
   path: '/wow',
@@ -225,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/trade': typeof TradeRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/trade': typeof TradeRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/software': typeof SoftwareRoute
   '/terms': typeof TermsRoute
   '/trade': typeof TradeRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/wow': typeof WowRoute
   '/city/$slug': typeof CitySlugRoute
   '/dj/$id': typeof DjIdRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/software'
     | '/terms'
     | '/trade'
+    | '/unsubscribe'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/software'
     | '/terms'
     | '/trade'
+    | '/unsubscribe'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/software'
     | '/terms'
     | '/trade'
+    | '/unsubscribe'
     | '/wow'
     | '/city/$slug'
     | '/dj/$id'
@@ -431,6 +443,7 @@ export interface RootRouteChildren {
   SoftwareRoute: typeof SoftwareRoute
   TermsRoute: typeof TermsRoute
   TradeRoute: typeof TradeRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   WowRoute: typeof WowRoute
   CitySlugRoute: typeof CitySlugRoute
   DjIdRoute: typeof DjIdRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wow': {
       id: '/wow'
       path: '/wow'
@@ -725,6 +745,7 @@ const rootRouteChildren: RootRouteChildren = {
   SoftwareRoute: SoftwareRoute,
   TermsRoute: TermsRoute,
   TradeRoute: TradeRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   WowRoute: WowRoute,
   CitySlugRoute: CitySlugRoute,
   DjIdRoute: DjIdRoute,

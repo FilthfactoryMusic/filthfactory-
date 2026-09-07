@@ -26,8 +26,8 @@ const FAQ = [
     a: "Not yet. Membership is the paid product. When gifts are on, members will send Drip, Filth, Warehouse, Afters or Factory during a broadcast. The DJ will receive 50%. Filthfactory 50%. They will not be refundable once sent.",
   },
   {
-    q: "Can I cancel?",
-    a: "Yes, any time from Account. Cancel ends membership immediately, including Featured placement. The current month is not refunded once it has started, except where UK law requires.",
+    q: "Can I unsubscribe?",
+    a: "Yes. Open Unsubscribe, tap once, confirm. Booth access ends now. The current month is not refunded once started, except where UK law requires.",
   },
   {
     q: "Do you licence all records?",
@@ -121,8 +121,8 @@ function MembershipPage() {
             Open the booth
           </Link>
           .{" "}
-          <Link to="/account" className="underline underline-offset-4">
-            Manage account
+          <Link to="/unsubscribe" className="underline underline-offset-4">
+            Unsubscribe
           </Link>
         </p>
       ) : null}
