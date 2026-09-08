@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { authEnabled, signOut } from "./client";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
+import { publicHandle } from "@/lib/handle";
 
 /**
  * Auth state components — plain wrappers around `useCurrentUserState()`.
@@ -55,7 +56,7 @@ export function UserButton() {
   // shows it is working and cannot be fired twice.
   const [signingOut, setSigningOut] = useState(false);
   if (!user) return null;
-  const label = user.displayName ?? user.primaryEmail ?? "Account";
+  const label = publicHandle(user);
   return (
     <div className="flex items-center gap-2">
       {user.profileImageUrl ? (

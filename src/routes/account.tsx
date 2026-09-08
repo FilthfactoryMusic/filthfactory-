@@ -6,6 +6,7 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
 import { planById } from "@/lib/billing";
+import { publicHandle, writeHandle } from "@/lib/handle";
 import { PAYOUT_MIN_PENCE } from "@/lib/legal";
 import { listMyBlocks, unblockUser } from "@/lib/moderation-api";
 
@@ -19,7 +20,16 @@ function AccountPage() {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payoutMsg, setPayoutMsg] = useState<string | null>(null);
+  const [handleDraft, setHandleDraft] = useState("");
+  const [handleSaved, setHandleSaved] = useState("");
   const [blocks, setBlocks] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const h = publicHandle(user);
+    setHandleDraft(h);
+    setHandleSaved(h);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -90,7 +100,33 @@ function AccountPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">Account</h1>
-      <p className="mt-1 text-sm text-muted">{user.displayName ?? user.primaryEmail}</p>
+      <p className="mt-1 font-display text-lg font-semibold uppercase tracking-wide">{handleSaved || publicHandle(user)}</p>
+      <p className="mt-1 text-xs text-muted">Email stays private. Only your username shows on air.</p>
+
+      <section className="mt-8 rounded-lg border border-border bg-surface p-5">
+        <h2 className="font-display text-xl font-semibold uppercase tracking-wide">Username</h2>
+        <p className="mt-1 text-sm text-muted">Letters, numbers, dash. This is what listeners see — never your email.</p>
+        <label className="mt-4 block text-xs uppercase tracking-widest text-muted">
+          On-air name
+          <input
+            value={handleDraft}
+            onChange={(e) => setHandleDraft(e.target.value.toUpperCase())}
+            maxLength={20}
+            className="mt-1 h-12 w-full rounded-sm border border-border bg-bg px-3 font-display text-lg font-semibold uppercase tracking-wide text-fg"
+          />
+        </label>
+        <Button
+          className="mt-4"
+          type="button"
+          onClick={() => {
+            const next = writeHandle(handleDraft);
+            setHandleDraft(next || "RESIDENT");
+            setHandleSaved(next || "RESIDENT");
+          }}
+        >
+          Save username
+        </Button>
+      </section>
 
       <section className="mt-8 rounded-lg border border-border bg-surface p-5">
         <div className="flex items-center justify-between gap-3">

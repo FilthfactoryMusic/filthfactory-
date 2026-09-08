@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { BroadcastStage } from "@/components/broadcast-stage";
@@ -15,7 +15,8 @@ import { Input } from "@/components/ui/input";
 import { formatCount } from "@/lib/utils";
 import { GiftBar } from "@/components/gift-bar";
 import { ReportControl } from "@/components/report-control";
-import { StealFlyer } from "@/components/steal-flyer";
+import { RepresentShare } from "@/components/represent-share";
+import { stopBoothLive } from "@/lib/live-api";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { LiveShow } from "@/lib/types";
 import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
@@ -44,7 +45,10 @@ function LiveShowPage() {
     communityLive.find((s) => s.id === id) ??
     resolveLive(id);
   const dj = show ? getDj(show.djId) : undefined;
+  const navigate = useNavigate();
+  const stopLiveLocal = useLibrary((s) => s.stopLive);
   const playLive = usePlayer((s) => s.playLive);
+  const stopPlayer = usePlayer((s) => s.stop);
   const now = usePlayer((s) => s.now);
   const playing = usePlayer((s) => s.playing);
   const currentTime = usePlayer((s) => s.currentTime);
@@ -175,11 +179,9 @@ function LiveShowPage() {
               {follows.includes(dj.id) ? "Following" : "Follow"}
             </button>
           ) : null}
-          <StealFlyer
+          <RepresentShare
             title={show.title}
-            kicker={dj?.name ?? show.city}
-            sub={`${show.venue} · ${show.city}`}
-            artwork={show.artwork}
+            artwork={show.artwork || "/art/brand/logo-stamp.png"}
             live={show.status === "live"}
           />
           <span className="flex h-11 items-center text-sm text-muted tabular-nums">
@@ -192,7 +194,21 @@ function LiveShowPage() {
           </p>
         ) : null}
         {isHost && booth ? (
-          <p className="mt-3 text-sm text-muted">Keep this tab open. Closing it drops the booth.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="inline-flex h-11 items-center rounded-md border border-border px-4 font-display text-sm font-semibold uppercase tracking-wide"
+              onClick={() => {
+                stopPlayer();
+                stopLiveLocal();
+                void stopBoothLive().catch(() => {});
+                void navigate({ to: "/booth" });
+              }}
+            >
+              End broadcast
+            </button>
+            <p className="text-sm text-muted">Keep this tab open while you are on air.</p>
+          </div>
         ) : null}
         <div className="mt-4">
           <ReportControl

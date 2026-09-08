@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Camera, CameraOff, Mic, MicOff, Radio, Upload } from "lucide-react";
+import { Camera, CameraOff, Mic, MicOff, Radio, SwitchCamera, Upload } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CITIES, GENRES } from "@/lib/catalog";
 import { dropBoothMix, listMyMixes, startBoothLive, stopBoothLive } from "@/lib/live-api";
@@ -17,6 +17,8 @@ import { SimulcastPanel } from "@/components/simulcast-panel";
 import { UrlGatewayPanel } from "@/components/url-gateway-panel";
 import { ObsDesk } from "@/components/obs-desk";
 import { HonestyBanner } from "@/components/honesty-banner";
+import { LogoStage } from "@/components/logo-stage";
+import { publicHandle, writeHandle } from "@/lib/handle";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -126,6 +128,9 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [camOn, setCamOn] = useState(true);
   const [micOn, setMicOn] = useState(true);
+  const [facing, setFacing] = useState<"user" | "environment">("user");
+  const [leadIn, setLeadIn] = useState(false);
+  const [handleDraft, setHandleDraft] = useState("");
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [going, setGoing] = useState(false);
   const [title, setTitle] = useState("");
@@ -134,11 +139,13 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const [dropRights, setDropRights] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
 
-  const displayName = user?.displayName || "Resident";
+  const displayName = publicHandle(user);
   const photo = user?.profileImageUrl ?? null;
 
   useEffect(() => {
+    setHandleDraft(displayName);
     setName(displayName);
+    writeHandle(displayName);
   }, [displayName, setName]);
 
   useEffect(() => {
@@ -156,30 +163,59 @@ function BoothStudio({ featured }: { featured: boolean }) {
     }
   }, []);
 
-  async function openMedia(wantCam: boolean) {
-    stopBoothStream();
+  async function audioConstraints(): Promise<MediaTrackConstraints> {
+    const raw: MediaTrackConstraints = leadIn
+      ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } }
+      : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const mics = devices.filter((d) => d.kind === "audioinput");
+      const ext = mics.find((d) =>
+        /irig|usb|headset|external|lightning|interface|rode|scarlett|focusrite|behringer|cable|line in/i.test(
+          d.label,
+        ),
+      );
+      if ((leadIn || ext) && ext) raw.deviceId = { exact: ext.deviceId };
+    } catch {
+      /* labels hidden until permission */
+    }
+    return raw;
+  }
+
+  async function openMedia(wantCam: boolean, face: "user" | "environment" = facing) {
+    const prev = getBoothStream();
+    prev?.getTracks().forEach((t) => t.stop());
+    try {
+      const audio = await audioConstraints();
       const s = await navigator.mediaDevices.getUserMedia({
-        video: wantCam ? { facingMode: "user", width: { ideal: 1280 } } : false,
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
+        video: wantCam
+          ? { facingMode: { ideal: face }, width: { ideal: 1280 }, height: { ideal: 720 } }
+          : false,
+        audio,
       });
       setBoothStream(s);
       setPreviewOn(true);
       setMediaError(null);
       if (videoRef.current) {
-        videoRef.current.srcObject = s;
+        videoRef.current.srcObject = wantCam ? s : null;
         videoRef.current.muted = true;
         await videoRef.current.play().catch(() => {});
       }
       return s;
     } catch {
-      setMediaError("Allow camera and mic when the phone asks — then tap Enable again.");
+      setMediaError(
+        leadIn
+          ? "Could not open the lead. Plug the iRig in, allow mic, then tap Enable again."
+          : "Allow camera and mic when the phone asks — then tap Enable again.",
+      );
       return null;
     }
+  }
+
+  async function flipCam() {
+    const next = facing === "user" ? "environment" : "user";
+    setFacing(next);
+    if (previewOn && camOn) await openMedia(true, next);
   }
 
   async function onLive(e: FormEvent<HTMLFormElement>) {
@@ -281,8 +317,13 @@ function BoothStudio({ featured }: { featured: boolean }) {
               muted
               autoPlay
               className="size-full object-cover"
-              style={{ transform: "scaleX(-1)" }}
+              style={{ transform: facing === "user" && camOn ? "scaleX(-1)" : undefined }}
             />
+            {previewOn && !camOn ? (
+              <div className="absolute inset-0 z-10">
+                <LogoStage label="Audio only" />
+              </div>
+            ) : null}
             {!previewOn ? (
               <div className="absolute inset-0 z-10 grid place-items-center gap-3 bg-bg p-4">
                 <img src="/art/brand/logo.png" alt="" className="size-24 opacity-80" />
@@ -331,8 +372,16 @@ function BoothStudio({ featured }: { featured: boolean }) {
                 >
                   {micOn ? <Mic className="size-4" /> : <MicOff className="size-4 text-muted" />}
                 </button>
+                <button
+                  type="button"
+                  aria-label="Flip camera"
+                  onClick={() => void flipCam()}
+                  className="flex size-11 items-center justify-center rounded-full bg-raised/90"
+                >
+                  <SwitchCamera className="size-4" />
+                </button>
               </div>
-              <p className="text-xs text-muted">{displayName}</p>
+              <p className="font-display text-xs font-semibold uppercase tracking-wide">{displayName}</p>
             </div>
             ) : null}
           </div>
@@ -365,6 +414,34 @@ function BoothStudio({ featured }: { featured: boolean }) {
             </div>
           ) : (
             <>
+              <label className="mt-4 block text-sm text-muted">
+                Username
+                <Input
+                  className="mt-1 font-display uppercase tracking-wide"
+                  value={handleDraft}
+                  maxLength={20}
+                  onChange={(e) => {
+                    const next = e.target.value.toUpperCase();
+                    setHandleDraft(next);
+                    writeHandle(next);
+                    setName(next || "RESIDENT");
+                  }}
+                  placeholder="FILTHFACTORY"
+                />
+              </label>
+              <label className="mt-4 flex gap-3 text-sm leading-relaxed text-muted">
+                <input
+                  type="checkbox"
+                  className="mt-1 size-4 shrink-0 accent-accent"
+                  checked={leadIn}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setLeadIn(on);
+                    if (previewOn) void openMedia(camOn);
+                  }}
+                />
+                <span>iRig / lead in — uses the cable as the mic, no echo cancel so the mix stays clean.</span>
+              </label>
               <label className="mt-4 block text-sm text-muted">
                 Show title
                 <Input

@@ -273,6 +273,19 @@
   }
 }
 
+@keyframes ff-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ff-logo-spin {
+  animation: ff-logo-spin 48s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .enter-up,
@@ -280,7 +293,8 @@
   .stamp-cdj-face,
   .stamp-cdj-deck,
   .stamp-cdj-platter,
-  .ff-word {
+  .ff-word,
+  .ff-logo-spin {
     animation: none;
   }
   .stamp-cdj-deck {

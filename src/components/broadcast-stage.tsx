@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { LiveDot } from "@/components/live-dot";
 import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 import { useWatchBroadcast, type WatchStatus } from "@/hooks/use-watch-broadcast";
-import { getBoothStream, subscribeBoothStream } from "@/lib/booth-stream";
+import { LogoStage } from "@/components/logo-stage";
 
 function statusCopy(s: WatchStatus) {
   if (s === "connecting") return "Connecting to the booth…";
@@ -73,7 +73,9 @@ function HostStage({ liveId, artwork }: { liveId: string; artwork: string }) {
         style={{ transform: "scaleX(-1)" }}
       />
       {!hasStream ? (
-        <img src={artwork} alt="" className="absolute inset-0 size-full object-cover" />
+        <div className="absolute inset-0">
+          <LogoStage label="On air" />
+        </div>
       ) : null}
       {hasStream ? (
         <div className="absolute left-3 top-3">
@@ -120,7 +122,9 @@ function ViewerStage({
         className={`aspect-video w-full object-cover ${showVideo ? "" : "hidden"}`}
       />
       {!showVideo ? (
-        <img src={artwork} alt="" className="aspect-video w-full object-cover" />
+        <div className={onAir ? "" : "contents"}>
+          {onAir ? <LogoStage label={`${title} · audio`} /> : <img src={artwork} alt="" className="aspect-video w-full object-cover" />}
+        </div>
       ) : null}
       <audio ref={audioRef} autoPlay playsInline />
       {onAir ? (
