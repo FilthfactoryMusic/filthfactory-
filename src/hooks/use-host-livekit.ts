@@ -86,6 +86,8 @@ export function useHostLiveKit(liveId: string | null, enabled: boolean) {
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("MEMBERSHIP")) setError("Resident or Featured membership is required to publish.");
         else if (msg.includes("ENDED") || msg.includes("NOT_HOST")) setError("This broadcast is not on air.");
+        else if (msg.includes("LIVEKIT_DISABLED")) setError(LIVEKIT_MISSING_MSG);
+        else if (msg && msg.length < 180 && !/secret|token|key|pat/i.test(msg)) setError(msg);
         else setError(LIVEKIT_MISSING_MSG);
       }
     })();

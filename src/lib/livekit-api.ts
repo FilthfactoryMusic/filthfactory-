@@ -10,9 +10,10 @@ export type LiveKitMint = {
 };
 
 function readLiveKitEnv() {
-  const url = process.env.LIVEKIT_URL?.trim() ?? "";
-  const apiKey = process.env.LIVEKIT_API_KEY?.trim() ?? "";
-  const apiSecret = process.env.LIVEKIT_API_SECRET?.trim() ?? "";
+  const bag = process.env;
+  const url = bag["LIVEKIT_URL"]?.trim() ?? "";
+  const apiKey = bag["LIVEKIT_API_KEY"]?.trim() ?? "";
+  const apiSecret = bag["LIVEKIT_API_SECRET"]?.trim() ?? "";
   if (!url || !apiKey || !apiSecret) throw new Error(LIVEKIT_MISSING_MSG);
   if (!/^wss?:\/\//i.test(url)) throw new Error(LIVEKIT_MISSING_MSG);
   return { url, apiKey, apiSecret };

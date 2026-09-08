@@ -14,7 +14,7 @@ export function liveKitRoomName(liveId: string) {
 
 export function liveKitConfigured(env: Record<string, string | undefined> = process.env) {
   return Boolean(
-    env.LIVEKIT_URL?.trim() && env.LIVEKIT_API_KEY?.trim() && env.LIVEKIT_API_SECRET?.trim(),
+    env["LIVEKIT_URL"]?.trim() && env["LIVEKIT_API_KEY"]?.trim() && env["LIVEKIT_API_SECRET"]?.trim(),
   );
 }
 
@@ -25,7 +25,7 @@ export function liveKitConfigured(env: Record<string, string | undefined> = proc
 export function resolveLiveTransport(
   env: Record<string, string | undefined> = process.env,
 ): LiveTransportMode {
-  const flag = env.LIVE_TRANSPORT?.trim().toLowerCase();
+  const flag = env["LIVE_TRANSPORT"]?.trim().toLowerCase();
   if (flag === "livekit") return "livekit";
   if (flag === "mesh") return "mesh";
 
