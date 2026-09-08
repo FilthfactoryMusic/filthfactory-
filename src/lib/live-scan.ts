@@ -12,7 +12,6 @@ export type LivePick = {
 };
 
 const YT_CHANNELS: { id: string; name: string; genre: string; url: string }[] = [
-  { id: "UCQRp7g7irivIUb4HdiU1KiQ", name: "Code Red Radio", genre: "Drum & Bass", url: "https://www.youtube.com/channel/UCQRp7g7irivIUb4HdiU1KiQ/live" },
   { id: "thames", name: "Thames Delta Radio", genre: "Jungle / DnB", url: "https://www.youtube.com/@ThamesDeltaRadio/live" },
   { id: "UColVASy4cKV9R_uLpbLWe-g", name: "Groove London", genre: "UK Garage / House", url: "https://www.youtube.com/channel/UColVASy4cKV9R_uLpbLWe-g/live" },
   { id: "rinse", name: "Rinse FM", genre: "Grime / UKG", url: "https://www.youtube.com/@RinseFM/live" },
