@@ -13,9 +13,10 @@ export function liveKitRoomName(liveId: string) {
 }
 
 export function liveKitConfigured(env: Record<string, string | undefined> = process.env) {
-  return Boolean(
-    env["LIVEKIT_URL"]?.trim() && env["LIVEKIT_API_KEY"]?.trim() && env["LIVEKIT_API_SECRET"]?.trim(),
-  );
+  const url = String(env["LIVEKIT_URL"] ?? "").trim();
+  const key = String(env["LIVEKIT_API_KEY"] ?? "").trim();
+  const secret = String(env["LIVEKIT_API_SECRET"] ?? "").trim();
+  return Boolean(url && key && secret);
 }
 
 /**

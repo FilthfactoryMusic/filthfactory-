@@ -28,8 +28,8 @@ export function useLiveTransport() {
       .then((info) => {
         if (!on) return;
         if (info.mode === "livekit" && !info.configured) {
-          setError(LIVEKIT_MISSING_MSG);
-          setMode("livekit");
+          // Keys not in this server — still go on air via the mesh relay.
+          setMode("mesh");
           return;
         }
         setMode(info.mode);

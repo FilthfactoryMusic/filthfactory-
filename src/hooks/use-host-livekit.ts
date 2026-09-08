@@ -86,8 +86,13 @@ export function useHostLiveKit(liveId: string | null, enabled: boolean) {
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("MEMBERSHIP")) setError("Resident or Featured membership is required to publish.");
         else if (msg.includes("ENDED") || msg.includes("NOT_HOST")) setError("This broadcast is not on air.");
+        else if (msg === "LIVEKIT_URL_MISSING") setError("LiveKit URL is missing on this Preview.");
+        else if (msg === "LIVEKIT_KEY_MISSING" || msg === "LIVEKIT_SECRET_MISSING")
+          setError("LiveKit API key or secret is missing on this Preview.");
+        else if (msg === "LIVEKIT_URL_BAD") setError("LiveKit URL must start with wss://");
         else if (msg.includes("LIVEKIT_DISABLED")) setError(LIVEKIT_MISSING_MSG);
-        else if (msg && msg.length < 180 && !/secret|token|key|pat/i.test(msg)) setError(msg);
+        else if (msg && msg.length < 180 && !/eyJ[A-Za-z0-9_-]{12,}|sk_live|github_pat/i.test(msg))
+          setError(msg);
         else setError(LIVEKIT_MISSING_MSG);
       }
     })();

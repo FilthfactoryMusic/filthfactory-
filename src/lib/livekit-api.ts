@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { LIVEKIT_MISSING_MSG, liveKitRoomName, liveTransportInfo } from "@/lib/live-transport";
+import { liveKitRoomName, resolveLiveTransport } from "@/lib/live-transport";
 
 export type LiveKitMint = {
   mode: "livekit";
@@ -9,19 +9,40 @@ export type LiveKitMint = {
   room: string;
 };
 
+function runtimeGet(name: string): string {
+  try {
+    const fn = new Function(
+      "k",
+      "try { return String((globalThis.process && globalThis.process.env && globalThis.process.env[k]) || ''); } catch (e) { return ''; }",
+    );
+    return String(fn(name) || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+function normalizeLiveKitUrl(raw: string) {
+  let url = raw.trim().replace(/^['"]|['"]$/g, "");
+  if (!url) return "";
+  if (url.startsWith("https://")) url = `wss://${url.slice("https://".length)}`;
+  if (url.startsWith("http://")) url = `ws://${url.slice("http://".length)}`;
+  if (!/^wss?:\/\//i.test(url) && /livekit\.cloud/i.test(url)) url = `wss://${url.replace(/^\/+/, "")}`;
+  return url.replace(/\/+$/, "");
+}
+
 function readLiveKitEnv() {
-  const bag = process.env;
-  const url = bag["LIVEKIT_URL"]?.trim() ?? "";
-  const apiKey = bag["LIVEKIT_API_KEY"]?.trim() ?? "";
-  const apiSecret = bag["LIVEKIT_API_SECRET"]?.trim() ?? "";
-  if (!url || !apiKey || !apiSecret) throw new Error(LIVEKIT_MISSING_MSG);
-  if (!/^wss?:\/\//i.test(url)) throw new Error(LIVEKIT_MISSING_MSG);
+  const url = normalizeLiveKitUrl(runtimeGet("LIVEKIT_URL"));
+  const apiKey = runtimeGet("LIVEKIT_API_KEY");
+  const apiSecret = runtimeGet("LIVEKIT_API_SECRET");
+  if (!url) throw new Error("LIVEKIT_URL_MISSING");
+  if (!apiKey) throw new Error("LIVEKIT_KEY_MISSING");
+  if (!apiSecret) throw new Error("LIVEKIT_SECRET_MISSING");
+  if (!/^wss?:\/\//i.test(url)) throw new Error("LIVEKIT_URL_BAD");
   return { url, apiKey, apiSecret };
 }
 
 function assertLiveKitMode() {
-  const info = liveTransportInfo();
-  if (info.mode !== "livekit") throw new Error("LIVEKIT_DISABLED");
+  if (resolveLiveTransport() !== "livekit") throw new Error("LIVEKIT_DISABLED");
   return readLiveKitEnv();
 }
 
@@ -61,7 +82,14 @@ async function mintJwt(opts: {
 }
 
 export const getLiveTransport = createServerFn({ method: "GET" }).handler(async () => {
-  return liveTransportInfo();
+  const mode = resolveLiveTransport();
+  if (mode === "mesh") return { mode, configured: true as const };
+  try {
+    readLiveKitEnv();
+    return { mode: "livekit" as const, configured: true as const };
+  } catch {
+    return { mode: "livekit" as const, configured: false as const };
+  }
 });
 
 export const mintLiveKitViewerToken = createServerFn({ method: "POST" })
