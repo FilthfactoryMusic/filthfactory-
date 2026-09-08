@@ -284,23 +284,24 @@ function BoothStudio({ featured }: { featured: boolean }) {
               style={{ transform: "scaleX(-1)" }}
             />
             {!previewOn ? (
-              <div className="absolute inset-0 grid place-items-center gap-3 bg-bg/80 p-4">
+              <div className="absolute inset-0 z-10 grid place-items-center gap-3 bg-bg p-4">
                 <img src="/art/brand/logo.png" alt="" className="size-24 opacity-80" />
                 <button
                   type="button"
                   onClick={() => void openMedia(camOn)}
-                  className="inline-flex h-12 items-center rounded-sm bg-live px-5 text-sm font-semibold text-live-fg"
+                  className="inline-flex h-12 items-center rounded-sm bg-live px-5 font-display text-sm font-semibold uppercase tracking-wide text-live-fg"
                 >
                   Enable camera & mic
                 </button>
               </div>
             ) : null}
             {ownLive ? (
-              <div className="absolute left-3 top-3">
+              <div className="absolute left-3 top-3 z-20">
                 <LiveDot />
               </div>
             ) : null}
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-bg to-transparent p-3">
+            {previewOn ? (
+            <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-2 bg-gradient-to-t from-bg to-transparent p-3">
               <div className="flex gap-1">
                 <button
                   type="button"
@@ -333,6 +334,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
               </div>
               <p className="text-xs text-muted">{displayName}</p>
             </div>
+            ) : null}
           </div>
           {mediaError ? <p className="mt-2 text-xs text-muted">{mediaError}</p> : null}
           {host.error ? <p className="mt-2 text-sm text-live">{host.error}</p> : null}
