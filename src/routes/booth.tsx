@@ -191,12 +191,12 @@ function BoothStudio({ featured }: { featured: boolean }) {
     }
     setGoing(true);
     setLiveError(null);
+    const formEl = e.currentTarget;
+    const genre = String(new FormData(formEl).get("lgenre") ?? "UK Garage");
     try {
       if (!getBoothStream()) {
         await openMedia(camOn);
       }
-      const fd = new FormData(e.currentTarget);
-      const genre = String(fd.get("lgenre") ?? "UK Garage");
       const show = await startBoothLive({
         data: {
           title: title.trim() || `${displayName} live`,
