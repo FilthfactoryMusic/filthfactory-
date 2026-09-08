@@ -1,21 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { BrandedText } from "@/components/brand-mark";
-import { FACTORY_MERCH, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { FACTORY_MERCH, SPOOF_MERCH, CAMO_MERCH, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
 import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { FEATURED_CONTROLLERS, UK_DJ_SHOPS, shopById, shopHref } from "@/lib/dj-shops";
 import { startMerch } from "@/lib/merch-api";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
-import { useTillStatus } from "@/lib/use-billing";
 
 export const Route = createFileRoute("/merch")({ component: MerchPage });
 
 export function MerchPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const till = useTillStatus();
-  const sellOpen = Boolean(till.loaded && till.stripe);
 
   async function buy(sku: string) {
     setBusy(sku);
@@ -26,10 +23,10 @@ export function MerchPage() {
         window.location.assign(result.url);
         return;
       }
-      setError("Checkout did not open. Coming soon.");
+      setError("Checkout did not open. Stripe keys still need to be live.");
     } catch (err) {
       const raw = err instanceof Error ? err.message : "";
-      if (/STRIPE/i.test(raw)) setError("Factory print checkout is coming soon.");
+      if (/STRIPE/i.test(raw)) setError("Stripe is not live yet. Add the keys, then this button takes the card.");
       else setError("Checkout failed. Try again.");
     } finally {
       setBusy(null);
@@ -42,6 +39,14 @@ export function MerchPage() {
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Shop</h1>
       <p className="mt-3 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
         Controllers from UK desks. Factory print. Label merch.
+      </p>
+      <p className="mt-4">
+        <Link
+          to="/drafts"
+          className="inline-flex h-11 items-center rounded-sm bg-accent px-4 font-display text-sm font-semibold uppercase tracking-wide text-accent-fg"
+        >
+          View design drafts — not on sale
+        </Link>
       </p>
 
       <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">DJ controllers</h2>
@@ -125,7 +130,7 @@ export function MerchPage() {
 
       <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Factory print</h2>
       <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
-        Hoodie, beanie, snapback, keyring. Stripe. UK post.
+        Circle stamp, drip letters, original factory mark. Black, white, olive. Mug stays. UK post.
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -138,12 +143,8 @@ export function MerchPage() {
               <p className="mt-1 text-sm text-muted">{item.blurb}</p>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
-                <Button
-                  size="sm"
-                  disabled={!sellOpen || busy === item.id}
-                  onClick={() => void buy(item.id)}
-                >
-                  {!sellOpen ? "Coming soon" : busy === item.id ? "Opening…" : "Buy"}
+                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
+                  {busy === item.id ? "Opening…" : "Buy"}
                 </Button>
               </div>
             </div>
@@ -151,6 +152,52 @@ export function MerchPage() {
         ))}
       </div>
       {error ? <p className="mt-4 text-sm text-accent">{error}</p> : null}
+
+      <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Jungle camo</h2>
+      <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        Woodland and tiger. FILTH / FACTORY graffiti.
+      </p>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {CAMO_MERCH.map((item) => (
+          <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
+            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
+            <div className="p-4">
+              <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
+              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
+              <p className="mt-1 text-sm text-muted">{item.blurb}</p>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
+                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
+                  {busy === item.id ? "Opening…" : "Buy"}
+                </Button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">UK spoofs</h2>
+      <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        Original gags. Black, white, olive. Logos can be swapped later.
+      </p>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {SPOOF_MERCH.map((item) => (
+          <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
+            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
+            <div className="p-4">
+              <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
+              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
+              <p className="mt-1 text-sm text-muted">{item.blurb}</p>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
+                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
+                  {busy === item.id ? "Opening…" : "Buy"}
+                </Button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
 
       <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">UK bass labels</h2>
       <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
