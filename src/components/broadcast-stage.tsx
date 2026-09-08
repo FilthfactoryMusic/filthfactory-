@@ -44,7 +44,7 @@ export function BroadcastStage({
 }
 
 function HostStage({ liveId, artwork }: { liveId: string; artwork: string }) {
-  const { viewers } = useHostBroadcast(liveId);
+  const { viewers, error } = useHostBroadcast(liveId);
   const ref = useRef<HTMLVideoElement>(null);
   const [hasStream, setHasStream] = useState(Boolean(getBoothStream()));
 
@@ -53,6 +53,7 @@ function HostStage({ liveId, artwork }: { liveId: string; artwork: string }) {
     if (!el) return;
     const apply = (s: MediaStream | null) => {
       setHasStream(Boolean(s));
+      el.muted = true;
       el.srcObject = s;
       if (s) void el.play().catch(() => {});
     };
@@ -74,12 +75,18 @@ function HostStage({ liveId, artwork }: { liveId: string; artwork: string }) {
       {!hasStream ? (
         <img src={artwork} alt="" className="absolute inset-0 size-full object-cover" />
       ) : null}
-      <div className="absolute left-3 top-3">
-        <LiveDot />
-      </div>
-      <p className="absolute bottom-3 left-3 rounded-sm bg-bg/80 px-2 py-1 text-xs uppercase tracking-widest">
-        On air · {viewers} listening
-      </p>
+      {hasStream ? (
+        <div className="absolute left-3 top-3">
+          <LiveDot />
+        </div>
+      ) : null}
+      {error ? (
+        <p className="absolute inset-x-3 bottom-3 rounded-sm bg-bg/80 px-2 py-1 text-xs">{error}</p>
+      ) : hasStream ? (
+        <p className="absolute bottom-3 left-3 rounded-sm bg-bg/80 px-2 py-1 text-xs uppercase tracking-widest">
+          On air · {viewers} listening
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -99,9 +106,10 @@ function ViewerStage({
   enabled: boolean;
   onNeedGesture?: () => void;
 }) {
-  const { status, remote, videoRef, audioRef } = useWatchBroadcast(liveId, enabled);
-  const copy = !enabled ? "Tap to listen" : statusCopy(status);
+  const { status, remote, videoRef, audioRef, error, unlock } = useWatchBroadcast(liveId, enabled);
+  const copy = error ?? (!enabled ? "Tap to listen" : statusCopy(status));
   const showVideo = Boolean(remote?.getVideoTracks().length);
+  const onAir = status === "live" || status === "audio";
 
   return (
     <div className="relative overflow-hidden rounded-sm bg-surface">
@@ -115,17 +123,22 @@ function ViewerStage({
         <img src={artwork} alt="" className="aspect-video w-full object-cover" />
       ) : null}
       <audio ref={audioRef} autoPlay playsInline />
-      <div className="absolute left-3 top-3">
-        <LiveDot />
-      </div>
+      {onAir ? (
+        <div className="absolute left-3 top-3">
+          <LiveDot />
+        </div>
+      ) : null}
       {copy ? (
         <button
           type="button"
-          onClick={onNeedGesture}
+          onClick={() => {
+            unlock();
+            onNeedGesture?.();
+          }}
           className="absolute inset-0 grid place-items-center bg-bg/50"
         >
           <span className="rounded-sm bg-live px-5 py-3 text-sm font-medium text-live-fg">
-            {status === "blocked" || !enabled ? "Tap to listen" : copy}
+            {error ? error : status === "blocked" || !enabled ? "Tap to listen" : copy}
           </span>
         </button>
       ) : null}

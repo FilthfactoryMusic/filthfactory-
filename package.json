@@ -16,7 +16,7 @@
     "preview:stop": "node scripts/preview.mjs stop",
     "typecheck": "tsc --noEmit",
     "check:auth": "node scripts/check-auth-invariant.mjs",
-    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts",
+    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/live-transport.test.ts src/lib/live-media.test.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -57,6 +57,8 @@
     "date-fns": "^4.0.0",
     "jose": "6.2.9",
     "kysely": "^0.28.5",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.18.0",
     "lucide-react": "^0.510.0",
     "pg": "^8.16.3",
     "react": "^19.2.0",

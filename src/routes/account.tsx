@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { cancelMembership, requestPayout } from "@/lib/billing-api";
-import { useMyBilling } from "@/lib/use-billing";
+import { useMyBilling, useTillStatus } from "@/lib/use-billing";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/account")({ component: AccountPage });
 function AccountPage() {
   const user = useCurrentUser();
   const billing = useMyBilling();
+  const till = useTillStatus();
   const [busy, setBusy] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,11 +118,13 @@ function AccountPage() {
             <p className="mt-3 text-sm text-muted">
               {billing.plan === "featured"
                 ? "Your live stream is advertised on Discover while you are on air."
-                : "Upgrade to Featured to advertise your live on the main feed."}
+                : till.stripe
+                  ? "Upgrade to Featured to advertise your live on the main feed."
+                  : "Resident booth is active. Featured advertising is coming soon."}
             </p>
             {error ? <p className="mt-2 text-sm text-live">{error}</p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
-              {billing.plan !== "featured" ? (
+              {billing.plan !== "featured" && till.stripe ? (
                 <Button asChild>
                   <Link to="/membership">Upgrade to Featured</Link>
                 </Button>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { getEngine, type EngineOpts } from "./audio-engine";
 import { getChartMix } from "./chart-cache";
-import { getLive, getMix, liveOffsetSec } from "./catalog";
+import { getLive, getMix } from "./catalog";
 import { mixStreamUrl } from "./feeds";
 import { resolveLive, useLibrary } from "./library-store";
 import { getRemoteDeck } from "./stream-player";
@@ -119,23 +119,18 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     } else if (live?.streamUrl) {
       eng?.stop();
       remote.start({ url: live.streamUrl, volume: vol, live: true });
-    } else if (live?.embedUrl || live?.watchUrl) {
+    } else {
       eng?.stop();
       remote.stop();
-    } else {
-      remote.stop();
-      const offset = live?.status === "live" && live ? liveOffsetSec(live) : 0;
-      if (eng && live) {
-        void eng.start({
-          engine: live.engine,
-          bpm: live.bpm,
-          seed: live.seed,
-          duration: live.durationMin * 60,
-          offset,
-          volume: vol,
-          onEnded: () => usePlayer.getState().stop(),
-        });
-      }
+      set({
+        now: { kind: "live", id },
+        playing: false,
+        currentTime: 0,
+        duration: live?.durationMin ? live.durationMin * 60 : 3 * 60 * 60,
+        queue: [],
+        queueIndex: 0,
+      });
+      return;
     }
     set({
       now: { kind: "live", id },

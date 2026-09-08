@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { LiveCard } from "@/components/live-card";
 import { CITIES } from "@/lib/catalog";
 import { WORLD_LIVE, WORLD_DJS } from "@/lib/feeds";
+import { hasPlayableLiveMedia } from "@/lib/live-media";
 
 export const Route = createFileRoute("/city/$slug")({ component: CityPage });
 
@@ -9,7 +10,7 @@ function CityPage() {
   const { slug } = Route.useParams();
   const city = CITIES.find((c) => c.slug === slug);
   const name = city?.name ?? slug;
-  const live = WORLD_LIVE.filter((s) => s.citySlug === slug);
+  const live = WORLD_LIVE.filter((s) => s.citySlug === slug && hasPlayableLiveMedia(s));
   const djs = WORLD_DJS.filter((d) => d.citySlug === slug);
 
   return (

@@ -19,6 +19,8 @@ import { loadUkCharts } from "@/lib/charts-api";
 import { rememberCharts } from "@/lib/chart-cache";
 import { useUkCharts } from "@/lib/use-uk-charts";
 import { useWow } from "@/lib/use-wow";
+import { useTillStatus } from "@/lib/use-billing";
+import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
 
 export const Route = createFileRoute("/")({
   loader: () => loadUkCharts().catch(() => ({ weekId: "", featured: [], trending: [] })),
@@ -59,6 +61,7 @@ function Home() {
   const playLive = usePlayer((s) => s.playLive);
   const now = usePlayer((s) => s.now);
   const playing = usePlayer((s) => s.playing);
+  const till = useTillStatus();
   const lead = advertised[0];
   const leadDj = lead ? getDj(lead.djId) : undefined;
   const leadActive = lead ? now?.kind === "live" && now.id === lead.id && playing : false;
@@ -156,15 +159,19 @@ function Home() {
           <article className="mt-4 overflow-hidden rounded-lg border border-border bg-surface md:grid md:grid-cols-2">
             <Link to="/live/$id" params={{ id: lead.id }} className="relative block">
               <img src={lead.artwork} alt="" className="aspect-video w-full bg-bg object-contain" />
-              <div className="absolute left-3 top-3 flex items-center gap-1">
-                <LiveDot />
-                <span className="rounded-sm bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg">
-                  Advertised
-                </span>
-              </div>
-              <div className="absolute bottom-3 left-3 rounded-sm bg-bg/70 px-2 py-0.5 text-xs text-fg tabular-nums">
-                {formatCount(lead.listeners)} listening
-              </div>
+              {hasPlayableLiveMedia(lead) ? (
+                <div className="absolute left-3 top-3 flex items-center gap-1">
+                  <LiveDot />
+                  <span className="rounded-sm bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg">
+                    Advertised
+                  </span>
+                </div>
+              ) : null}
+              {hasTuneInAudio(lead) ? (
+                <div className="absolute bottom-3 left-3 rounded-sm bg-bg/70 px-2 py-0.5 text-xs text-fg tabular-nums">
+                  {formatCount(lead.listeners)} listening
+                </div>
+              ) : null}
             </Link>
             <div className="flex flex-col justify-center p-5 md:p-8">
               <Link to="/live/$id" params={{ id: lead.id }}>
@@ -177,20 +184,32 @@ function Home() {
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">{lead.description}</p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => playLive(lead.id)}
-                  className="inline-flex h-11 items-center gap-2 rounded-md bg-live px-4 text-sm font-medium text-live-fg"
-                >
-                  <Radio className="size-4" />
-                  {leadActive ? "Listening" : "Tune in"}
-                </button>
-                <Link
-                  to="/membership"
-                  className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-accent"
-                >
-                  Advertise your live
-                </Link>
+                {hasTuneInAudio(lead) ? (
+                  <button
+                    type="button"
+                    onClick={() => playLive(lead.id)}
+                    className="inline-flex h-11 items-center gap-2 rounded-md bg-live px-4 text-sm font-medium text-live-fg"
+                  >
+                    <Radio className="size-4" />
+                    {leadActive ? "Listening" : "Tune in"}
+                  </button>
+                ) : hasPlayableLiveMedia(lead) ? (
+                  <Link
+                    to="/live/$id"
+                    params={{ id: lead.id }}
+                    className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg"
+                  >
+                    Watch
+                  </Link>
+                ) : null}
+                {till.loaded && till.stripe ? (
+                  <Link
+                    to="/membership"
+                    className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-accent"
+                  >
+                    Advertise your live
+                  </Link>
+                ) : null}
               </div>
             </div>
           </article>

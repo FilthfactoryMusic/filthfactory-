@@ -8,8 +8,20 @@ import {
   pullBoothSignals,
   type Signal,
 } from "@/lib/stream-api";
+import { useHostLiveKit } from "@/hooks/use-host-livekit";
+import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export function useHostBroadcast(liveId: string | null) {
+  const transport = useLiveTransport();
+  const mesh = useHostMesh(transport.mesh ? liveId : null);
+  const livekit = useHostLiveKit(liveId, transport.livekit);
+  return {
+    viewers: transport.livekit ? livekit.viewers : mesh.viewers,
+    error: transport.error ?? livekit.error ?? null,
+  };
+}
+
+function useHostMesh(liveId: string | null) {
   const [viewers, setViewers] = useState(0);
   const pcs = useRef(new Map<string, RTCPeerConnection>());
   const streamRef = useRef<MediaStream | null>(getBoothStream());
@@ -52,11 +64,14 @@ export function useHostBroadcast(liveId: string | null) {
         next.ondataavailable = (ev) => {
           if (!ev.data.size || dead) return;
           const n = seq++;
-          void ev.data.arrayBuffer().then((buf) => {
-            const data = bufToB64(buf);
-            if (data.length > 78_000) return;
-            return postBoothChunk({ data: { liveId: id, seq: n, mime, data } });
-          }).catch(() => {});
+          void ev.data
+            .arrayBuffer()
+            .then((buf) => {
+              const data = bufToB64(buf);
+              if (data.length > 78_000) return;
+              return postBoothChunk({ data: { liveId: id, seq: n, mime, data } });
+            })
+            .catch(() => {});
         };
         next.start(900);
         rec = next;

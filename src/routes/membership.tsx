@@ -47,7 +47,8 @@ function MembershipPage() {
   const [terms, setTerms] = useState(false);
   const [community, setCommunity] = useState(false);
   const [waiver, setWaiver] = useState(false);
-  const chosen = PLANS.find((p) => p.id === pick) ?? PLANS[0];
+  const sellOpen = Boolean(till.loaded && till.stripe);
+  const chosen = (sellOpen ? PLANS.find((p) => p.id === pick) : PLANS[0]) ?? PLANS[0];
   const ready = age && terms && community && waiver;
 
   async function confirm() {
@@ -83,8 +84,8 @@ function MembershipPage() {
         return;
       }
       if (/CONSENT/i.test(raw)) setError("Tick every box to pay.");
-      else if (/STRIPE_UNAVAILABLE/i.test(raw)) setError("The till is not connected yet. Wait a minute and try again.");
-      else setError("Could not open Stripe. Sign in, tick the boxes, then Pay — Google Pay, PayPal or card.");
+      else if (/STRIPE_UNAVAILABLE/i.test(raw)) setError("Membership checkout is coming soon.");
+      else setError("Could not open checkout. Sign in, tick the boxes, then try Pay again.");
     } finally {
       setBusy(false);
     }
@@ -107,10 +108,9 @@ function MembershipPage() {
         on Discover. Listening stays free. {VAT_NOTE}
       </p>
 
-      {till.loaded && (!till.stripe || !till.database) ? (
-        <p className="mt-4 rounded-sm border border-live/40 bg-raised px-3 py-2 text-sm">
-          The till is not fully connected on this site yet. You can still sign in and tick the boxes — Pay
-          will light up once the live keys are on.
+      {till.loaded && !till.stripe ? (
+        <p className="mt-4 rounded-sm border border-border bg-raised px-3 py-2 text-sm text-muted">
+          Membership checkout is coming soon.
         </p>
       ) : null}
 
@@ -157,12 +157,13 @@ function MembershipPage() {
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {PLANS.map((p) => (
+        {PLANS.filter((p) => till.stripe || p.id !== "featured").map((p) => (
           <button
             key={p.id}
             type="button"
             aria-pressed={pick === p.id}
             onClick={() => setPick(p.id)}
+            disabled={!till.stripe && till.loaded}
             className={cn(
               "rounded-lg border p-5 text-left transition-colors duration-150",
               pick === p.id ? "border-accent bg-surface" : "border-border bg-bg hover:border-accent",
@@ -190,48 +191,58 @@ function MembershipPage() {
       </div>
 
       <div className="mt-8 rounded-lg border border-border bg-surface p-5">
-        <h2 className="font-display text-xl font-semibold uppercase tracking-wide">Pay</h2>
-        <p className="mt-2 text-sm text-muted">
-          {chosen.name} · {formatGbp(chosen.pence)} now, then each calendar month until you cancel. {VAT_NOTE}
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          Next screen is Stripe. Pay with <span className="text-fg">Google Pay</span>,{" "}
-          <span className="text-fg">Apple Pay</span>, <span className="text-fg">PayPal</span> or card. We never
-          see the card number.
-        </p>
-        <fieldset className="mt-4 space-y-3">
-          <CheckRow checked={age} onChange={setAge}>
-            I am {MIN_AGE} or over.
-          </CheckRow>
-          <CheckRow checked={terms} onChange={setTerms}>
-            I agree to the{" "}
-            <a href="/terms" className="underline underline-offset-2">
-              Terms
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="underline underline-offset-2">
-              Privacy policy
-            </a>
-            .
-          </CheckRow>
-          <CheckRow checked={community} onChange={setCommunity}>
-            I will follow the{" "}
-            <a href="/community" className="underline underline-offset-2">
-              Community rules
-            </a>
-            . I only broadcast content I have the rights to.
-          </CheckRow>
-          <CheckRow checked={waiver} onChange={setWaiver}>
-            {DIGITAL_WAIVER_NOTE}
-          </CheckRow>
-        </fieldset>
-        {error ? <p className="mt-2 text-sm text-live">{error}</p> : null}
-        <Button className="mt-5 w-full sm:w-auto" disabled={busy} onClick={() => void confirm()}>
-          {cta}
-        </Button>
-        <p className="mt-3 text-xs text-faint">
-          Receipt lands in Account. Cancel any time. Google Pay, Apple Pay, PayPal or card via Stripe.
-        </p>
+        <h2 className="font-display text-xl font-semibold uppercase tracking-wide">
+          {sellOpen ? "Pay" : "Coming soon"}
+        </h2>
+        {!till.loaded ? (
+          <p className="mt-4 text-sm text-muted">Checking checkout…</p>
+        ) : sellOpen ? (
+          <>
+            <p className="mt-2 text-sm text-muted">
+              {chosen.name} · {formatGbp(chosen.pence)} now, then each calendar month until you cancel. {VAT_NOTE}
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              Next screen is Stripe. Pay with <span className="text-fg">Google Pay</span>,{" "}
+              <span className="text-fg">Apple Pay</span>, <span className="text-fg">PayPal</span> or card. We never
+              see the card number.
+            </p>
+            <fieldset className="mt-4 space-y-3">
+              <CheckRow checked={age} onChange={setAge}>
+                I am {MIN_AGE} or over.
+              </CheckRow>
+              <CheckRow checked={terms} onChange={setTerms}>
+                I agree to the{" "}
+                <a href="/terms" className="underline underline-offset-2">
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a href="/privacy" className="underline underline-offset-2">
+                  Privacy policy
+                </a>
+                .
+              </CheckRow>
+              <CheckRow checked={community} onChange={setCommunity}>
+                I will follow the{" "}
+                <a href="/community" className="underline underline-offset-2">
+                  Community rules
+                </a>
+                . I only broadcast content I have the rights to.
+              </CheckRow>
+              <CheckRow checked={waiver} onChange={setWaiver}>
+                {DIGITAL_WAIVER_NOTE}
+              </CheckRow>
+            </fieldset>
+            {error ? <p className="mt-2 text-sm text-live">{error}</p> : null}
+            <Button className="mt-5 w-full sm:w-auto" disabled={busy} onClick={() => void confirm()}>
+              {cta}
+            </Button>
+            <p className="mt-3 text-xs text-faint">
+              Receipt lands in Account. Cancel any time. Google Pay, Apple Pay, PayPal or card via Stripe.
+            </p>
+          </>
+        ) : (
+          <p className="mt-4 text-sm text-muted">Membership checkout is coming soon.</p>
+        )}
       </div>
 
       <section className="mt-10">

@@ -1,6 +1,7 @@
 import type { Comment, Dj, EngineGenre, LiveShow, Mix, Track } from "./types";
 import { hashString } from "./utils";
 import { WORLD_LIVE, WORLD_DJS, worldDj, worldLive } from "./feeds";
+import { hasPlayableLiveMedia } from "./live-media";
 
 export const GENRES = [
   "UK Garage",
@@ -1163,7 +1164,7 @@ export function mixesByCity(slug: string) {
 }
 
 export function liveNow() {
-  return WORLD_LIVE;
+  return WORLD_LIVE.filter(hasPlayableLiveMedia);
 }
 
 export function liveUpcoming(): LiveShow[] {
@@ -1199,8 +1200,10 @@ export function searchCatalog(q: string) {
   return {
     mixes: [] as Mix[],
     djs: WORLD_DJS.filter((d) => hit([d.name, d.handle, d.city, d.show, d.genres.join(" "), d.bio])),
-    live: WORLD_LIVE.filter((l) =>
-      hit([l.title, l.venue, l.city, l.genres.join(" "), getDj(l.djId)?.name ?? ""]),
+    live: WORLD_LIVE.filter(
+      (l) =>
+        hasPlayableLiveMedia(l) &&
+        hit([l.title, l.venue, l.city, l.genres.join(" "), getDj(l.djId)?.name ?? ""]),
     ),
   };
 }

@@ -6,6 +6,7 @@ import { getDj } from "@/lib/catalog";
 import { usePlayer } from "@/lib/player-store";
 import type { LiveShow } from "@/lib/types";
 import { formatCount } from "@/lib/utils";
+import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
 
 export function LiveCard({ show }: { show: LiveShow }) {
   const dj = getDj(show.djId);
@@ -22,17 +23,21 @@ export function LiveCard({ show }: { show: LiveShow }) {
         className="relative block overflow-hidden rounded-sm bg-surface"
       >
         <img src={show.artwork} alt="" loading="lazy" decoding="async" className="aspect-video w-full bg-bg object-contain" />
-        <div className="absolute left-2 top-2 flex items-center gap-1">
-          <LiveDot />
-          {show.advertised ? (
-            <span className="rounded-sm bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg">
-              Advertised
-            </span>
-          ) : null}
-        </div>
-        <div className="absolute bottom-2 left-2 rounded-sm bg-bg/70 px-2 py-0.5 text-xs text-fg tabular-nums">
-          {formatCount(show.listeners)} listening
-        </div>
+        {hasPlayableLiveMedia(show) ? (
+          <div className="absolute left-2 top-2 flex items-center gap-1">
+            <LiveDot />
+            {show.advertised ? (
+              <span className="rounded-sm bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg">
+                Advertised
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+        {hasTuneInAudio(show) ? (
+          <div className="absolute bottom-2 left-2 rounded-sm bg-bg/70 px-2 py-0.5 text-xs text-fg tabular-nums">
+            {formatCount(show.listeners)} listening
+          </div>
+        ) : null}
       </Link>
       <div className="mt-2 flex items-start gap-2">
         {dj ? (
@@ -53,7 +58,7 @@ export function LiveCard({ show }: { show: LiveShow }) {
           <p className="truncate text-xs text-muted">
             <BrandedText text={`${dj?.name ?? show.hostName ?? "Resident"} · ${show.venue}`} />
           </p>
-          {show.streamUrl ? (
+          {hasTuneInAudio(show) ? (
             <button
               type="button"
               onClick={() => playLive(show.id)}
@@ -62,7 +67,7 @@ export function LiveCard({ show }: { show: LiveShow }) {
               <Radio className="size-3.5" />
               {active ? "Listening" : "Tune in"}
             </button>
-          ) : (
+          ) : hasPlayableLiveMedia(show) ? (
             <Link
               to="/live/$id"
               params={{ id: show.id }}
@@ -70,6 +75,17 @@ export function LiveCard({ show }: { show: LiveShow }) {
             >
               Watch
             </Link>
+          ) : (
+            show.watchUrl ? (
+              <a
+                href={show.watchUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-flex h-9 items-center rounded-sm border border-border px-3 text-xs"
+              >
+                Open station
+              </a>
+            ) : null
           )}
         </div>
       </div>

@@ -18,6 +18,7 @@ import { ReportControl } from "@/components/report-control";
 import { StealFlyer } from "@/components/steal-flyer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { LiveShow } from "@/lib/types";
+import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
 
 export const Route = createFileRoute("/live/$id")({ component: LiveShowPage });
 
@@ -110,7 +111,7 @@ function LiveShowPage() {
           />
         ) : (
           <div className="relative overflow-hidden rounded-sm bg-surface">
-            {embed ? (
+            {hasPlayableLiveMedia(show) && embed ? (
               <iframe
                 title={show.title}
                 src={embed}
@@ -122,9 +123,9 @@ function LiveShowPage() {
               <img src={show.artwork} alt="" className="aspect-video w-full bg-bg object-contain" />
             )}
             <div className="absolute left-3 top-3">
-              {show.status === "live" ? <LiveDot /> : (
+              {hasPlayableLiveMedia(show) && show.status === "live" ? <LiveDot /> : show.status !== "live" ? (
                 <span className="rounded-sm bg-raised px-2 py-0.5 text-xs">Upcoming</span>
-              )}
+              ) : null}
             </div>
           </div>
         )}
@@ -145,14 +146,16 @@ function LiveShowPage() {
           </div>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => playLive(show.id)}
-            className="inline-flex h-11 items-center gap-2 rounded-md bg-live px-4 text-sm font-medium text-live-fg"
-          >
-            <Radio className="size-4" />
-            {listening ? "Listening" : "Tune in"}
-          </button>
+          {hasTuneInAudio(show) ? (
+            <button
+              type="button"
+              onClick={() => playLive(show.id)}
+              className="inline-flex h-11 items-center gap-2 rounded-md bg-live px-4 text-sm font-medium text-live-fg"
+            >
+              <Radio className="size-4" />
+              {listening ? "Listening" : "Tune in"}
+            </button>
+          ) : null}
           {show.watchUrl ? (
             <a
               href={show.watchUrl}

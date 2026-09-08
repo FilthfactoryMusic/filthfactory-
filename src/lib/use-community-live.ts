@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { listBoothLives } from "@/lib/live-api";
 import { useLibrary } from "@/lib/library-store";
 import { liveNow } from "@/lib/catalog";
+import { hasPlayableLiveMedia } from "@/lib/live-media";
 import type { LiveShow } from "@/lib/types";
 
 export function useCommunityLive() {
@@ -32,5 +33,5 @@ export function mergeLiveNow(community: LiveShow[]): LiveShow[] {
   const seeded = liveNow();
   const ids = new Set(community.map((s) => s.id));
   const merged = [...community, ...seeded.filter((s) => !ids.has(s.id))];
-  return merged;
+  return merged.filter((s) => hasPlayableLiveMedia(s) || Boolean(s.hostUserId));
 }

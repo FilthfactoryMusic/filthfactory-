@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { ICE, b64ToBuf } from "@/lib/broadcast-ice";
 import {
   joinBoothStream,
@@ -10,16 +10,20 @@ import {
 } from "@/lib/stream-api";
 import { getViewerId } from "@/lib/viewer-id";
 import { registerWatchEl } from "@/lib/watch-media";
+import { useLiveTransport } from "@/hooks/use-live-transport";
+import { useWatchLiveKit } from "@/hooks/use-watch-livekit";
+import type { WatchStatus } from "@/hooks/watch-status";
 
-export type WatchStatus = "connecting" | "live" | "audio" | "blocked" | "ended" | "full";
+export type { WatchStatus };
 
 export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
-  const [status, setStatus] = useState<WatchStatus>("connecting");
-  const [remote, setRemote] = useState<MediaStream | null>(null);
+  const transport = useLiveTransport();
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const pcRef = useRef<RTCPeerConnection | null>(null);
-  const webrtcLive = useRef(false);
+  const meshOn = enabled && transport.mesh;
+  const livekitOn = enabled && transport.livekit;
+  const mesh = useWatchMesh(liveId, meshOn, videoRef, audioRef);
+  const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
 
   useEffect(() => {
     const node = videoRef.current;
@@ -32,6 +36,38 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     if (!node) return;
     return registerWatchEl(node);
   }, []);
+
+  if (transport.livekit || transport.error) {
+    return {
+      status: (transport.error ? "ended" : livekit.status) as WatchStatus,
+      remote: livekit.remote,
+      videoRef,
+      audioRef,
+      error: transport.error ?? livekit.error ?? null,
+      unlock: livekit.unlock,
+    };
+  }
+
+  return {
+    status: mesh.status,
+    remote: mesh.remote,
+    videoRef,
+    audioRef,
+    error: null as string | null,
+    unlock: mesh.unlock,
+  };
+}
+
+function useWatchMesh(
+  liveId: string | null,
+  enabled: boolean,
+  videoRef: RefObject<HTMLVideoElement | null>,
+  audioRef: RefObject<HTMLAudioElement | null>,
+) {
+  const [status, setStatus] = useState<WatchStatus>("connecting");
+  const [remote, setRemote] = useState<MediaStream | null>(null);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const webrtcLive = useRef(false);
 
   useEffect(() => {
     if (!liveId || !enabled) return;
@@ -217,5 +253,12 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     };
   }, [liveId, enabled]);
 
-  return { status, remote, videoRef, audioRef };
+  function unlock() {
+    const v = videoRef.current;
+    const a = audioRef.current;
+    void v?.play().catch(() => setStatus("blocked"));
+    void a?.play().catch(() => setStatus("blocked"));
+  }
+
+  return { status, remote, videoRef, audioRef, unlock };
 }

@@ -113,7 +113,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const startLiveLocal = useLibrary((s) => s.startLive);
   const stopLiveLocal = useLibrary((s) => s.stopLive);
   const ownLive = useLibrary((s) => s.ownLive);
-  useHostBroadcast(ownLive?.id ?? null);
+  const host = useHostBroadcast(ownLive?.id ?? null);
   const setName = useLibrary((s) => s.setName);
   const playLive = usePlayer((s) => s.playLive);
   const stop = usePlayer((s) => s.stop);
@@ -157,13 +157,18 @@ function BoothStudio({ featured }: { featured: boolean }) {
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         video: wantCam ? { facingMode: "user", width: { ideal: 1280 } } : false,
-        audio: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
       });
       setBoothStream(s);
       setPreviewOn(true);
       setMediaError(null);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
+        videoRef.current.muted = true;
         await videoRef.current.play().catch(() => {});
       }
       return s;
@@ -308,7 +313,15 @@ function BoothStudio({ featured }: { featured: boolean }) {
                 <button
                   type="button"
                   aria-label={micOn ? "Mic off" : "Mic on"}
-                  onClick={() => setMicOn((v) => !v)}
+                  onClick={() => {
+                    setMicOn((v) => {
+                      const next = !v;
+                      getBoothStream()?.getAudioTracks().forEach((t) => {
+                        t.enabled = next;
+                      });
+                      return next;
+                    });
+                  }}
                   className="flex size-11 items-center justify-center rounded-full bg-raised/90"
                 >
                   {micOn ? <Mic className="size-4" /> : <MicOff className="size-4 text-muted" />}
@@ -318,6 +331,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
             </div>
           </div>
           {mediaError ? <p className="mt-2 text-xs text-muted">{mediaError}</p> : null}
+          {host.error ? <p className="mt-2 text-sm text-live">{host.error}</p> : null}
         </div>
 
         <form onSubmit={onLive} className="rounded-sm border border-border bg-surface p-5">

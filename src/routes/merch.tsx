@@ -7,12 +7,15 @@ import { FEATURED_CONTROLLERS, UK_DJ_SHOPS, shopById, shopHref } from "@/lib/dj-
 import { startMerch } from "@/lib/merch-api";
 import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
+import { useTillStatus } from "@/lib/use-billing";
 
 export const Route = createFileRoute("/merch")({ component: MerchPage });
 
 export function MerchPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const till = useTillStatus();
+  const sellOpen = Boolean(till.loaded && till.stripe);
 
   async function buy(sku: string) {
     setBusy(sku);
@@ -23,10 +26,10 @@ export function MerchPage() {
         window.location.assign(result.url);
         return;
       }
-      setError("Checkout did not open. Stripe keys still need to be live.");
+      setError("Checkout did not open. Coming soon.");
     } catch (err) {
       const raw = err instanceof Error ? err.message : "";
-      if (/STRIPE/i.test(raw)) setError("Stripe is not live yet. Add the keys, then this button takes the card.");
+      if (/STRIPE/i.test(raw)) setError("Factory print checkout is coming soon.");
       else setError("Checkout failed. Try again.");
     } finally {
       setBusy(null);
@@ -135,8 +138,12 @@ export function MerchPage() {
               <p className="mt-1 text-sm text-muted">{item.blurb}</p>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
-                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
-                  {busy === item.id ? "Opening…" : "Buy"}
+                <Button
+                  size="sm"
+                  disabled={!sellOpen || busy === item.id}
+                  onClick={() => void buy(item.id)}
+                >
+                  {!sellOpen ? "Coming soon" : busy === item.id ? "Opening…" : "Buy"}
                 </Button>
               </div>
             </div>

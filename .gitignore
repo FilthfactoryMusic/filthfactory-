@@ -1,1 +1,6 @@
 /filthfactory-github.zip
+node_modules
+.env
+.env.local
+.env.*.local
+
