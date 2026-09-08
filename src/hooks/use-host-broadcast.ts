@@ -13,11 +13,12 @@ import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export function useHostBroadcast(liveId: string | null) {
   const transport = useLiveTransport();
-  const mesh = useHostMesh(transport.mesh ? liveId : null);
   const livekit = useHostLiveKit(liveId, transport.livekit);
+  const livekitDown = Boolean(livekit.error);
+  const mesh = useHostMesh(transport.mesh || livekitDown ? liveId : null);
   return {
-    viewers: transport.livekit ? livekit.viewers : mesh.viewers,
-    error: transport.error ?? livekit.error ?? null,
+    viewers: transport.livekit && !livekitDown ? livekit.viewers : mesh.viewers,
+    error: livekitDown ? null : (transport.error ?? livekit.error ?? null),
   };
 }
 
