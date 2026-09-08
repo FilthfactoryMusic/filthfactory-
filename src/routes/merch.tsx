@@ -241,6 +241,10 @@ export function MerchPage() {
         <Link to="/ops" className="underline underline-offset-2">
           Ops desk
         </Link>
+        {" · "}
+        <Link to="/team" className="underline underline-offset-2">
+          Firm
+        </Link>
       </p>
     </main>
   );

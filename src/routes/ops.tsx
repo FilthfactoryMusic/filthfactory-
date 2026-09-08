@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BrandedText } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,10 @@ function OpsPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-muted">Filthfactory ops</p>
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Approve</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted">
-        Design gather, price check, print partner, QC. Bots recommend. You tap OK. Nothing ships until you do.
+        Design gather, price check, print partner, QC. Bots recommend. You tap OK. Nothing ships until you do.{" "}
+        <Link to="/desk" className="underline underline-offset-2">
+          Chief of staff
+        </Link>
       </p>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
