@@ -93,7 +93,7 @@ export const authConfigured =
 // the broker's preview client accepts.
 const explicitBaseURL =
   env("BETTER_AUTH_URL") ??
-  (env("VERCEL") ? "https://www.filthfactory.co.uk" : undefined);
+  (env("VERCEL_ENV") === "production" ? "https://www.filthfactory.co.uk" : undefined);
 // Explicit `string[]` (not a readonly tuple) — Better Auth's DynamicBaseURLConfig
 // requires a mutable `allowedHosts: string[]`.
 const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS];
@@ -110,6 +110,8 @@ const PRODUCTION_ORIGINS: string[] = [
   "https://filthfactory.co.uk",
   "https://filthfactory.vercel.app",
 ];
+const VERCEL_PREVIEW_HOSTS: string[] = ["*.vercel.app"];
+const VERCEL_PREVIEW_ORIGINS: string[] = ["https://*.vercel.app"];
 const baseURL = explicitBaseURL ?? {
   // Include loopback hosts so dynamic baseURL resolves for local email/password
   // (not only the preview wildcard).
@@ -121,6 +123,7 @@ const baseURL = explicitBaseURL ?? {
     "www.filthfactory.co.uk",
     "filthfactory.co.uk",
     "filthfactory.vercel.app",
+    "*.vercel.app",
   ],
   // `auto` → trust both http:// and https:// expansions of allowedHosts
   // (preview is https; local dev is http).
@@ -131,12 +134,14 @@ const baseURL = explicitBaseURL ?? {
 // Origins Better Auth accepts on credentialed POSTs (sign-up/sign-in, etc.).
 // Missing entries here surface as FORBIDDEN "Invalid origin".
 const trustedOrigins: string[] = explicitBaseURL
-  ? [explicitBaseURL, ...PRODUCTION_ORIGINS, ...LOCAL_DEV_ORIGINS]
+  ? [explicitBaseURL, ...PRODUCTION_ORIGINS, ...VERCEL_PREVIEW_ORIGINS, ...LOCAL_DEV_ORIGINS]
   : [
       // Host wildcards (matched against Origin's host)
       ...previewAllowedHosts,
+      ...VERCEL_PREVIEW_HOSTS,
       // Full-origin wildcards (matched against Origin)
       ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
+      ...VERCEL_PREVIEW_ORIGINS,
       ...PRODUCTION_ORIGINS,
       ...LOCAL_DEV_ORIGINS,
     ];
