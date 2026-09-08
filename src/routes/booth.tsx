@@ -52,7 +52,7 @@ function BoothMemberGate() {
   const billing = useMyBilling();
   const [unlocking, setUnlocking] = useState(false);
   const [unlockErr, setUnlockErr] = useState<string | null>(null);
-  if (billing.loading || unlocking) return <BoothLoading copy="Checking your membership…" />;
+  if (billing.loading && !billing.member) return <BoothLoading copy="Checking your membership…" />;
   if (!billing.member) {
     return (
       <div className="mx-auto max-w-md py-8 text-center">
@@ -64,6 +64,7 @@ function BoothMemberGate() {
         <button
           type="button"
           className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-sm bg-live px-5 text-sm font-semibold text-live-fg"
+          disabled={unlocking}
           onClick={() => {
             setUnlocking(true);
             setUnlockErr(null);
@@ -76,7 +77,7 @@ function BoothMemberGate() {
               .finally(() => setUnlocking(false));
           }}
         >
-          I already paid — unlock
+          {unlocking ? "Unlocking…" : "I already paid — unlock"}
         </button>
         <Link
           to="/membership"
@@ -187,12 +188,20 @@ function BoothStudio({ featured }: { featured: boolean }) {
     prev?.getTracks().forEach((t) => t.stop());
     try {
       const audio = await audioConstraints();
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: wantCam
-          ? { facingMode: { ideal: face }, width: { ideal: 1280 }, height: { ideal: 720 } }
-          : false,
-        audio,
-      });
+      let s: MediaStream;
+      try {
+        s = await navigator.mediaDevices.getUserMedia({
+          video: wantCam
+            ? { facingMode: { ideal: face }, width: { ideal: 1280 }, height: { ideal: 720 } }
+            : false,
+          audio,
+        });
+      } catch {
+        s = await navigator.mediaDevices.getUserMedia({
+          video: wantCam ? true : false,
+          audio: true,
+        });
+      }
       setBoothStream(s);
       setPreviewOn(true);
       setMediaError(null);
@@ -249,7 +258,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.includes("MEMBERSHIP")) {
-        void navigate({ to: "/membership" });
+        setLiveError("Membership didn't stick on the server. Stay here, tap I already paid — unlock.");
         return;
       }
       setLiveError(msg && !/unauthorized/i.test(msg) ? msg : "Could not go live. Sign in on www, then try again.");
@@ -295,7 +304,10 @@ function BoothStudio({ featured }: { featured: boolean }) {
       void navigate({ to: "/mix/$id", params: { id: mix.id } });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("MEMBERSHIP")) void navigate({ to: "/membership" });
+      if (msg.includes("MEMBERSHIP")) {
+        setLiveError("Membership didn't stick. Stay in the booth and tap I already paid — unlock.");
+        return;
+      }
     }
   }
 
