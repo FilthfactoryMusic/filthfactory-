@@ -16,6 +16,7 @@ import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 import { SimulcastPanel } from "@/components/simulcast-panel";
 import { UrlGatewayPanel } from "@/components/url-gateway-panel";
 import { ObsDesk } from "@/components/obs-desk";
+import { HonestyBanner } from "@/components/honesty-banner";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -95,6 +96,9 @@ function BoothGate() {
       <p className="mt-2 text-sm text-muted">
         Sign in with email, camera on, you're on air. Mixcloud ease — factory floor energy.
       </p>
+      <div className="mt-4 text-left">
+        <HonestyBanner room="booth" />
+      </div>
       <Link
         to="/login"
         search={{ redirect: "/booth" }}
@@ -340,6 +344,9 @@ function BoothStudio({ featured }: { featured: boolean }) {
             <h2 className="font-display text-2xl font-semibold uppercase tracking-wide whitespace-nowrap">Go live</h2>
           </div>
           <p className="mt-1 text-sm text-muted">Title it. One tap. You're on air.</p>
+          <div className="mt-3">
+            <HonestyBanner room="booth" />
+          </div>
           {ownLive ? (
             <div className="mt-4">
               <p className="text-sm font-medium">On air: {ownLive.title}</p>

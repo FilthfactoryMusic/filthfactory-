@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { HonestyBanner } from "@/components/honesty-banner";
 import { BrandedText } from "@/components/brand-mark";
 import { LiveCard } from "@/components/live-card";
 import { LiveDot } from "@/components/live-dot";
@@ -46,6 +47,9 @@ function LivePage() {
         <Link to="/booth" className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg">
           Go live
         </Link>
+      </div>
+      <div className="mt-4">
+        <HonestyBanner room="stations" />
       </div>
 
       {ownLive ? (

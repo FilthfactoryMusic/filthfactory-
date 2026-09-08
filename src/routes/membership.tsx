@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { MIN_AGE } from "@/lib/legal";
+import { HonestyBanner } from "@/components/honesty-banner";
 
 export const Route = createFileRoute("/membership")({ component: MembershipPage });
 
@@ -107,6 +108,9 @@ function MembershipPage() {
         Resident is {formatGbp(500)} a calendar month. Featured is {formatGbp(1500)} and advertises your live
         on Discover. Listening stays free. {VAT_NOTE}
       </p>
+      <div className="mt-4">
+        <HonestyBanner room="pay" />
+      </div>
 
       {till.loaded && !till.stripe ? (
         <p className="mt-4 rounded-sm border border-border bg-raised px-3 py-2 text-sm text-muted">

@@ -62,15 +62,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-sm">
         <div className="mx-auto flex h-24 max-w-7xl items-center gap-3 px-3 md:h-28 md:px-6">
-          <Link to="/" className="text-fg" aria-label="Filthfactory home">
+          <Link to="/" className="shrink-0 text-fg" aria-label="Filthfactory home">
             <Wordmark />
           </Link>
-          <nav className="hidden max-w-[calc(100%-12rem)] flex-wrap items-center gap-1 lg:flex">
+          <nav className="hidden min-w-0 flex-1 flex-wrap items-center gap-1 lg:flex">
             {NAV.map((item) => {
               const on =
                 pathname === item.to ||
                 (item.to === "/releases" && (pathname.startsWith("/genre") || pathname.startsWith("/charts"))) ||
                 (item.to === "/shop" && pathname.startsWith("/merch"));
+              const live = item.to === "/booth";
               const big = "big" in item && item.big;
               return (
                 <Link
@@ -79,9 +80,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className={cn(
                     "rounded-sm px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide",
                     big && "px-4 py-2 text-base",
-                    big && on && "bg-accent text-accent-fg",
-                    big && !on && "bg-raised text-fg hover:bg-accent hover:text-accent-fg",
-                    !big && (on ? "text-fg" : "text-muted hover:text-fg"),
+                    live && "bg-live px-4 text-live-fg",
+                    big && on && !live && "bg-fg text-bg",
+                    big && !on && !live && "bg-raised text-fg hover:bg-fg hover:text-bg",
+                    !big && !live && (on ? "text-fg" : "text-muted hover:text-fg"),
                   )}
                 >
                   {item.label}
@@ -119,6 +121,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           Filth Factory Music trading as Filthfactory · sole trader · UK · 18+
         </p>
         <p className="mt-1">Resident £5 / month. Gifts not on sale yet. legal@filthfactory.co.uk</p>
+        <p className="mt-1">
+          No blanket PRS or PPL licence. Only go live or drop mixes you have the rights to. Not legal advice.
+        </p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
           <Link to="/shop" className="hover:text-fg">
             Shop
@@ -182,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <MobileLink to="/school" label="School" icon={BookOpen} active={pathname.startsWith("/school")} />
           <MobileLink to="/live" label="On air" icon={Radio} active={pathname.startsWith("/live")} />
           <MobileLink to="/wow" label="WOW" icon={Sparkles} active={pathname.startsWith("/wow")} />
-          <MobileLink to="/booth" label="Go live" icon={Mic} active={pathname.startsWith("/booth")} />
+          <MobileLink to="/booth" label="Go live" icon={Mic} active={pathname.startsWith("/booth")} live />
         </div>
       </nav>
     </div>
@@ -195,23 +200,26 @@ function MobileLink({
   icon: Icon,
   active,
   big,
+  live,
 }: {
   to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases" | "/shop" | "/software" | "/school";
   label: string;
   icon: LucideIcon;
   active: boolean;
   big?: boolean;
+  live?: boolean;
 }) {
   return (
     <Link
       to={to}
       className={cn(
         "flex h-16 flex-col items-center justify-center gap-0.5 px-0.5 text-center font-display text-[10px] font-semibold uppercase leading-tight tracking-wide",
-        big && "bg-accent/15 font-display font-semibold uppercase tracking-wide",
-        active && big && "bg-accent text-accent-fg",
-        active && !big && "text-fg",
-        !active && !big && "text-muted",
-        !active && big && "text-fg",
+        big && "bg-raised font-display font-semibold uppercase tracking-wide",
+        live && "bg-live text-live-fg",
+        active && big && !live && "bg-fg text-bg",
+        active && !big && !live && "text-fg",
+        !active && !big && !live && "text-muted",
+        !active && big && !live && "text-fg",
       )}
     >
       <Icon className="size-5" />
