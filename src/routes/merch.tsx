@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { BrandedText } from "@/components/brand-mark";
-import { FACTORY_MERCH, SPOOF_MERCH, CAMO_MERCH, LABEL_INSTAGRAM, instagramUrl } from "@/lib/merch";
+import { FACTORY_MERCH, SPOOF_MERCH, CAMO_MERCH, CLASH_MERCH, LABEL_INSTAGRAM, instagramUrl, tagFor, type MerchSku } from "@/lib/merch";
 import { UK_BASS_LABELS } from "@/lib/uk-bass-labels";
 import { FEATURED_CONTROLLERS, UK_DJ_SHOPS, shopById, shopHref } from "@/lib/dj-shops";
 import { startMerch } from "@/lib/merch-api";
@@ -9,6 +9,41 @@ import { Button } from "@/components/ui/button";
 import { formatGbp } from "@/lib/utils";
 
 export const Route = createFileRoute("/merch")({ component: MerchPage });
+
+function MerchCard({
+  item,
+  busy,
+  onBuy,
+}: {
+  item: MerchSku;
+  busy: string | null;
+  onBuy: (id: string) => void;
+}) {
+  const [view, setView] = useState<"piece" | "tag">("piece");
+  const tag = item.tag ?? tagFor(item.kind, item.color);
+  const src = view === "tag" ? tag : item.image;
+  return (
+    <article className="overflow-hidden rounded-lg border border-border bg-surface">
+      <button type="button" className="relative block w-full" onClick={() => setView(view === "piece" ? "tag" : "piece")}>
+        <img src={src} alt={view === "tag" ? `${item.name} clothing tag` : `${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
+        <span className="absolute bottom-2 right-2 rounded-sm bg-bg/80 px-2 py-1 font-display text-[10px] font-semibold uppercase tracking-wide">
+          {view === "tag" ? "Tag" : "Tap for tag"}
+        </span>
+      </button>
+      <div className="p-4">
+        <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
+        <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
+        <p className="mt-1 text-sm text-muted">{item.blurb}</p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
+          <Button size="sm" disabled={busy === item.id} onClick={() => onBuy(item.id)}>
+            {busy === item.id ? "Opening…" : "Buy"}
+          </Button>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export function MerchPage() {
   const [busy, setBusy] = useState<string | null>(null);
@@ -39,14 +74,6 @@ export function MerchPage() {
       <h1 className="mt-2 font-display text-4xl font-semibold uppercase tracking-wide">Shop</h1>
       <p className="mt-3 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
         Controllers from UK desks. Factory print. Label merch.
-      </p>
-      <p className="mt-4">
-        <Link
-          to="/drafts"
-          className="inline-flex h-11 items-center rounded-sm bg-accent px-4 font-display text-sm font-semibold uppercase tracking-wide text-accent-fg"
-        >
-          View design drafts — not on sale
-        </Link>
       </p>
 
       <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">DJ controllers</h2>
@@ -128,51 +155,45 @@ export function MerchPage() {
         ))}
       </div>
 
+      <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Warehouse</h2>
+      <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        Jungle, workwear, xerox. Not neon bikini.
+      </p>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {CLASH_MERCH.map((item) => (
+          <MerchCard key={item.id} item={item} busy={busy} onBuy={buy} />
+        ))}
+      </div>
+
+      <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Drip</h2>
+      <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
+        Your FILTH FACTORY letters. Thick black outline. Tees and hoodies.
+      </p>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {FACTORY_MERCH.filter((i) => i.id.startsWith("drip-")).map((item) => (
+          <MerchCard key={item.id} item={item} busy={busy} onBuy={buy} />
+        ))}
+      </div>
+
       <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Factory print</h2>
       <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
-        Circle stamp, drip letters, original factory mark. Black, white, olive. Mug stays. UK post.
+        Circle stamp, drip letters, original factory mark. Colourways. Clothing tags. UK post.
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FACTORY_MERCH.map((item) => (
-          <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
-            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
-            <div className="p-4">
-              <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
-              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
-              <p className="mt-1 text-sm text-muted">{item.blurb}</p>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
-                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
-                  {busy === item.id ? "Opening…" : "Buy"}
-                </Button>
-              </div>
-            </div>
-          </article>
+        {FACTORY_MERCH.filter((i) => !i.id.startsWith("drip-")).map((item) => (
+          <MerchCard key={item.id} item={item} busy={busy} onBuy={buy} />
         ))}
       </div>
       {error ? <p className="mt-4 text-sm text-accent">{error}</p> : null}
 
       <h2 className="mt-14 font-display text-2xl font-semibold uppercase tracking-wide">Jungle camo</h2>
       <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase tracking-wide text-muted">
-        Woodland and tiger. FILTH / FACTORY graffiti.
+        Woodland and snow. Drip FILTH FACTORY.
       </p>
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {CAMO_MERCH.map((item) => (
-          <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
-            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
-            <div className="p-4">
-              <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
-              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
-              <p className="mt-1 text-sm text-muted">{item.blurb}</p>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
-                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
-                  {busy === item.id ? "Opening…" : "Buy"}
-                </Button>
-              </div>
-            </div>
-          </article>
+          <MerchCard key={item.id} item={item} busy={busy} onBuy={buy} />
         ))}
       </div>
 
@@ -182,20 +203,7 @@ export function MerchPage() {
       </p>
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {SPOOF_MERCH.map((item) => (
-          <article key={item.id} className="overflow-hidden rounded-lg border border-border bg-surface">
-            <img src={item.image} alt={`${item.name} ${item.color}`} className="aspect-square w-full bg-white object-contain" />
-            <div className="p-4">
-              <h2 className="font-display text-xl font-semibold uppercase tracking-wide">{item.name}</h2>
-              <p className="mt-0.5 text-xs uppercase tracking-widest text-muted">{item.color}</p>
-              <p className="mt-1 text-sm text-muted">{item.blurb}</p>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium">{formatGbp(item.pence)}</p>
-                <Button size="sm" disabled={busy === item.id} onClick={() => void buy(item.id)}>
-                  {busy === item.id ? "Opening…" : "Buy"}
-                </Button>
-              </div>
-            </div>
-          </article>
+          <MerchCard key={item.id} item={item} busy={busy} onBuy={buy} />
         ))}
       </div>
 
@@ -228,6 +236,10 @@ export function MerchPage() {
         <BrandedText text="Hardware is theirs. Factory print is ours." />{" "}
         <Link to="/terms" className="underline underline-offset-2">
           Terms
+        </Link>
+        {" · "}
+        <Link to="/ops" className="underline underline-offset-2">
+          Ops desk
         </Link>
       </p>
     </main>

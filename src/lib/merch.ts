@@ -19,71 +19,79 @@ export type MerchSku = {
   kind: MerchKind;
   color: string;
   swatch: string;
+  tag?: string;
 };
 
-const V = "line3";
+const V = "line10";
+const T = "tag1";
 
-export const FACTORY_MERCH: MerchSku[] = [
-  { id: "sil-tee-black", name: "Factory tee", blurb: "Original factory mark. White on black.", pence: 2000, image: `/art/merch/sil-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "sil-tee-white", name: "Factory tee", blurb: "Original factory mark. Black on white.", pence: 2000, image: `/art/merch/sil-tee-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "sil-tee-olive", name: "Factory tee", blurb: "Original factory mark. Black on olive.", pence: 2000, image: `/art/merch/sil-tee-olive.jpg?v=${V}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
-  { id: "sil-hoodie-black", name: "Factory hoodie", blurb: "Original factory mark. White on black.", pence: 4500, image: `/art/merch/sil-hoodie-black.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
-  { id: "sil-hoodie-white", name: "Factory hoodie", blurb: "Original factory mark. Black on white.", pence: 4500, image: `/art/merch/sil-hoodie-white.jpg?v=${V}`, kind: "hoodie", color: "White", swatch: "#f4f4f0" },
-  { id: "sil-hoodie-olive", name: "Factory hoodie", blurb: "Original factory mark. Black on olive.", pence: 4500, image: `/art/merch/sil-hoodie-olive.jpg?v=${V}`, kind: "hoodie", color: "Olive", swatch: "#5c5a3a" },
-  { id: "drip-tee-black", name: "Drip tee", blurb: "FILTH FACTORY bubble letters. White on black.", pence: 2000, image: `/art/merch/drip-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "drip-tee-olive", name: "Drip tee", blurb: "FILTH FACTORY bubble letters. White on olive.", pence: 2000, image: `/art/merch/drip-tee-olive.jpg?v=${V}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
-  { id: "drip-hoodie-black", name: "Drip hoodie", blurb: "FILTH FACTORY bubble letters. White on black.", pence: 4500, image: `/art/merch/drip-hoodie-black.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
-  { id: "tee-black", name: "Stamp tee", blurb: "Circle stamp, chest. Black blank.", pence: 2000, image: `/art/merch/tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "tee-white", name: "Stamp tee", blurb: "Circle stamp, chest. White blank.", pence: 2000, image: `/art/merch/tee-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "hoodie-black", name: "Stamp hoodie", blurb: "Circle stamp, chest. Black blank.", pence: 4500, image: `/art/merch/hoodie-black.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
-  { id: "hoodie-white", name: "Stamp hoodie", blurb: "Circle stamp, chest. White blank.", pence: 4500, image: `/art/merch/hoodie-white.jpg?v=${V}`, kind: "hoodie", color: "White", swatch: "#f4f4f0" },
-  { id: "hoodie-olive", name: "Stamp hoodie", blurb: "Circle stamp, chest. Olive blank.", pence: 4500, image: `/art/merch/stamp-hoodie-olive.jpg?v=${V}`, kind: "hoodie", color: "Olive", swatch: "#5c5a3a" },
-  { id: "beanie-black", name: "Stamp beanie", blurb: "Circle stamp on the cuff.", pence: 1800, image: `/art/merch/beanie.jpg?v=${V}`, kind: "beanie", color: "Black", swatch: "#111111" },
-  { id: "snapback-black", name: "Stamp cap", blurb: "Circle stamp, front. Black snapback.", pence: 2500, image: `/art/merch/snapback-black.jpg?v=${V}`, kind: "snapback", color: "Black", swatch: "#111111" },
-  { id: "tote-black", name: "Stamp tote", blurb: "Circle stamp, one side.", pence: 1500, image: `/art/merch/tote.jpg?v=${V}`, kind: "tote", color: "Black", swatch: "#111111" },
-  { id: "mug-black", name: "Stamp mug", blurb: "Circle stamp on a black mug.", pence: 1400, image: `/art/merch/mug.jpg?v=${V}`, kind: "mug", color: "Black", swatch: "#111111" },
-  { id: "lighter-black", name: "Stamp lighter", blurb: "Circle stamp on a black case.", pence: 1200, image: `/art/merch/lighter.jpg?v=${V}`, kind: "lighter", color: "Black", swatch: "#111111" },
-  { id: "badge", name: "Stamp badge", blurb: "Enamel disc. The circle.", pence: 600, image: `/art/merch/badge.jpg?v=${V}`, kind: "badge", color: "Steel", swatch: "#c4c4c0" },
-  { id: "stickers", name: "Stamp stickers", blurb: "Die-cut circle pack.", pence: 500, image: `/art/merch/stickers.jpg?v=${V}`, kind: "sticker", color: "Pack", swatch: "#111111" },
-  { id: "keyring", name: "Stamp keyring", blurb: "Metal disc. The circle on your keys.", pence: 800, image: `/art/merch/keyring.jpg?v=${V}`, kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
+export function tagFor(kind: MerchKind, color: string) {
+  if (kind === "beanie" || kind === "snapback") return `/art/merch/tags/beanie.jpg?v=${T}`;
+  if (kind === "hoodie") return `/art/merch/tags/hoodie-black.jpg?v=${T}`;
+  if (/white|acid|mint/i.test(color)) return `/art/merch/tags/tee-white.jpg?v=${T}`;
+  return `/art/merch/tags/tee-black.jpg?v=${T}`;
+}
+
+export const CLASH_MERCH: MerchSku[] = [
+  { id: "ug-leftchest-hoodie", name: "Left-chest hoodie", blurb: "Small factory on the left. Rest black.", pence: 4500, image: `/art/merch/ug-leftchest-hoodie.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "ug-olive-graff-hoodie", name: "Graffiti olive hoodie", blurb: "FILTHFACTORY graffiti. Olive drab.", pence: 4500, image: `/art/merch/ug-olive-graff-hoodie.jpg?v=${V}`, kind: "hoodie", color: "Olive", swatch: "#5c5a3a" },
+  { id: "ug-flyer-tee", name: "Flyer tee", blurb: "Xerox jungle flyer. Hazard yellow on black.", pence: 2000, image: `/art/merch/ug-flyer-tee.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "ug-ecru-tee", name: "Ecru factory tee", blurb: "Black factory on cream.", pence: 2000, image: `/art/merch/ug-ecru-tee.jpg?v=${V}`, kind: "tee", color: "Ecru", swatch: "#e6dfd0" },
+  { id: "ug-xerox-hoodie", name: "Xerox hoodie", blurb: "Faded FILTH. Charcoal.", pence: 4500, image: `/art/merch/ug-xerox-hoodie.jpg?v=${V}`, kind: "hoodie", color: "Charcoal", swatch: "#3a3a3a" },
+  { id: "ug-navy-stripe-hoodie", name: "Workwear hoodie", blurb: "Yellow stripe. Navy.", pence: 4500, image: `/art/merch/ug-navy-stripe-hoodie.jpg?v=${V}`, kind: "hoodie", color: "Navy", swatch: "#1a1f2e" },
+  { id: "stencil-tee-black", name: "Stencil tee", blurb: "White factory stencil. No box.", pence: 2000, image: `/art/merch/stencil-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spray-tee-black", name: "Can tee", blurb: "Spray can mark. Cropped.", pence: 2000, image: `/art/merch/spray-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
 ];
 
-const D = "d7";
+export const FACTORY_MERCH: MerchSku[] = [
+  { id: "sil-tee-black", name: "Factory tee", blurb: "Factory mark. No box.", pence: 2000, image: `/art/merch/sil-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "sil-tee-white", name: "Factory tee", blurb: "Factory mark. No box.", pence: 2000, image: `/art/merch/sil-tee-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "sil-tee-olive", name: "Factory tee", blurb: "Factory mark. No box.", pence: 2000, image: `/art/merch/sil-tee-olive.jpg?v=${V}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
+  { id: "sil-hoodie-black", name: "Factory hoodie", blurb: "Factory mark. No box.", pence: 4500, image: `/art/merch/sil-hoodie-black.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "sil-hoodie-olive", name: "Factory hoodie", blurb: "Factory mark. No box.", pence: 4500, image: `/art/merch/sil-hoodie-olive.jpg?v=${V}`, kind: "hoodie", color: "Olive", swatch: "#5c5a3a" },
+  { id: "drip-tee-black", name: "Drip tee", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 2000, image: `/art/merch/drip-tee-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "drip-tee-white", name: "Drip tee", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 2000, image: `/art/merch/drip-tee-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "drip-tee-olive", name: "Drip tee", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 2000, image: `/art/merch/drip-tee-olive.jpg?v=${V}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
+  { id: "drip-tee-navy", name: "Drip tee", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 2000, image: `/art/merch/drip-tee-navy.jpg?v=${V}`, kind: "tee", color: "Navy", swatch: "#1a1f2e" },
+  { id: "drip-hoodie-black", name: "Drip hoodie", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 4500, image: `/art/merch/drip-hoodie-black.jpg?v=${V}`, kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "drip-hoodie-olive", name: "Drip hoodie", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 4500, image: `/art/merch/drip-hoodie-olive.jpg?v=${V}`, kind: "hoodie", color: "Olive", swatch: "#5c5a3a" },
+  { id: "drip-hoodie-navy", name: "Drip hoodie", blurb: "FILTH FACTORY drip. Thick black outline.", pence: 4500, image: `/art/merch/drip-hoodie-navy.jpg?v=${V}`, kind: "hoodie", color: "Navy", swatch: "#1a1f2e" },
+  { id: "drip-hoodie-woodland", name: "Drip hoodie", blurb: "FILTH FACTORY drip. Woodland camo.", pence: 4500, image: `/art/merch/ug-camo-drip-hoodie.jpg?v=${V}`, kind: "hoodie", color: "Woodland", swatch: "#4a5a32" },
+  { id: "beanie-black", name: "Factory beanie", blurb: "Factory mark on the brim.", pence: 1800, image: `/art/merch/beanie.jpg?v=${V}`, kind: "beanie", color: "Black", swatch: "#111111" },
+  { id: "snapback-black", name: "Factory cap", blurb: "Factory mark, front.", pence: 2500, image: `/art/merch/snapback-black.jpg?v=${V}`, kind: "snapback", color: "Black", swatch: "#111111" },
+  { id: "mug-black", name: "Stamp mug", blurb: "Circle stamp on a black mug.", pence: 1400, image: `/art/merch/mug.jpg?v=${V}`, kind: "mug", color: "Black", swatch: "#111111" },
+  { id: "keyring", name: "Stamp keyring", blurb: "Metal disc.", pence: 800, image: `/art/merch/keyring.jpg?v=${V}`, kind: "keyring", color: "Steel", swatch: "#c4c4c0" },
+];
 
 export const CAMO_MERCH: MerchSku[] = [
-  { id: "camo-hoodie-woodland", name: "Jungle hoodie", blurb: "Woodland camo. FILTH / FACTORY graffiti.", pence: 4500, image: `/art/merch/drafts/13-woodland-hoodie.jpg?v=${D}`, kind: "hoodie", color: "Woodland", swatch: "#4a5a32" },
-  { id: "camo-tee-woodland", name: "Jungle tee", blurb: "Woodland camo. FILTH / FACTORY graffiti.", pence: 2000, image: `/art/merch/drafts/14-woodland-tee.jpg?v=${D}`, kind: "tee", color: "Woodland", swatch: "#4a5a32" },
-  { id: "camo-hoodie-tiger", name: "Tiger hoodie", blurb: "Tigerstripe camo. FILTH / FACTORY graffiti.", pence: 4500, image: `/art/merch/drafts/15-tiger-hoodie.jpg?v=${D}`, kind: "hoodie", color: "Tiger", swatch: "#3d4a28" },
+  { id: "camo-tee-woodland", name: "Jungle tee", blurb: "Woodland camo. Drip FILTH FACTORY.", pence: 2000, image: `/art/merch/drip-tee-woodland.jpg?v=${V}`, kind: "tee", color: "Woodland", swatch: "#4a5a32" },
 ];
 
 export const SPOOF_MERCH: MerchSku[] = [
-  { id: "spoof-brokelads-black", name: "Brokelads tee", blurb: "Bookies fascia gag. Black.", pence: 2000, image: `/art/merch/drafts/tee-brokelads-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-brokelads-white", name: "Brokelads tee", blurb: "Bookies fascia gag. White.", pence: 2000, image: `/art/merch/drafts/tee-brokelads-white.jpg?v=${D}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "spoof-crack-black", name: "Crack Converters tee", blurb: "Pawn shop gag. Black.", pence: 2000, image: `/art/merch/drafts/tee-crack-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-crack-olive", name: "Crack Converters tee", blurb: "Pawn shop gag. Olive.", pence: 2000, image: `/art/merch/drafts/tee-crack-olive.jpg?v=${D}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
-  { id: "spoof-superdrugs-white", name: "Superdrugs tee", blurb: "Chemist gag. White.", pence: 2000, image: `/art/merch/drafts/tee-superdrugs-white.jpg?v=${D}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "spoof-superdrugs-hoodie", name: "Superdrugs hoodie", blurb: "Chemist gag. White hoodie.", pence: 4500, image: `/art/merch/drafts/hoodie-superdrugs-white.jpg?v=${D}`, kind: "hoodie", color: "White", swatch: "#f4f4f0" },
-  { id: "spoof-greggs-black", name: "Greggs Afters tee", blurb: "6am meat bake. Black.", pence: 2000, image: `/art/merch/drafts/tee-greggs-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-paddy-black", name: "Paddy Powder tee", blurb: "In-play all night. Black.", pence: 2000, image: `/art/merch/drafts/tee-paddy-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-gurnoff-black", name: "Gurnoff tee", blurb: "No filter just teeth. Black.", pence: 2000, image: `/art/merch/drafts/tee-gurnoff-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-gurnoff-olive", name: "Gurnoff tee", blurb: "No filter just teeth. Olive.", pence: 2000, image: `/art/merch/drafts/tee-gurnoff-olive.jpg?v=${D}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
-  { id: "spoof-silk-black", name: "Silk Cuts tee", blurb: "Purple pack gag. Black.", pence: 2000, image: `/art/merch/drafts/tee-silk-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-silk-white", name: "Silk Cuts tee", blurb: "Purple pack gag. White.", pence: 2000, image: `/art/merch/drafts/tee-silk-white.jpg?v=${D}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "spoof-stoned-black", name: "Stoned Island tee", blurb: "4am in the car park. Black.", pence: 2000, image: `/art/merch/drafts/tee-stoned-black.jpg?v=${D}`, kind: "tee", color: "Black", swatch: "#111111" },
-  { id: "spoof-stoned-white", name: "Stoned Island tee", blurb: "4am in the car park. White.", pence: 2000, image: `/art/merch/drafts/tee-stoned-white.jpg?v=${D}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
-  { id: "spoof-stoned-olive", name: "Stoned Island tee", blurb: "4am in the car park. Olive.", pence: 2000, image: `/art/merch/drafts/tee-stoned-olive.jpg?v=${D}`, kind: "tee", color: "Olive", swatch: "#5c5a3a" },
-  { id: "spoof-stoned-hoodie", name: "Stoned Island hoodie", blurb: "4am in the car park. Black hoodie.", pence: 4500, image: `/art/merch/drafts/hoodie-stoned-black.jpg?v=${D}`, kind: "hoodie", color: "Black", swatch: "#111111" },
+  { id: "spoof-brokelads-black", name: "Brokelads tee", blurb: "Bookies fascia.", pence: 2000, image: `/art/merch/drafts/tee-brokelads-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-crack-black", name: "Crack Converters tee", blurb: "Yellow and send blue. Cropped.", pence: 2000, image: `/art/merch/spoof-crack-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-superdrugs-white", name: "Superdrugs tee", blurb: "Chemist gag.", pence: 2000, image: `/art/merch/drafts/tee-superdrugs-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-greggs-black", name: "Greggs Afters tee", blurb: "6am meat bake.", pence: 2000, image: `/art/merch/drafts/tee-greggs-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-paddy-black", name: "Paddy Powder tee", blurb: "In-play all night.", pence: 2000, image: `/art/merch/drafts/tee-paddy-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-gurnoff-black", name: "Gurnoff tee", blurb: "No filter just teeth.", pence: 2000, image: `/art/merch/drafts/tee-gurnoff-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-silk-black", name: "Silk Cuts tee", blurb: "Purple pack gag.", pence: 2000, image: `/art/merch/drafts/tee-silk-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-stoned-black", name: "Stoned Island tee", blurb: "4am in the car park.", pence: 2000, image: `/art/merch/drafts/tee-stoned-black.jpg?v=${V}`, kind: "tee", color: "Black", swatch: "#111111" },
+  { id: "spoof-weedafix-black", name: "Weedafix tee", blurb: "Breakfast of champions.", pence: 2000, image: `/art/merch/spoof-weedafix-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-dila-black", name: "Dila tee", blurb: "Navy red sports gag.", pence: 2000, image: `/art/merch/spoof-dila-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-gay-black", name: "Gay tee", blurb: "Navy square. Chest size.", pence: 2000, image: `/art/merch/spoof-gay-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-lucozed-black", name: "Lucozed tee", blurb: "Orange energy gag.", pence: 2000, image: `/art/merch/spoof-lucozed-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-faze-black", name: "North Faze tee", blurb: "Outdoor stack gag.", pence: 2000, image: `/art/merch/spoof-faze-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
+  { id: "spoof-adihash-black", name: "Adihash tee", blurb: "Three bars.", pence: 2000, image: `/art/merch/spoof-adihash-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
 ];
 
 export const DROP_SHOT = "/art/merch/drop.jpg";
 
+export function allMerch() {
+  return [...CLASH_MERCH, ...FACTORY_MERCH, ...CAMO_MERCH, ...SPOOF_MERCH];
+}
+
 export function merchById(id: string) {
-  return (
-    FACTORY_MERCH.find((m) => m.id === id) ??
-    SPOOF_MERCH.find((m) => m.id === id) ??
-    CAMO_MERCH.find((m) => m.id === id) ??
-    null
-  );
+  return allMerch().find((m) => m.id === id) ?? null;
 }
 
 /** Public Instagram profiles we link to. We do not scrape posts or sell their stock. */
