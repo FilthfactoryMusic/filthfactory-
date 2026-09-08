@@ -3,6 +3,7 @@ import { LiveDot } from "@/components/live-dot";
 import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 import { useWatchBroadcast, type WatchStatus } from "@/hooks/use-watch-broadcast";
 import { LogoStage } from "@/components/logo-stage";
+import { getBoothStream, subscribeBoothStream } from "@/lib/booth-stream";
 
 function statusCopy(s: WatchStatus) {
   if (s === "connecting") return "Connecting to the booth…";
