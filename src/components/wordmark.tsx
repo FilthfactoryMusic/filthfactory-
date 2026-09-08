@@ -9,9 +9,11 @@ export function Wordmark({ className }: { className?: string }) {
         alt=""
         className="size-12 shrink-0 rounded-full object-contain sm:size-14 md:size-14"
       />
-      <span className="ff-word font-display text-lg font-bold uppercase tracking-[0.14em] sm:text-xl md:text-2xl md:tracking-[0.16em]">
-        Filthfactory
-      </span>
+      <img
+        src="/art/brand/word-graff.png?v=graff1"
+        alt="Filthfactory"
+        className="h-8 w-auto sm:h-9 md:h-10"
+      />
     </span>
   );
 }

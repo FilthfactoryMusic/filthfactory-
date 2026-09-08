@@ -70,10 +70,13 @@ function Home() {
           <StampCdj />
           <div className="w-full max-w-xl text-center md:text-left">
             <p className="text-[10px] uppercase tracking-[0.35em] text-live-fg">18+ · UK · free to listen</p>
-            <h1 className="mt-3 font-display text-4xl font-semibold uppercase leading-[0.88] tracking-tight text-fg sm:text-5xl lg:text-6xl">
-              If it's filthy
-              <br />
-              it bangs!
+            <h1 className="mt-3">
+              <span className="sr-only">If it's filthy it bangs!</span>
+              <img
+                src="/art/brand/bangs-graff.png?v=graff1"
+                alt=""
+                className="mx-auto w-full max-w-md md:mx-0 md:max-w-lg"
+              />
             </h1>
             <p className="mx-auto mt-4 max-w-md font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted md:mx-0">
               The download shops packed up. The crate didn't. Garage, grime, bassline, 140, DnB, tech house. Tap a room. Fiver a month to go live.
