@@ -20,6 +20,9 @@ import { stopBoothLive } from "@/lib/live-api";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { LiveShow } from "@/lib/types";
 import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
+import { useLiveChat } from "@/lib/use-live-chat";
+import { publicHandle } from "@/lib/handle";
+import { stopHostRelay } from "@/lib/host-relay";
 
 export const Route = createFileRoute("/live/$id")({ component: LiveShowPage });
 
@@ -56,6 +59,8 @@ function LiveShowPage() {
   const toggleFollow = useLibrary((s) => s.toggleFollow);
   const userChat = useLibrary((s) => s.chat[id] ?? EMPTY_CHAT);
   const addChat = useLibrary((s) => s.addChat);
+  const boothEarly = id.startsWith("live-") || id.startsWith("url-");
+  const roomChat = useLiveChat(id, boothEarly);
   const [listeners, setListeners] = useState(show?.listeners ?? 0);
   const isHost = ownLive?.id === id || Boolean(user && show?.hostUserId === user.id);
   const booth = Boolean(show && isBoothBroadcast(show.id));
@@ -96,7 +101,9 @@ function LiveShowPage() {
     e.preventDefault();
     const text = String(new FormData(e.currentTarget).get("msg") ?? "").trim();
     if (!text) return;
-    addChat(id, text);
+    const name = publicHandle(user) || useLibrary.getState().displayName || "Listener";
+    if (booth) void roomChat.send(name, text);
+    else addChat(id, text);
     e.currentTarget.reset();
   }
 
@@ -110,7 +117,7 @@ function LiveShowPage() {
             hasCamera={Boolean(show.hasCamera)}
             artwork={show.artwork}
             title={show.title}
-            enabled={listening || isHost || booth}
+            enabled
             onNeedGesture={() => playLive(show.id)}
           />
         ) : (
@@ -201,6 +208,7 @@ function LiveShowPage() {
               onClick={() => {
                 stopPlayer();
                 stopLiveLocal();
+                stopHostRelay();
                 void stopBoothLive().catch(() => {});
                 void navigate({ to: "/booth" });
               }}
@@ -228,7 +236,7 @@ function LiveShowPage() {
         <aside className="flex h-80 flex-col rounded-lg border border-border bg-surface lg:min-h-96">
           <div className="border-b border-border px-4 py-3 text-sm font-medium">Live chat</div>
           <ul className="flex-1 space-y-3 overflow-y-auto p-4 text-sm">
-            {[...seeded, ...userChat].map((m) => (
+            {(booth ? roomChat.lines : [...seeded, ...userChat]).map((m) => (
               <li key={m.id}>
                 <span className="text-muted">{m.user}</span>
                 <span className="ml-2 text-fg">{m.text}</span>

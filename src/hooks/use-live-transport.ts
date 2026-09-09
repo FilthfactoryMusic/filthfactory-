@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getLiveTransport } from "@/lib/livekit-api";
-import { LIVEKIT_MISSING_MSG, type LiveTransportMode } from "@/lib/live-transport";
+import { type LiveTransportMode } from "@/lib/live-transport";
 
 let cached: { mode: LiveTransportMode; configured: boolean } | null = null;
 let inflight: Promise<{ mode: LiveTransportMode; configured: boolean }> | null = null;
@@ -35,7 +35,7 @@ export function useLiveTransport() {
         setMode(info.mode);
       })
       .catch(() => {
-        if (on) setError(LIVEKIT_MISSING_MSG);
+        if (on) setMode("mesh");
       });
     return () => {
       on = false;

@@ -19,6 +19,7 @@ import { ObsDesk } from "@/components/obs-desk";
 import { HonestyBanner } from "@/components/honesty-banner";
 import { LogoStage } from "@/components/logo-stage";
 import { publicHandle, writeHandle } from "@/lib/handle";
+import { rememberStreamKey, startHostRelay } from "@/lib/host-relay";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -252,6 +253,9 @@ function BoothStudio({ featured }: { featured: boolean }) {
           rightsConfirmed: liveRights,
         },
       });
+      const streamKey = "streamKey" in show ? String((show as { streamKey?: string }).streamKey ?? "") : "";
+      if (streamKey) rememberStreamKey(show.id, streamKey);
+      startHostRelay(show.id);
       startLiveLocal(show);
       playLive(show.id);
       void navigate({ to: "/live/$id", params: { id: show.id } });
@@ -271,6 +275,8 @@ function BoothStudio({ featured }: { featured: boolean }) {
     if (now?.kind === "live" && now.id === ownLive?.id) stop();
     stopLiveLocal();
     stopBoothStream();
+    const { stopHostRelay } = await import("@/lib/host-relay");
+    stopHostRelay();
     try {
       await stopBoothLive();
     } catch {

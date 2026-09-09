@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Compass, Cpu, Disc3, Mic, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
+import { BookOpen, Disc3, Mic, Radio, Search, type LucideIcon } from "lucide-react";
 import { useEffect, type FormEvent, type ReactNode } from "react";
 import { PlayerBar } from "@/components/player-bar";
 import { Wordmark } from "@/components/wordmark";
@@ -12,21 +12,44 @@ import { usePlayer } from "@/lib/player-store";
 import { isLegalPath } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { to: "/", label: "Home" },
-  { to: "/releases", label: "NEW RELEASES", big: true },
-  { to: "/shop", label: "SHOP", big: true },
-  { to: "/live", label: "On air" },
-  { to: "/wow", label: "WOW" },
-  { to: "/software", label: "Software" },
-  { to: "/school", label: "School" },
-  { to: "/trade", label: "Trade" },
-  { to: "/charts", label: "Charts" },
-  { to: "/library", label: "Crate" },
-  { to: "/booth", label: "Go live" },
-  { to: "/open", label: "Open" },
-  { to: "/membership", label: "£5" },
-] as const;
+const PILLARS = [
+  {
+    to: "/live" as const,
+    label: "Radio & Live",
+    short: "Radio",
+    icon: Radio,
+    match: (p: string) => p.startsWith("/live") || p.startsWith("/wow"),
+  },
+  {
+    to: "/releases" as const,
+    label: "Library & Crate",
+    short: "Crate",
+    icon: Disc3,
+    match: (p: string) =>
+      p.startsWith("/releases") ||
+      p.startsWith("/library") ||
+      p.startsWith("/charts") ||
+      p.startsWith("/genre") ||
+      p.startsWith("/shop") ||
+      p.startsWith("/merch") ||
+      p.startsWith("/search"),
+  },
+  {
+    to: "/school" as const,
+    label: "Education & Tools",
+    short: "School",
+    icon: BookOpen,
+    match: (p: string) => p.startsWith("/school") || p.startsWith("/software") || p.startsWith("/trade"),
+  },
+  {
+    to: "/booth" as const,
+    label: "Booth & Membership",
+    short: "Booth",
+    icon: Mic,
+    live: true,
+    match: (p: string) => p.startsWith("/booth") || p.startsWith("/membership") || p.startsWith("/login"),
+  },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -61,32 +84,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-24 max-w-7xl items-center gap-3 px-3 md:h-28 md:px-6">
+        <div className="mx-auto flex h-20 max-w-7xl items-center gap-3 px-3 md:h-24 md:px-6">
           <Link to="/" className="shrink-0 text-fg" aria-label="Filthfactory home">
             <Wordmark />
           </Link>
-          <nav className="hidden min-w-0 flex-1 flex-wrap items-center gap-1 lg:flex">
-            {NAV.map((item) => {
-              const on =
-                pathname === item.to ||
-                (item.to === "/releases" && (pathname.startsWith("/genre") || pathname.startsWith("/charts"))) ||
-                (item.to === "/shop" && pathname.startsWith("/merch"));
-              const live = item.to === "/booth";
-              const big = "big" in item && item.big;
+          <nav className="hidden min-w-0 flex-1 items-center gap-1 sm:flex">
+            {PILLARS.map((item) => {
+              const on = item.match(pathname);
               return (
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-label={item.label}
                   className={cn(
-                    "rounded-sm px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide",
-                    big && "px-4 py-2 text-base",
-                    live && "bg-live px-4 text-live-fg",
-                    big && on && !live && "bg-fg text-bg",
-                    big && !on && !live && "bg-raised text-fg hover:bg-fg hover:text-bg",
-                    !big && !live && (on ? "text-fg" : "text-muted hover:text-fg"),
+                    "rounded-sm px-3 py-2.5 font-display text-xs font-semibold uppercase tracking-wide md:text-sm",
+                    item.live && "bg-live px-4 text-live-fg",
+                    !item.live && on && "bg-fg text-bg",
+                    !item.live && !on && "text-muted hover:text-fg",
                   )}
                 >
-                  {item.label}
+                  <span className="hidden lg:inline">{item.label}</span>
+                  <span className="lg:hidden">{item.short}</span>
                 </Link>
               );
             })}
@@ -97,12 +115,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Input name="q" placeholder="Find a mix, a DJ, a city" className="h-10 pl-9" />
             </div>
           </form>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <div className="ml-auto flex items-center gap-2 sm:ml-0">
             <AuthSlot />
             <Link
               to="/search"
               search={{ q: "" }}
-              className="flex size-11 items-center justify-center text-muted xl:hidden"
+              className="ff-hit text-muted xl:hidden"
               aria-label="Search"
             >
               <Search className="size-5" />
@@ -111,11 +129,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className={cn("mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8", now ? "pb-36 md:pb-28" : "pb-24")}>
+      <main
+        className={cn(
+          "mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8",
+          now ? "pb-[calc(9.5rem+env(safe-area-inset-bottom))] md:pb-28" : "pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-24",
+        )}
+      >
         {children}
       </main>
 
-      <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs text-faint md:px-6 md:pb-10">
+      <footer className="mx-auto max-w-7xl px-4 pb-28 text-xs text-faint md:px-6 md:pb-10">
         <p className="flex items-center gap-2">
           <img src="/art/brand/logo.png" alt="" className="size-5 rounded-full object-cover" />
           Filth Factory Music trading as Filthfactory · sole trader · UK · 18+
@@ -131,14 +154,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/software" className="hover:text-fg">
             DJ software
           </Link>
-          <Link to="/school" className="hover:text-fg">
-            School
-          </Link>
-          <Link to="/trade" className="hover:text-fg">
-            Trade
+          <Link to="/library" className="hover:text-fg">
+            Crate
           </Link>
           <Link to="/wow" className="hover:text-fg">
             Who's On What
+          </Link>
+          <Link to="/membership" className="hover:text-fg">
+            Membership
           </Link>
           <Link to="/privacy" className="hover:text-fg">
             Privacy
@@ -166,28 +189,19 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!legal ? <AgeGate /> : null}
       {!legal ? <CookieNotice /> : null}
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
-        <div className="grid grid-cols-8">
-          <MobileLink to="/" label="Home" icon={Compass} active={pathname === "/"} />
-          <MobileLink
-            to="/releases"
-            label="NEW RELEASES"
-            icon={Disc3}
-            active={pathname.startsWith("/releases") || pathname.startsWith("/charts") || pathname.startsWith("/genre")}
-            big
-          />
-          <MobileLink
-            to="/shop"
-            label="SHOP"
-            icon={ShoppingBag}
-            active={pathname.startsWith("/shop") || pathname.startsWith("/merch")}
-            big
-          />
-          <MobileLink to="/software" label="SOFT" icon={Cpu} active={pathname.startsWith("/software")} />
-          <MobileLink to="/school" label="School" icon={BookOpen} active={pathname.startsWith("/school")} />
-          <MobileLink to="/live" label="On air" icon={Radio} active={pathname.startsWith("/live")} />
-          <MobileLink to="/wow" label="WOW" icon={Sparkles} active={pathname.startsWith("/wow")} />
-          <MobileLink to="/booth" label="Go live" icon={Mic} active={pathname.startsWith("/booth")} live />
+      <nav className="ff-tab-bar fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface sm:hidden">
+        <div className="grid grid-cols-4">
+          {PILLARS.map((item) => (
+            <MobileLink
+              key={item.to}
+              to={item.to}
+              label={item.short}
+              ariaLabel={item.label}
+              icon={item.icon}
+              active={item.match(pathname)}
+              live={item.live}
+            />
+          ))}
         </div>
       </nav>
     </div>
@@ -197,41 +211,31 @@ export function AppShell({ children }: { children: ReactNode }) {
 function MobileLink({
   to,
   label,
+  ariaLabel,
   icon: Icon,
   active,
-  big,
   live,
 }: {
-  to: "/" | "/live" | "/booth" | "/library" | "/wow" | "/releases" | "/shop" | "/software" | "/school";
+  to: "/live" | "/booth" | "/releases" | "/school";
   label: string;
+  ariaLabel: string;
   icon: LucideIcon;
   active: boolean;
-  big?: boolean;
   live?: boolean;
 }) {
   return (
     <Link
       to={to}
+      aria-label={ariaLabel}
       className={cn(
-        "flex h-16 flex-col items-center justify-center gap-0.5 px-0.5 text-center font-display text-[10px] font-semibold uppercase leading-tight tracking-wide",
-        big && "bg-raised font-display font-semibold uppercase tracking-wide",
+        "flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-center font-display text-[10px] font-semibold uppercase leading-tight tracking-wide",
         live && "bg-live text-live-fg",
-        active && big && !live && "bg-fg text-bg",
-        active && !big && !live && "text-fg",
-        !active && !big && !live && "text-muted",
-        !active && big && !live && "text-fg",
+        active && !live && "text-fg",
+        !active && !live && "text-muted",
       )}
     >
       <Icon className="size-5" />
-      {big && label === "NEW RELEASES" ? (
-        <span className="leading-[1.05]">
-          NEW
-          <br />
-          RELEASES
-        </span>
-      ) : (
-        label
-      )}
+      {label}
     </Link>
   );
 }

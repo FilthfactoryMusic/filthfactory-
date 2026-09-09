@@ -13,12 +13,24 @@ export const ICE: RTCConfiguration = {
   ],
 };
 
+function isApple() {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent));
+}
+
+/** Safari/iOS likes mp4. Chrome/Edge like webm. */
 export function pickRecorderMime(stream: MediaStream) {
   const hasVideo = stream.getVideoTracks().some((t) => t.readyState === "live");
-  const list = hasVideo
-    ? ["video/webm;codecs=vp8,opus", "video/webm;codecs=vp9,opus", "video/webm"]
-    : ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
-  return list.find((t) => typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)) ?? "";
+  const apple = isApple();
+  const list = apple
+    ? hasVideo
+      ? ["video/mp4", "video/webm;codecs=vp8,opus", "audio/mp4", "audio/webm"]
+      : ["audio/mp4", "audio/aac", "audio/webm;codecs=opus", "audio/webm"]
+    : hasVideo
+      ? ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4", "audio/webm;codecs=opus"]
+      : ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+  if (typeof MediaRecorder === "undefined") return "";
+  return list.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
 }
 
 export function bufToB64(buf: ArrayBuffer) {

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 
-const MAX_VIEWERS = 12;
+const MAX_VIEWERS = 250;
 const MAX_PAYLOAD = 24_000;
 const STALE_MS = 20_000;
 
@@ -146,15 +146,16 @@ export const pullBoothSignals = createServerFn({ method: "POST" })
   });
 
 export const postBoothChunk = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator((d: { liveId: string; seq: number; mime: string; data: string }) => d)
-  .handler(async ({ context, data }) => {
-    if (data.data.length > 80_000) throw new Error("CHUNK_TOO_LARGE");
+  .validator((d: { liveId: string; seq: number; mime: string; data: string; streamKey?: string }) => d)
+  .handler(async ({ data }) => {
+    if (data.data.length > 180_000) throw new Error("CHUNK_TOO_LARGE");
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
+    const key = (data.streamKey ?? "").trim();
+    if (!key) throw new Error("ENDED");
     const live = (
       await sql<{ id: string }>`
-        select id from booth_lives where id = ${data.liveId} and user_id = ${context.userId}
+        select id from booth_lives where id = ${data.liveId} and stream_key = ${key}
       `
     )[0];
     if (!live) throw new Error("ENDED");
@@ -165,7 +166,7 @@ export const postBoothChunk = createServerFn({ method: "POST" })
     await sql`
       delete from booth_chunks
       where live_id = ${data.liveId}
-        and seq < ${data.seq - 40}
+        and seq < ${data.seq - 80}
     `;
   });
 
@@ -196,3 +197,46 @@ export const loadBoothLive = createServerFn({ method: "POST" })
     const row = rows[0];
     return row ? liveFromRow(row) : null;
   });
+
+export type ChatLine = { id: string; user: string; text: string; at: number };
+
+export const postLiveChat = createServerFn({ method: "POST" })
+  .validator((d: { liveId: string; user: string; text: string }) => d)
+  .handler(async ({ data }) => {
+    const text = data.text.trim().slice(0, 280);
+    const user = data.user.trim().slice(0, 32) || "Listener";
+    if (!text) return { ok: false as const };
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    const live = (await sql<{ id: string }>`select id from booth_lives where id = ${data.liveId}`)[0];
+    if (!live) throw new Error("ENDED");
+    const id = rid("chat");
+    await sql`
+      insert into booth_chat (id, live_id, user_name, body)
+      values (${id}, ${data.liveId}, ${user}, ${text})
+    `;
+    return { ok: true as const, id };
+  });
+
+export const pullLiveChat = createServerFn({ method: "POST" })
+  .validator((d: { liveId: string; after: string }) => d)
+  .handler(async ({ data }) => {
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    const rows = await sql<{ id: string; user_name: string; body: string; created_at: string }>`
+      select id, user_name, body, created_at from booth_chat
+      where live_id = ${data.liveId}
+        and created_at > ${data.after || "1970-01-01"}
+      order by created_at asc
+      limit 80
+    `;
+    return rows.map(
+      (r): ChatLine => ({
+        id: r.id,
+        user: r.user_name,
+        text: r.body,
+        at: +new Date(r.created_at),
+      }),
+    );
+  });
+

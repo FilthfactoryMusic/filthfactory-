@@ -152,13 +152,14 @@ export const startBoothLive = createServerFn({ method: "POST" })
     const id = `live-${context.userId.slice(0, 8)}-${Date.now().toString(36)}`;
     const seed = hashString(id) % 99991;
     const displayName = data.displayName.trim() || "Resident";
+    const streamKey = `${context.userId.slice(0, 8)}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     await sql`delete from booth_lives where user_id = ${context.userId}`;
     await sql`
       insert into booth_lives (
-        id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured
+        id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured, stream_key
       ) values (
         ${id}, ${context.userId}, ${displayName}, ${data.photo ?? null}, ${title}, ${genre},
-        ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, ${data.hasCamera}, 1, ${featured}
+        ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, ${data.hasCamera}, 1, ${featured}, ${streamKey}
       )
     `;
     const rows = await sql<LiveRow>`
@@ -167,7 +168,7 @@ export const startBoothLive = createServerFn({ method: "POST" })
     `;
     const row = rows[0];
     if (!row) throw new Error("Failed to go live");
-    return liveFromRow(row);
+    return { ...liveFromRow(row), streamKey };
   });
 
 export const setBoothLiveName = createServerFn({ method: "POST" })

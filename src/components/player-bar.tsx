@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Pause, Play, Radio, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Heart, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useEffect } from "react";
 import { BrandedText } from "@/components/brand-mark";
 import { Waveform } from "@/components/waveform";
@@ -7,6 +7,7 @@ import { getDj, getLive } from "@/lib/catalog";
 import { getChartMix } from "@/lib/chart-cache";
 import { resolveLive, useLibrary } from "@/lib/library-store";
 import { usePlayer } from "@/lib/player-store";
+import { useMediaSession } from "@/lib/use-media-session";
 import { formatDuration } from "@/lib/utils";
 
 export function PlayerBar() {
@@ -39,30 +40,41 @@ export function PlayerBar() {
     return () => cancelAnimationFrame(raf);
   }, [playing, tick]);
 
-  if (!now) return null;
-
   const mix =
-    now.kind === "mix"
+    now?.kind === "mix"
       ? (getChartMix(now.id) ?? uploads.find((m) => m.id === now.id))
       : undefined;
   const live =
-    now.kind === "live"
+    now?.kind === "live"
       ? (getLive(now.id) ?? resolveLive(now.id) ?? (ownLive?.id === now.id ? ownLive : undefined))
       : undefined;
   const dj = getDj((mix?.djId ?? live?.djId) as string);
-  const artwork = mix?.artwork ?? live?.artwork ?? dj?.photo ?? "";
+  const artwork = mix?.artwork ?? live?.artwork ?? dj?.photo ?? "/art/brand/logo.png";
   const title = mix?.title ?? live?.title ?? "Filthfactory";
   const seed = mix?.seed ?? live?.seed ?? 1;
   const liked = mix ? likes.includes(mix.id) : false;
 
+  useMediaSession({
+    title,
+    artist: dj?.name ?? mix?.show ?? live?.hostName ?? "Filthfactory",
+    artwork,
+    live: now?.kind === "live",
+  });
+
+  if (!now) return null;
+
   return (
-    <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border bg-surface/95 backdrop-blur-sm md:bottom-0">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-3 md:h-18 md:gap-4 md:px-6">
-        <Link to={now.kind === "mix" ? "/mix/$id" : "/live/$id"} params={{ id: now.id }} className="flex min-w-0 items-center gap-3">
-          <img src={artwork} alt="" className="size-11 rounded-sm object-cover md:size-12" />
+    <div className="ff-mini-player" role="region" aria-label="Now playing">
+      <div className="ff-mini-player__inner">
+        <Link
+          to={now.kind === "mix" ? "/mix/$id" : "/live/$id"}
+          params={{ id: now.id }}
+          className="flex min-w-0 flex-1 items-center gap-3"
+        >
+          <img src={artwork} alt="" className="size-11 rounded-sm object-cover" />
           <span className="min-w-0">
-            <span className="flex items-center gap-1.5 truncate text-sm font-medium">
-              {now.kind === "live" ? <Radio className="size-3.5 shrink-0 text-live" /> : null}
+            <span className="flex items-center gap-1.5 truncate text-sm font-medium text-fg">
+              {now.kind === "live" ? <span className="ff-live-badge">Live</span> : null}
               <BrandedText text={title} />
             </span>
             <span className="block truncate text-xs text-muted">
@@ -71,9 +83,9 @@ export function PlayerBar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 md:gap-2">
+        <div className="flex items-center">
           {now.kind === "mix" ? (
-            <button type="button" aria-label="Previous" onClick={prev} className="hidden size-11 items-center justify-center text-muted hover:text-fg md:flex">
+            <button type="button" aria-label="Previous" onClick={prev} className="ff-hit hidden text-muted hover:text-fg md:inline-flex">
               <SkipBack className="size-4 fill-current" />
             </button>
           ) : null}
@@ -81,12 +93,12 @@ export function PlayerBar() {
             type="button"
             aria-label={playing ? "Pause" : "Play"}
             onClick={toggle}
-            className="flex size-11 items-center justify-center rounded-full bg-accent text-accent-fg"
+            className="ff-hit rounded-full bg-fg text-bg"
           >
             {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
           </button>
           {now.kind === "mix" ? (
-            <button type="button" aria-label="Next" onClick={next} className="hidden size-11 items-center justify-center text-muted hover:text-fg md:flex">
+            <button type="button" aria-label="Next" onClick={next} className="ff-hit hidden text-muted hover:text-fg md:inline-flex">
               <SkipForward className="size-4 fill-current" />
             </button>
           ) : null}
@@ -103,13 +115,13 @@ export function PlayerBar() {
           <span className="w-10 text-xs text-faint tabular-nums">{formatDuration(duration)}</span>
         </div>
 
-        <div className="ml-auto flex items-center gap-1 md:ml-0">
+        <div className="flex items-center">
           {mix ? (
             <button
               type="button"
               aria-label={liked ? "Unlike" : "Like"}
               onClick={() => toggleLike(mix.id)}
-              className="flex size-11 items-center justify-center text-muted hover:text-fg"
+              className="ff-hit text-muted hover:text-fg"
             >
               <Heart className={`size-4 ${liked ? "fill-live text-live" : ""}`} />
             </button>
@@ -118,7 +130,7 @@ export function PlayerBar() {
             type="button"
             aria-label={muted ? "Unmute" : "Mute"}
             onClick={toggleMute}
-            className="hidden size-11 items-center justify-center text-muted hover:text-fg md:flex"
+            className="ff-hit hidden text-muted hover:text-fg md:inline-flex"
           >
             {muted || volume === 0 ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
           </button>
@@ -136,7 +148,7 @@ export function PlayerBar() {
       </div>
       <div className="h-1 bg-border md:hidden">
         <div
-          className="h-full bg-accent"
+          className="h-full bg-fg"
           style={{ width: `${duration ? Math.min(100, (currentTime / duration) * 100) : 0}%` }}
         />
       </div>

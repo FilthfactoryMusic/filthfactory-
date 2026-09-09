@@ -83,6 +83,61 @@
   border: 0;
 }
 
+.ff-mini-player {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  background: #0a0a0a;
+  border-top: 1px solid #2a2a2a;
+  color: #f4f4f0;
+}
+
+.ff-mini-player__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0.35rem 0.75rem;
+}
+
+.ff-hit {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ff-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #c4453c;
+  color: #fff6f4;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  border-radius: 2px;
+}
+
+.ff-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 768px) {
+  .ff-mini-player {
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
 @keyframes live-pulse {
   0%,
   100% {

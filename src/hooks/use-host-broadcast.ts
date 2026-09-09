@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { getBoothStream, subscribeBoothStream } from "@/lib/booth-stream";
-import { ICE, bufToB64, pickRecorderMime } from "@/lib/broadcast-ice";
+import { ICE } from "@/lib/broadcast-ice";
 import {
   pingBoothHost,
-  postBoothChunk,
   postBoothSignal,
   pullBoothSignals,
   type Signal,
 } from "@/lib/stream-api";
+import { startHostRelay } from "@/lib/host-relay";
 import { useHostLiveKit } from "@/hooks/use-host-livekit";
 import { useLiveTransport } from "@/hooks/use-live-transport";
 
@@ -15,7 +15,16 @@ export function useHostBroadcast(liveId: string | null) {
   const transport = useLiveTransport();
   const livekit = useHostLiveKit(liveId, transport.livekit);
   const livekitDown = Boolean(livekit.error);
-  const mesh = useHostMesh(transport.mesh || livekitDown ? liveId : null);
+  const mesh = useHostMesh(liveId);
+
+  useEffect(() => {
+    if (!liveId) return;
+    startHostRelay(liveId);
+    return () => {
+      /* keep pushing through the website until they tap End */
+    };
+  }, [liveId]);
+
   return {
     viewers: transport.livekit && !livekitDown ? livekit.viewers : mesh.viewers,
     error: livekitDown ? null : (transport.error ?? livekit.error ?? null),
@@ -46,58 +55,6 @@ function useHostMesh(liveId: string | null) {
   useEffect(() => {
     if (!liveId) return;
     const id = liveId;
-    let rec: MediaRecorder | null = null;
-    let seq = 0;
-    let dead = false;
-
-    function armRecorder(stream: MediaStream | null) {
-      rec?.stop();
-      rec = null;
-      if (!stream || dead) return;
-      const mime = pickRecorderMime(stream);
-      if (!mime || !stream.getAudioTracks().length) return;
-      try {
-        const next = new MediaRecorder(stream, {
-          mimeType: mime,
-          audioBitsPerSecond: 96_000,
-          videoBitsPerSecond: 350_000,
-        });
-        next.ondataavailable = (ev) => {
-          if (!ev.data.size || dead) return;
-          const n = seq++;
-          void ev.data
-            .arrayBuffer()
-            .then((buf) => {
-              const data = bufToB64(buf);
-              if (data.length > 78_000) return;
-              return postBoothChunk({ data: { liveId: id, seq: n, mime, data } });
-            })
-            .catch(() => {});
-        };
-        next.start(900);
-        rec = next;
-      } catch {
-        /* recorder optional — WebRTC still runs */
-      }
-    }
-
-    armRecorder(streamRef.current);
-    const unsub = subscribeBoothStream((s) => armRecorder(s));
-
-    return () => {
-      dead = true;
-      unsub();
-      try {
-        rec?.stop();
-      } catch {
-        /* already stopped */
-      }
-    };
-  }, [liveId]);
-
-  useEffect(() => {
-    if (!liveId) return;
-    const id = liveId;
     let dead = false;
 
     async function offerTo(viewerId: string) {
@@ -121,22 +78,6 @@ function useHostMesh(liveId: string | null) {
             payload: JSON.stringify(ev.candidate.toJSON()),
           },
         }).catch(() => {});
-      };
-      pc.onnegotiationneeded = () => {
-        void (async () => {
-          if (pc.signalingState !== "stable") return;
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          await postBoothSignal({
-            data: {
-              liveId: id,
-              viewerId,
-              fromRole: "host",
-              kind: "offer",
-              payload: JSON.stringify(pc.localDescription),
-            },
-          });
-        })().catch(() => {});
       };
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
@@ -184,7 +125,7 @@ function useHostMesh(liveId: string | null) {
         const sigs = await pullBoothSignals({ data: { liveId: id, viewerId: "host", role: "host" } });
         for (const s of sigs) await onSignal(s);
       } catch {
-        /* keep looping */
+        /* HTTP chunk relay still runs */
       }
     }
 

@@ -22,8 +22,7 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const livekitOn = enabled && transport.livekit;
   const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
-  const meshOn = enabled && (transport.mesh || Boolean(livekit.error));
-  const mesh = useWatchMesh(liveId, meshOn, videoRef, audioRef);
+  const mesh = useWatchMesh(liveId, enabled, videoRef, audioRef);
 
   useEffect(() => {
     const node = videoRef.current;
@@ -37,24 +36,13 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     return registerWatchEl(node);
   }, []);
 
-  if (livekit.error) {
+  if (livekitOn && !livekit.error && (livekit.status === "live" || livekit.status === "audio")) {
     return {
-      status: mesh.status,
-      remote: mesh.remote,
-      videoRef,
-      audioRef,
-      error: null as string | null,
-      unlock: mesh.unlock,
-    };
-  }
-
-  if (transport.livekit || transport.error) {
-    return {
-      status: (transport.error ? "ended" : livekit.status) as WatchStatus,
+      status: livekit.status as WatchStatus,
       remote: livekit.remote,
       videoRef,
       audioRef,
-      error: transport.error ?? livekit.error ?? null,
+      error: null as string | null,
       unlock: livekit.unlock,
     };
   }
@@ -78,7 +66,6 @@ function useWatchMesh(
   const [status, setStatus] = useState<WatchStatus>("connecting");
   const [remote, setRemote] = useState<MediaStream | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-  const webrtcLive = useRef(false);
 
   useEffect(() => {
     if (!liveId || !enabled) return;
@@ -93,7 +80,6 @@ function useWatchMesh(
       pc.addTransceiver("audio", { direction: "recvonly" });
       pc.addTransceiver("video", { direction: "recvonly" });
       pc.ontrack = (ev) => {
-        webrtcLive.current = true;
         const stream = ev.streams[0] ?? new MediaStream([ev.track]);
         setRemote(stream);
         setStatus(stream.getVideoTracks().length ? "live" : "audio");
@@ -103,7 +89,7 @@ function useWatchMesh(
           v.srcObject = stream;
           void v.play().catch(() => setStatus("blocked"));
         }
-        if (a) {
+        if (a && !stream.getVideoTracks().length) {
           a.removeAttribute("src");
           a.srcObject = stream;
           void a.play().catch(() => setStatus("blocked"));
@@ -172,7 +158,6 @@ function useWatchMesh(
     return () => {
       dead = true;
       window.clearInterval(poll);
-      webrtcLive.current = false;
       void leaveBoothStream({ data: { liveId, viewerId } }).catch(() => {});
       void postBoothSignal({
         data: { liveId, viewerId, fromRole: "viewer", kind: "hangup", payload: "{}" },
@@ -185,16 +170,21 @@ function useWatchMesh(
 
   useEffect(() => {
     if (!liveId || !enabled) return;
-    const player = audioRef.current;
-    if (!player) return;
-    const dest: HTMLAudioElement = player;
+    const dest = audioRef.current;
+    if (!dest) return;
+    const player = dest;
     let dead = false;
     let afterSeq = 0;
     let mime = "";
     let ms: MediaSource | null = null;
     let sb: SourceBuffer | null = null;
     const queue: ArrayBuffer[] = [];
+    const blobs: Blob[] = [];
+    let blobPlaying = false;
     const id = liveId;
+
+    player.setAttribute("playsinline", "true");
+    player.setAttribute("webkit-playsinline", "true");
 
     function pump() {
       if (!sb || sb.updating || !queue.length) return;
@@ -205,11 +195,32 @@ function useWatchMesh(
       }
     }
 
+    function playBlobQueue() {
+      if (blobPlaying || !blobs.length || dead) return;
+      blobPlaying = true;
+      const blob = blobs.shift()!;
+      const url = URL.createObjectURL(blob);
+      player.srcObject = null;
+      player.src = url;
+      void player.play().then(() => setStatus((s) => (s === "connecting" || s === "blocked" ? "audio" : s))).catch(() => {
+        blobPlaying = false;
+        setStatus("blocked");
+      });
+      player.onended = () => {
+        URL.revokeObjectURL(url);
+        blobPlaying = false;
+        playBlobQueue();
+      };
+    }
+
     function attachMse(nextMime: string) {
-      if (!("MediaSource" in window) || !MediaSource.isTypeSupported(nextMime)) return false;
+      const ok =
+        "MediaSource" in window &&
+        (MediaSource.isTypeSupported(nextMime) || MediaSource.isTypeSupported(`${nextMime}; codecs="opus"`));
+      if (!ok) return false;
       ms = new MediaSource();
-      dest.srcObject = null;
-      dest.src = URL.createObjectURL(ms);
+      player.srcObject = null;
+      player.src = URL.createObjectURL(ms);
       ms.addEventListener("sourceopen", () => {
         if (!ms) return;
         try {
@@ -221,12 +232,12 @@ function useWatchMesh(
           sb = null;
         }
       });
-      void dest.play().catch(() => setStatus("blocked"));
+      void player.play().catch(() => setStatus("blocked"));
       return true;
     }
 
     async function tickChunks() {
-      if (dead || webrtcLive.current) return;
+      if (dead) return;
       try {
         const rows = await pullBoothChunks({ data: { liveId: id, afterSeq } });
         for (const row of rows) {
@@ -235,23 +246,24 @@ function useWatchMesh(
           if (!mime) {
             mime = row.mime;
             if (!attachMse(mime)) {
-              const blob = new Blob([buf], { type: mime });
-              dest.srcObject = null;
-              dest.src = URL.createObjectURL(blob);
-              void dest.play().catch(() => setStatus("blocked"));
+              blobs.push(new Blob([buf], { type: mime }));
+              playBlobQueue();
             }
             setStatus((s) => (s === "connecting" ? "audio" : s));
           } else if (sb) {
             queue.push(buf);
             pump();
+          } else {
+            blobs.push(new Blob([buf], { type: mime || row.mime }));
+            playBlobQueue();
           }
         }
       } catch {
-        /* keep pulling */
+        /* keep pulling the website */
       }
     }
 
-    const poll = window.setInterval(() => void tickChunks(), 900);
+    const poll = window.setInterval(() => void tickChunks(), 500);
     void tickChunks();
     return () => {
       dead = true;
@@ -269,6 +281,7 @@ function useWatchMesh(
     const a = audioRef.current;
     void v?.play().catch(() => setStatus("blocked"));
     void a?.play().catch(() => setStatus("blocked"));
+    setStatus((s) => (s === "connecting" ? "blocked" : s));
   }
 
   return { status, remote, videoRef, audioRef, unlock };
