@@ -10,6 +10,7 @@ import { formatGbp } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { MIN_AGE } from "@/lib/legal";
 import { HonestyBanner } from "@/components/honesty-banner";
+import { useLiveProduct } from "@/hooks/use-live-transport";
 
 export const Route = createFileRoute("/membership")({ component: MembershipPage });
 
@@ -20,7 +21,7 @@ const FAQ = [
   },
   {
     q: "What is Featured?",
-    a: "Featured is £15 a calendar month. While you are live, your stream is advertised on Discover, above the rest of the room.",
+    a: "Featured is £15 a calendar month. When live is proven, your stream is advertised on Discover while you are on air. Until then Featured is the same booth membership with the advertised slot coming soon.",
   },
   {
     q: "How do live gifts work?",
@@ -51,6 +52,17 @@ function MembershipPage() {
   const sellOpen = Boolean(till.loaded && till.stripe);
   const chosen = (sellOpen ? PLANS.find((p) => p.id === pick) : PLANS[0]) ?? PLANS[0];
   const ready = age && terms && community && waiver;
+  const { openJoin } = useLiveProduct();
+
+  function liveFeature(feature: string) {
+    if (feature === "Go live from the booth" && !openJoin) return "Go live from the booth (coming soon)";
+    return feature;
+  }
+
+  function livePoint(line: string) {
+    if (line === "Go live from the booth" && !openJoin) return "Go live from the booth — coming soon";
+    return line;
+  }
 
   async function confirm() {
     if (!user) {
@@ -105,12 +117,18 @@ function MembershipPage() {
         Membership
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-        Resident is {formatGbp(500)} a calendar month. Featured is {formatGbp(1500)} and advertises your live
-        on Discover. Listening stays free. {VAT_NOTE}
+        Resident is {formatGbp(500)} a calendar month. Featured is {formatGbp(1500)}
+        {openJoin ? " and advertises your live on Discover." : ". Advertising a live session comes once the booth is proven."}{" "}
+        Listening stays free. {VAT_NOTE}
       </p>
       <div className="mt-4">
         <HonestyBanner room="pay" />
       </div>
+      {!openJoin ? (
+        <p className="mt-4 rounded-sm border border-border bg-raised px-3 py-2 text-sm text-muted">
+          The live booth is coming soon. Membership does not sell live audio and video until it is proven.
+        </p>
+      ) : null}
 
       {till.loaded && !till.stripe ? (
         <p className="mt-4 rounded-sm border border-border bg-raised px-3 py-2 text-sm text-muted">
@@ -144,7 +162,7 @@ function MembershipPage() {
           <tbody>
             {PLAN_COMPARE.map((row) => (
               <tr key={row.feature} className="border-b border-border last:border-0">
-                <td className="px-3 py-3 text-muted sm:px-4">{row.feature}</td>
+                <td className="px-3 py-3 text-muted sm:px-4">{liveFeature(row.feature)}</td>
                 <Cell on={row.listen} />
                 <Cell on={row.resident} />
                 <Cell on={row.featured} />
@@ -181,12 +199,18 @@ function MembershipPage() {
             </div>
             <p className="mt-1 font-display text-3xl tabular-nums">{formatGbp(p.pence)}</p>
             <p className="text-sm text-muted">per calendar month</p>
-            <p className="mt-3 text-sm text-muted">{p.tagline}</p>
+            <p className="mt-3 text-sm text-muted">
+              {openJoin
+                ? p.tagline
+                : p.id === "resident"
+                  ? "Drop mixes. Gift the booth when gifts are on. Live booth coming soon."
+                  : "Featured placement when live is proven. Mix drops now."}
+            </p>
             <ul className="mt-4 space-y-2">
               {p.points.map((line) => (
                 <li key={line} className="flex gap-2 text-sm">
                   <Check className="mt-0.5 size-4 shrink-0 text-accent" />
-                  {line}
+                  {livePoint(line)}
                 </li>
               ))}
             </ul>

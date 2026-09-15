@@ -1,6 +1,6 @@
 import { useEffect, useState, type RefObject } from "react";
 import { mintLiveKitViewerToken } from "@/lib/livekit-api";
-import { LIVEKIT_MISSING_MSG } from "@/lib/live-transport";
+import { LIVEKIT_CONNECT_MSG, LIVEKIT_MISSING_MSG } from "@/lib/live-transport";
 import { getViewerId } from "@/lib/viewer-id";
 import type { WatchStatus } from "@/hooks/watch-status";
 
@@ -69,6 +69,7 @@ export function useWatchLiveKit(
 
         next.on(RoomEvent.TrackSubscribed, attach);
         next.on(RoomEvent.TrackUnsubscribed, attach);
+        next.on(RoomEvent.ParticipantConnected, attach);
         next.on(RoomEvent.Disconnected, () => {
           if (!dead) setStatus("ended");
         });
@@ -83,7 +84,14 @@ export function useWatchLiveKit(
         if (dead) return;
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("ENDED")) setStatus("ended");
-        else setError(LIVEKIT_MISSING_MSG);
+        else if (
+          msg === "LIVEKIT_URL_MISSING" ||
+          msg === "LIVEKIT_KEY_MISSING" ||
+          msg === "LIVEKIT_SECRET_MISSING" ||
+          msg.includes("LIVEKIT_DISABLED")
+        )
+          setError(LIVEKIT_MISSING_MSG);
+        else setError(LIVEKIT_CONNECT_MSG);
       }
     })();
 

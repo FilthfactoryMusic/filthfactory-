@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { fulfillMembership, recoverMembership } from "@/lib/billing-api";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { formatGbp } from "@/lib/utils";
+import { LiveBoothCta } from "@/components/live-booth-cta";
 
 type Search = { session_id?: string };
 
@@ -77,12 +78,7 @@ function MembershipSuccess() {
           <p className="mt-3 text-sm text-muted">
             {plan} is live — {formatGbp(amount)} this month.
           </p>
-          <Link
-            to="/booth"
-            className="mt-8 inline-flex h-16 w-full max-w-sm items-center justify-center rounded-sm bg-live px-8 font-display text-2xl font-semibold uppercase tracking-[0.2em] text-live-fg"
-          >
-            Go live
-          </Link>
+          <LiveBoothCta size="xl" className="mt-8" />
         </>
       ) : null}
       {state === "fail" ? (
@@ -96,7 +92,7 @@ function MembershipSuccess() {
             search={{ redirect: "/booth" }}
             className="mt-8 inline-flex h-12 items-center rounded-sm bg-live px-6 text-sm font-semibold text-live-fg"
           >
-            Sign in, then go live
+            Sign in, then open the booth
           </Link>
         </>
       ) : null}

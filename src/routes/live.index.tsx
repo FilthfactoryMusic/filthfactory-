@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { HonestyBanner } from "@/components/honesty-banner";
 import { BrandedText } from "@/components/brand-mark";
 import { LiveCard } from "@/components/live-card";
@@ -9,6 +9,7 @@ import { useLibrary } from "@/lib/library-store";
 import { usePlayer } from "@/lib/player-store";
 import { useMyBlocks } from "@/lib/use-blocks";
 import { useJustLive } from "@/lib/use-just-live";
+import { LiveBoothCta } from "@/components/live-booth-cta";
 
 export const Route = createFileRoute("/live/")({ component: LivePage });
 
@@ -41,12 +42,10 @@ function LivePage() {
         <div>
           <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">On air</h1>
           <p className="mt-1 text-sm text-muted">
-            <BrandedText text="Rinse, Flex, Groove London, Thames Delta, Radio Respect. Or jump on the booth yourself." />
+            <BrandedText text="Rinse, Flex, Groove London, Thames Delta, Radio Respect. Anyone can join a Filthfactory booth room — no mates-only lock." />
           </p>
         </div>
-        <Link to="/booth" className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg">
-          Go live
-        </Link>
+        <LiveBoothCta size="sm" className="shrink-0" />
       </div>
       <div className="mt-4">
         <HonestyBanner room="stations" />

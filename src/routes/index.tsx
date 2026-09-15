@@ -19,6 +19,9 @@ import { loadUkCharts } from "@/lib/charts-api";
 import { rememberCharts } from "@/lib/chart-cache";
 import { useUkCharts } from "@/lib/use-uk-charts";
 import { useWow } from "@/lib/use-wow";
+import { LiveBoothCta } from "@/components/live-booth-cta";
+import { useLiveProduct } from "@/hooks/use-live-transport";
+import { liveHeroLine } from "@/lib/live-copy";
 
 export const Route = createFileRoute("/")({
   loader: () => loadUkCharts().catch(() => ({ weekId: "", featured: [], trending: [] })),
@@ -29,7 +32,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "UK garage, grime, bassline, 140, DnB, tech house. Live rooms. Free to listen. £5/month to go live. 18+.",
+          "UK garage, grime, bassline, 140, DnB, tech house. Live rooms. Free to listen. Live booth coming soon. 18+.",
       },
     ],
   }),
@@ -51,6 +54,7 @@ function Home() {
   const error = hook.error && !preloaded.featured.length;
   const weekId = hook.weekId || preloaded.weekId;
   const wow = useWow();
+  const { openJoin } = useLiveProduct();
   useEffect(() => {
     rememberCharts([...preloaded.featured, ...preloaded.trending]);
   }, [preloaded]);
@@ -82,15 +86,10 @@ function Home() {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-md font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted md:mx-0">
-              The download shops packed up. The crate didn't. Garage, grime, bassline, 140, DnB, tech house. Tap a room. Fiver a month to go live.
+              {liveHeroLine(openJoin)}
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 md:items-start">
-              <Link
-                to="/booth"
-                className="inline-flex h-14 w-full max-w-sm items-center justify-center rounded-sm bg-live px-8 font-display text-xl font-semibold uppercase tracking-[0.2em] text-live-fg"
-              >
-                Go live
-              </Link>
+              <LiveBoothCta size="md" />
               <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
                 <Link
                   to="/live"
@@ -147,12 +146,7 @@ function Home() {
       </section>
 
       <section className="mt-10 flex justify-center border border-live/50 bg-live/10 px-4 py-8">
-        <Link
-          to="/booth"
-          className="inline-flex h-16 w-full max-w-md items-center justify-center rounded-sm bg-live px-8 font-display text-2xl font-semibold uppercase tracking-[0.25em] text-live-fg"
-        >
-          Go live
-        </Link>
+        <LiveBoothCta size="xl" />
       </section>
 
       {lead ? (

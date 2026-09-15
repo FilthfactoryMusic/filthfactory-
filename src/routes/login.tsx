@@ -59,7 +59,7 @@ function Login() {
       <p className="mt-5 font-display text-lg font-semibold uppercase tracking-widest">Filthfactory</p>
       <h1 className="mt-6 font-display text-3xl font-semibold uppercase tracking-wide">Sign in</h1>
       <p className="mt-2 text-sm text-muted">
-        18+ only. Then join from {formatGbp(500)} a month to go live and drop mixes.
+        18+ only. Then join from {formatGbp(500)} a month to drop mixes. The live booth is coming soon.
       </p>
       {authEnabled ? (
         <div className="mt-8 space-y-3 text-left">

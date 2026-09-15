@@ -87,7 +87,7 @@ export const DEAL_DRAFTS = [
 export const SOCIAL_PACK = [
   "The download shops packed up. The crate didn't.",
   "If it's filthy it bangs.",
-  "Free to listen. Fiver to go live.",
+  "Free to listen. Live booth coming soon.",
   "Garage. Grime. Bassline. 140. DnB. Tech house.",
   "Not a playlist. A booth.",
   "Wear it. Represent. Don't wait for a publicist.",

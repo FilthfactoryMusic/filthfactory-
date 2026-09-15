@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { liveKitRoomName, resolveLiveTransport } from "@/lib/live-transport";
+import {
+  liveKitHostGrant,
+  liveKitRoomName,
+  liveKitViewerGrant,
+  resolveLiveTransport,
+  runtimeGet,
+  runtimeLiveEnv,
+} from "@/lib/live-transport";
 
 export type LiveKitMint = {
   mode: "livekit";
@@ -8,18 +15,6 @@ export type LiveKitMint = {
   token: string;
   room: string;
 };
-
-function runtimeGet(name: string): string {
-  try {
-    const fn = new Function(
-      "k",
-      "try { return String((globalThis.process && globalThis.process.env && globalThis.process.env[k]) || ''); } catch (e) { return ''; }",
-    );
-    return String(fn(name) || "").trim();
-  } catch {
-    return "";
-  }
-}
 
 function normalizeLiveKitUrl(raw: string) {
   let url = raw.trim().replace(/^['"]|['"]$/g, "");
@@ -42,7 +37,7 @@ function readLiveKitEnv() {
 }
 
 function assertLiveKitMode() {
-  if (resolveLiveTransport() !== "livekit") throw new Error("LIVEKIT_DISABLED");
+  if (resolveLiveTransport(runtimeLiveEnv()) !== "livekit") throw new Error("LIVEKIT_DISABLED");
   return readLiveKitEnv();
 }
 
@@ -60,9 +55,7 @@ async function mintJwt(opts: {
   apiSecret: string;
   identity: string;
   name: string;
-  room: string;
-  canPublish: boolean;
-  canSubscribe: boolean;
+  grant: ReturnType<typeof liveKitViewerGrant> | ReturnType<typeof liveKitHostGrant>;
 }) {
   const { AccessToken } = await import("livekit-server-sdk");
   const at = new AccessToken(opts.apiKey, opts.apiSecret, {
@@ -70,19 +63,12 @@ async function mintJwt(opts: {
     name: opts.name,
     ttl: "6h",
   });
-  at.addGrant({
-    roomJoin: true,
-    room: opts.room,
-    roomCreate: opts.canPublish,
-    canPublish: opts.canPublish,
-    canSubscribe: opts.canSubscribe,
-    canPublishData: opts.canPublish,
-  });
+  at.addGrant(opts.grant);
   return at.toJwt();
 }
 
 export const getLiveTransport = createServerFn({ method: "GET" }).handler(async () => {
-  const mode = resolveLiveTransport();
+  const mode = resolveLiveTransport(runtimeLiveEnv());
   if (mode === "mesh") return { mode, configured: true as const };
   try {
     readLiveKitEnv();
@@ -100,15 +86,14 @@ export const mintLiveKitViewerToken = createServerFn({ method: "POST" })
     const room = liveKitRoomName(liveId);
     const live = await liveExists(liveId);
     if (!live) throw new Error("ENDED");
+    // Open join: anyone who opens the session may subscribe. Not a private mates room.
     const viewerId = data.viewerId.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64) || "anon";
     const token = await mintJwt({
       apiKey: creds.apiKey,
       apiSecret: creds.apiSecret,
       identity: `viewer_${viewerId}`,
       name: "Listener",
-      room,
-      canPublish: false,
-      canSubscribe: true,
+      grant: liveKitViewerGrant(room),
     });
     return { mode: "livekit", url: creds.url, token, room };
   });
@@ -145,9 +130,7 @@ export const mintLiveKitHostToken = createServerFn({ method: "POST" })
       apiSecret: creds.apiSecret,
       identity: `host_${context.userId.slice(0, 48)}`,
       name,
-      room,
-      canPublish: true,
-      canSubscribe: true,
+      grant: liveKitHostGrant(room),
     });
     return { mode: "livekit", url: creds.url, token, room };
   });

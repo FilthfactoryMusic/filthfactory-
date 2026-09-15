@@ -22,7 +22,8 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const livekitOn = enabled && transport.livekit;
   const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
-  const mesh = useWatchMesh(liveId, enabled, videoRef, audioRef);
+  const meshOn = enabled && transport.mesh;
+  const mesh = useWatchMesh(liveId, meshOn, videoRef, audioRef);
 
   useEffect(() => {
     const node = videoRef.current;
@@ -36,24 +37,24 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     return registerWatchEl(node);
   }, []);
 
-  if (livekitOn && !livekit.error && (livekit.status === "live" || livekit.status === "audio")) {
+  if (transport.mesh) {
     return {
-      status: livekit.status as WatchStatus,
-      remote: livekit.remote,
+      status: mesh.status,
+      remote: mesh.remote,
       videoRef,
       audioRef,
       error: null as string | null,
-      unlock: livekit.unlock,
+      unlock: mesh.unlock,
     };
   }
 
   return {
-    status: mesh.status,
-    remote: mesh.remote,
+    status: (transport.error ? "ended" : livekit.status) as WatchStatus,
+    remote: livekit.remote,
     videoRef,
     audioRef,
-    error: null as string | null,
-    unlock: mesh.unlock,
+    error: transport.error ?? livekit.error ?? null,
+    unlock: livekit.unlock,
   };
 }
 

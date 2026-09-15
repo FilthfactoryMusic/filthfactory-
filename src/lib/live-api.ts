@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { genreToEngine } from "@/lib/catalog";
+import { boothPublishAllowed, liveTransportInfo, runtimeLiveEnv } from "@/lib/live-transport";
 import { hashString } from "@/lib/utils";
 import type { EngineGenre, LiveShow, Mix } from "@/lib/types";
 
@@ -134,6 +135,8 @@ export const startBoothLive = createServerFn({ method: "POST" })
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     if (!data.rightsConfirmed) throw new Error("RIGHTS_REQUIRED");
+    const publish = boothPublishAllowed(liveTransportInfo(runtimeLiveEnv()));
+    if (!publish.ok) throw new Error(publish.error ?? "LIVEKIT_NOT_CONFIGURED");
     let sub = (
       await sql<{ plan: string; status: string }>`
         select plan, status from subscriptions where user_id = ${context.userId}

@@ -93,9 +93,9 @@ function TradePage() {
         <BrandedText text="Gigs, promoters, looking for a DJ, reviews. One aisle for the UK bass desk — book, play, get paid, get rated." />
       </p>
       <p className="mt-2 text-sm text-muted">
-        Pull a YouTube / Mixcloud / Twitch desk onto Filthfactory from{" "}
+        Pull a YouTube / Mixcloud / Twitch desk onto Filthfactory from the{" "}
         <Link to="/booth" className="underline underline-offset-4">
-          Go live
+          booth
         </Link>
         . OBS virtual camera lives there too.
       </p>

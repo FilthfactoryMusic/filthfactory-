@@ -182,7 +182,7 @@ function AccountPage() {
         ) : (
           <>
             <p className="mt-3 text-sm text-muted">
-              No active membership. Resident is {formatGbp(500)} a month to go live, drop mixes and gift DJs.
+              No active membership. Resident is {formatGbp(500)} a month to drop mixes. The live booth is coming soon.
             </p>
             <Button className="mt-4" asChild>
               <Link to="/membership">Join from {formatGbp(500)} / month</Link>
