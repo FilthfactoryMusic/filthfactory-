@@ -31,6 +31,9 @@ type Run = {
   ctx: AudioContext | null;
   proc: ScriptProcessorNode | null;
   src: MediaStreamAudioSourceNode | null;
+  keep: number | null;
+  vis: (() => void) | null;
+  wake: WakeLockSentinel | null;
 };
 
 let run: Run | null = null;
@@ -101,6 +104,7 @@ function arm(liveId: string, stream: MediaStream | null) {
 
 export function startHostRelay(liveId: string) {
   if (run?.liveId === liveId && !run.dead) {
+    void run.ctx?.resume().catch(() => {});
     arm(liveId, getBoothStream());
     return;
   }
@@ -113,15 +117,49 @@ export function startHostRelay(liveId: string) {
     ctx: null,
     proc: null,
     src: null,
+    keep: null,
+    vis: null,
+    wake: null,
   };
   run = current;
   current.unsub = subscribeBoothStream((s) => arm(liveId, s));
   arm(liveId, getBoothStream());
+  current.keep = window.setInterval(() => {
+    if (current.dead) return;
+    void current.ctx?.resume().catch(() => {});
+    const t = getBoothStream()?.getAudioTracks()[0];
+    if (t && t.readyState !== "live") arm(liveId, getBoothStream());
+  }, 2000);
+  current.vis = () => {
+    if (document.visibilityState === "visible") {
+      void current.ctx?.resume().catch(() => {});
+      arm(liveId, getBoothStream());
+      void grabWake(current);
+    }
+  };
+  document.addEventListener("visibilitychange", current.vis);
+  void grabWake(current);
+}
+
+async function grabWake(slot: Run) {
+  try {
+    slot.wake?.release().catch(() => {});
+    slot.wake = (await navigator.wakeLock?.request("screen")) ?? null;
+  } catch {
+    slot.wake = null;
+  }
 }
 
 export function stopHostRelay() {
   if (!run) return;
   run.dead = true;
+  if (run.keep != null) window.clearInterval(run.keep);
+  if (run.vis) document.removeEventListener("visibilitychange", run.vis);
+  try {
+    void run.wake?.release();
+  } catch {
+    /* ignore */
+  }
   try {
     run.proc?.disconnect();
     run.src?.disconnect();
