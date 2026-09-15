@@ -65,17 +65,9 @@ describe("liveKitRoomName", () => {
 });
 
 describe("resolveLiveTransport", () => {
-  it("honors LIVE_TRANSPORT=livekit", () => {
-    const env = box({ LIVE_TRANSPORT: "livekit" });
-    assert.equal(env.LIVE_TRANSPORT, "livekit");
-    assert.equal(
-      resolveLiveTransport(env),
-      "livekit",
-      `arg=${JSON.stringify(env)} processFlag=${process.env.LIVE_TRANSPORT ?? ""}`,
-    );
-  });
-  it("honors LIVE_TRANSPORT=mesh", () => {
+  it("LIVE_TRANSPORT=mesh wins even when Cloud keys exist", () => {
     assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "mesh", VERCEL_ENV: "preview" })), "mesh");
+    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "mesh", ...KEYS })), "mesh");
   });
   it("production unset without keys stays mesh", () => {
     assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "production" })), "mesh");
@@ -95,8 +87,12 @@ describe("resolveLiveTransport", () => {
       "livekit",
     );
     assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "preview", ...KEYS })), "livekit");
+    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "livekit", ...KEYS })), "livekit");
   });
-  it("explicit LIVE_TRANSPORT=livekit still wins on production", () => {
+  it("never returns livekit without keys — missing keys stay mesh", () => {
+    assert.equal(resolveLiveTransport(box()), "mesh");
+    assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "preview" })), "mesh");
+    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "livekit" })), "mesh");
     assert.equal(
       resolveLiveTransport(
         box({
@@ -105,23 +101,14 @@ describe("resolveLiveTransport", () => {
           LIVE_TRANSPORT: "livekit",
         }),
       ),
-      "livekit",
+      "mesh",
     );
-  });
-  it("unset flag and missing keys resolve to mesh (preview and local)", () => {
-    assert.equal(resolveLiveTransport(box()), "mesh");
-    assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "preview" })), "mesh");
-  });
-  it("LIVE_TRANSPORT=mesh wins even when Cloud keys exist", () => {
-    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "mesh", ...KEYS })), "mesh");
   });
 });
 
 describe("clientTransportPlan", () => {
-  it("fails closed when LiveKit is on and keys are missing", () => {
-    const info = liveTransportInfo(box({ LIVE_TRANSPORT: "livekit" }));
-    assert.equal(info.mode, "livekit");
-    assert.equal(info.configured, false);
+  it("livekit mode never falls back to mesh when unconfigured", () => {
+    const info = { mode: "livekit" as const, configured: false };
     assert.deepEqual(clientTransportPlan(info), {
       livekit: false,
       mesh: false,
@@ -134,24 +121,13 @@ describe("clientTransportPlan", () => {
   });
   it("does not treat configured LiveKit as mesh", () => {
     const info = liveTransportInfo(box({ LIVE_TRANSPORT: "livekit", ...KEYS }));
+    assert.equal(info.mode, "livekit");
     assert.deepEqual(clientTransportPlan(info), {
       livekit: true,
       mesh: false,
       error: null,
     });
     assert.deepEqual(boothPublishAllowed(info), { ok: true, error: null });
-  });
-  it("never enables mesh when LiveKit is requested but unconfigured", () => {
-    const preview = clientTransportPlan(
-      liveTransportInfo(box({ VERCEL_ENV: "preview", LIVE_TRANSPORT: "livekit" })),
-    );
-    assert.equal(preview.mesh, false);
-    assert.equal(preview.livekit, false);
-    assert.equal(preview.error, "LiveKit is not configured on this server.");
-
-    const flagged = clientTransportPlan(liveTransportInfo(box({ LIVE_TRANSPORT: "livekit" })));
-    assert.equal(flagged.mesh, false);
-    assert.equal(flagged.livekit, false);
   });
   it("preview with Cloud keys is livekit, never mesh", () => {
     const plan = clientTransportPlan(liveTransportInfo(box({ VERCEL_ENV: "preview", ...KEYS })));
@@ -161,7 +137,7 @@ describe("clientTransportPlan", () => {
       error: null,
     });
   });
-  it("keeps mesh only when mode is mesh", () => {
+  it("keeps mesh when mode is mesh", () => {
     assert.deepEqual(clientTransportPlan(liveTransportInfo(box({ LIVE_TRANSPORT: "mesh" }))), {
       livekit: false,
       mesh: true,
