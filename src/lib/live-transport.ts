@@ -56,3 +56,14 @@ export function liveTransportInfo(
 }
 
 export const LIVEKIT_MISSING_MSG = "LiveKit is not configured on this server.";
+
+/** LiveKit never falls back to mesh/openrelay. Missing env fails closed. */
+export function clientTransportPlan(info: LiveTransportInfo): {
+  livekit: boolean;
+  mesh: boolean;
+  error: string | null;
+} {
+  if (info.mode === "mesh") return { livekit: false, mesh: true, error: null };
+  if (!info.configured) return { livekit: false, mesh: false, error: LIVEKIT_MISSING_MSG };
+  return { livekit: true, mesh: false, error: null };
+}

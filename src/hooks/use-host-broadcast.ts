@@ -7,27 +7,26 @@ import {
   pullBoothSignals,
   type Signal,
 } from "@/lib/stream-api";
-import { startHostRelay } from "@/lib/host-relay";
+import { startHostRelay, stopHostRelay } from "@/lib/host-relay";
 import { useHostLiveKit } from "@/hooks/use-host-livekit";
 import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export function useHostBroadcast(liveId: string | null) {
   const transport = useLiveTransport();
   const livekit = useHostLiveKit(liveId, transport.livekit);
-  const livekitDown = Boolean(livekit.error);
-  const mesh = useHostMesh(liveId);
+  const mesh = useHostMesh(transport.mesh ? liveId : null);
 
   useEffect(() => {
-    if (!liveId) return;
+    if (!liveId || !transport.mesh) return;
     startHostRelay(liveId);
     return () => {
-      /* keep pushing through the website until they tap End */
+      stopHostRelay();
     };
-  }, [liveId]);
+  }, [liveId, transport.mesh]);
 
   return {
-    viewers: transport.livekit && !livekitDown ? livekit.viewers : mesh.viewers,
-    error: livekitDown ? null : (transport.error ?? livekit.error ?? null),
+    viewers: transport.livekit ? livekit.viewers : mesh.viewers,
+    error: transport.error ?? livekit.error ?? null,
   };
 }
 
