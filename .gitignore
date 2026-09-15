@@ -1,6 +1,6 @@
 /filthfactory-github.zip
 node_modules
-.env
-.env.local
-.env.*.local
 
+# Ignore all env variants (.env.production, .envrc, backups, etc.)
+.env*
+!.env.example
