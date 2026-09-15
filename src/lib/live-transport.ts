@@ -46,15 +46,14 @@ export function liveKitConfigured(env: Record<string, string | undefined> = proc
 }
 
 /**
- * LIVE_TRANSPORT=livekit|mesh wins.
- * If LiveKit keys exist, use LiveKit (including www).
- * Mesh only when keys are missing.
+ * Keys present → LiveKit (including www).
+ * LIVE_TRANSPORT=mesh forces mesh.
+ * Never return livekit without keys — that bricks the booth.
  */
 export function resolveLiveTransport(
   env: Record<string, string | undefined> = process.env,
 ): LiveTransportMode {
   const flag = env["LIVE_TRANSPORT"]?.trim().toLowerCase();
-  if (flag === "livekit") return "livekit";
   if (flag === "mesh") return "mesh";
   if (liveKitConfigured(env)) return "livekit";
   return "mesh";
