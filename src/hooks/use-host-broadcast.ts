@@ -7,26 +7,28 @@ import {
   pullBoothSignals,
   type Signal,
 } from "@/lib/stream-api";
-import { startHostRelay, stopHostRelay } from "@/lib/host-relay";
+import { startHostRelay } from "@/lib/host-relay";
 import { useHostLiveKit } from "@/hooks/use-host-livekit";
 import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export function useHostBroadcast(liveId: string | null) {
   const transport = useLiveTransport();
-  const livekit = useHostLiveKit(liveId, transport.livekit);
-  const mesh = useHostMesh(transport.mesh ? liveId : null);
+  // Production LiveKit keys currently mint invalid tokens. WAV/mesh is the path that reaches tablets.
+  const livekit = useHostLiveKit(liveId, false);
+  const livekitDown = Boolean(livekit.error);
+  const mesh = useHostMesh(liveId);
 
   useEffect(() => {
-    if (!liveId || !transport.mesh) return;
+    if (!liveId) return;
     startHostRelay(liveId);
     return () => {
-      stopHostRelay();
+      /* keep pushing through the website until they tap End */
     };
-  }, [liveId, transport.mesh]);
+  }, [liveId]);
 
   return {
-    viewers: transport.livekit ? livekit.viewers : mesh.viewers,
-    error: transport.error ?? livekit.error ?? null,
+    viewers: transport.livekit && !livekitDown ? livekit.viewers : mesh.viewers,
+    error: livekitDown ? null : (transport.error ?? livekit.error ?? null),
   };
 }
 

@@ -5,9 +5,12 @@ import { postBoothChunk } from "@/lib/stream-api";
 
 const KEY = (id: string) => `ff-stream:${id}`;
 const TARGET_RATE = 16000;
-const SLICE_SEC = 1;
+const SLICE_SEC = 0.75;
+
+const memKeys = new Map<string, string>();
 
 export function rememberStreamKey(liveId: string, key: string) {
+  memKeys.set(liveId, key);
   try {
     sessionStorage.setItem(KEY(liveId), key);
   } catch {
@@ -16,6 +19,8 @@ export function rememberStreamKey(liveId: string, key: string) {
 }
 
 export function readStreamKey(liveId: string) {
+  const mem = memKeys.get(liveId);
+  if (mem) return mem;
   try {
     return sessionStorage.getItem(KEY(liveId)) ?? "";
   } catch {
