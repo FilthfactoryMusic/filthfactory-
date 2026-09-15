@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BookOpen, Compass, Cpu, Disc3, Mic, Radio, Search, ShoppingBag, Sparkles, type LucideIcon } from "lucide-react";
 import { useEffect, type FormEvent, type ReactNode } from "react";
 import { PlayerBar } from "@/components/player-bar";
-import { Wordmark } from "@/components/wordmark";
+import { BrandLink } from "@/components/wordmark";
 import { AuthSlot } from "@/components/auth-slot";
 import { Input } from "@/components/ui/input";
 import { AgeGate } from "@/components/age-gate";
@@ -62,9 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-sm">
         <div className="mx-auto flex h-24 max-w-7xl items-center gap-3 px-3 md:h-28 md:px-6">
-          <Link to="/" className="shrink-0 text-fg" aria-label="Filthfactory home">
-            <Wordmark />
-          </Link>
+          <BrandLink />
           <nav className="hidden min-w-0 flex-1 flex-wrap items-center gap-1 lg:flex">
             {NAV.map((item) => {
               const on =

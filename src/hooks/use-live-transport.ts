@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { getLiveTransport } from "@/lib/livekit-api";
-import { LIVEKIT_MISSING_MSG, type LiveTransportMode } from "@/lib/live-transport";
+import {
+  LIVEKIT_MISSING_MSG,
+  clientTransportPlan,
+  type LiveTransportMode,
+} from "@/lib/live-transport";
 
 let cached: { mode: LiveTransportMode; configured: boolean } | null = null;
 let inflight: Promise<{ mode: LiveTransportMode; configured: boolean }> | null = null;
@@ -19,23 +23,29 @@ function loadTransport() {
 }
 
 export function useLiveTransport() {
+  const initial = cached ? clientTransportPlan(cached) : null;
   const [mode, setMode] = useState<LiveTransportMode | null>(cached?.mode ?? null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initial?.error ?? null);
+  const [livekit, setLivekit] = useState(Boolean(initial?.livekit));
+  const [mesh, setMesh] = useState(Boolean(initial?.mesh));
 
   useEffect(() => {
     let on = true;
     void loadTransport()
       .then((info) => {
         if (!on) return;
-        if (info.mode === "livekit" && !info.configured) {
-          // Keys not in this server — still go on air via the mesh relay.
-          setMode("mesh");
-          return;
-        }
+        const plan = clientTransportPlan(info);
         setMode(info.mode);
+        setError(plan.error);
+        setLivekit(plan.livekit);
+        setMesh(plan.mesh);
       })
       .catch(() => {
-        if (on) setError(LIVEKIT_MISSING_MSG);
+        if (!on) return;
+        setMode("livekit");
+        setError(LIVEKIT_MISSING_MSG);
+        setLivekit(false);
+        setMesh(false);
       });
     return () => {
       on = false;
@@ -46,7 +56,7 @@ export function useLiveTransport() {
     mode,
     ready: mode !== null || error !== null,
     error,
-    livekit: mode === "livekit" && !error,
-    mesh: mode === "mesh",
+    livekit,
+    mesh,
   };
 }

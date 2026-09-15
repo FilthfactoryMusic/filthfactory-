@@ -1,4 +1,4 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { mintLiveKitViewerToken } from "@/lib/livekit-api";
 import { LIVEKIT_MISSING_MSG } from "@/lib/live-transport";
 import { getViewerId } from "@/lib/viewer-id";
@@ -13,6 +13,7 @@ export function useWatchLiveKit(
   const [status, setStatus] = useState<WatchStatus>("connecting");
   const [remote, setRemote] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const remoteRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     if (!liveId || !enabled) return;
@@ -55,10 +56,12 @@ export function useWatchLiveKit(
             }
           }
           if (!audio && !video) {
+            remoteRef.current = null;
             setRemote(null);
             setStatus((s) => (s === "ended" || s === "full" ? s : "connecting"));
             return;
           }
+          remoteRef.current = stream;
           setRemote(stream);
           setStatus(video ? "live" : "audio");
           const v = videoRef.current;
@@ -69,6 +72,8 @@ export function useWatchLiveKit(
 
         next.on(RoomEvent.TrackSubscribed, attach);
         next.on(RoomEvent.TrackUnsubscribed, attach);
+        next.on(RoomEvent.ParticipantConnected, attach);
+        next.on(RoomEvent.ParticipantDisconnected, attach);
         next.on(RoomEvent.Disconnected, () => {
           if (!dead) setStatus("ended");
         });
@@ -90,6 +95,7 @@ export function useWatchLiveKit(
     return () => {
       dead = true;
       void room?.disconnect().catch(() => {});
+      remoteRef.current = null;
       setRemote(null);
     };
   }, [liveId, enabled]);
@@ -102,7 +108,13 @@ export function useWatchLiveKit(
     if (a) plays.push(a.play().then(() => undefined));
     void Promise.all(plays)
       .then(() => {
-        setStatus((s) => (s === "blocked" ? (remote?.getVideoTracks().length ? "live" : "audio") : s));
+        setStatus((s) =>
+          s === "blocked" || s === "connecting"
+            ? remoteRef.current?.getVideoTracks().length
+              ? "live"
+              : "audio"
+            : s,
+        );
       })
       .catch(() => setStatus("blocked"));
   }

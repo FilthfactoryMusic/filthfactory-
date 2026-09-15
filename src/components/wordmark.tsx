@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 /** Header stamp only. Hero CDJ mark stays large in stamp-cdj. */
@@ -13,5 +14,13 @@ export function Wordmark({ className }: { className?: string }) {
         Filthfactory
       </span>
     </span>
+  );
+}
+
+export function BrandLink() {
+  return (
+    <Link to="/" className="shrink-0 text-fg" aria-label="Filthfactory home">
+      <Wordmark />
+    </Link>
   );
 }

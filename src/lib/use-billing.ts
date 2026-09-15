@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { getMyBilling, getTillStatus, recoverMembership, type BillingSnapshot } from "@/lib/billing-api";
+import { getMyBilling, getTillStatus, type BillingSnapshot } from "@/lib/billing-api";
+import type { PlanId } from "@/lib/billing";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+
+const CACHE = "ff-plan";
 
 const empty: BillingSnapshot = {
   plan: null,
@@ -15,49 +18,66 @@ const empty: BillingSnapshot = {
   payouts: [],
 };
 
+function readPlan(): PlanId | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = localStorage.getItem(CACHE);
+    if (v === "resident" || v === "featured") return v;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function writePlan(plan: PlanId | null) {
+  try {
+    if (plan) localStorage.setItem(CACHE, plan);
+    else localStorage.removeItem(CACHE);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useMyBilling() {
   const user = useCurrentUser();
-  const [data, setData] = useState<BillingSnapshot>(empty);
-  const [loading, setLoading] = useState(Boolean(user));
+  const userId = user?.id ?? null;
+  const [data, setData] = useState<BillingSnapshot>(() => {
+    const plan = readPlan();
+    return plan ? { ...empty, plan, status: "active" } : empty;
+  });
+  const [loading, setLoading] = useState(() => Boolean(userId) && !readPlan());
 
   const refresh = useCallback(() => {
-    if (!user) {
+    if (!userId) {
       setData(empty);
       setLoading(false);
+      writePlan(null);
       return Promise.resolve();
     }
-    setLoading(true);
     let settled = false;
     const timer = setTimeout(() => {
       if (settled) return;
       settled = true;
       setLoading(false);
-    }, 6000);
+    }, 2500);
     return getMyBilling()
-      .then(async (row) => {
-        if (row.plan) return row;
-        try {
-          await recoverMembership();
-          return await getMyBilling();
-        } catch {
-          return row;
-        }
-      })
       .then((row) => {
-        if (!settled) setData(row);
+        if (settled) return;
+        setData(row);
+        if (row.plan) writePlan(row.plan);
       })
       .catch(() => {
-        if (!settled) setData(empty);
+        /* keep last known plan so the booth does not dump them */
       })
       .finally(() => {
         settled = true;
         clearTimeout(timer);
         setLoading(false);
       });
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   return { ...data, loading, refresh, member: Boolean(data.plan) };

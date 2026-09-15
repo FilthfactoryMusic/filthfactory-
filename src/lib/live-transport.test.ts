@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { liveKitConfigured, liveKitRoomName, resolveLiveTransport } from "./live-transport.ts";
+import {
+  clientTransportPlan,
+  liveKitConfigured,
+  liveKitRoomName,
+  liveTransportInfo,
+  resolveLiveTransport,
+} from "./live-transport.ts";
 
 describe("liveKitRoomName", () => {
   it("prefixes liveId", () => {
@@ -42,6 +48,39 @@ describe("resolveLiveTransport", () => {
   });
   it("defaults local/preview sandboxes to livekit", () => {
     assert.equal(resolveLiveTransport({}), "livekit");
+  });
+});
+
+describe("clientTransportPlan", () => {
+  it("fails closed when LiveKit is on and keys are missing", () => {
+    const info = liveTransportInfo({ LIVE_TRANSPORT: "livekit" });
+    assert.equal(info.mode, "livekit");
+    assert.equal(info.configured, false);
+    assert.deepEqual(clientTransportPlan(info), {
+      livekit: false,
+      mesh: false,
+      error: "LiveKit is not configured on this server.",
+    });
+  });
+  it("does not treat a LiveKit token failure as mesh", () => {
+    const info = liveTransportInfo({
+      LIVE_TRANSPORT: "livekit",
+      LIVEKIT_URL: "wss://x.livekit.cloud",
+      LIVEKIT_API_KEY: "k",
+      LIVEKIT_API_SECRET: "s",
+    });
+    assert.deepEqual(clientTransportPlan(info), {
+      livekit: true,
+      mesh: false,
+      error: null,
+    });
+  });
+  it("keeps mesh only when LIVE_TRANSPORT=mesh", () => {
+    assert.deepEqual(clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
+      livekit: false,
+      mesh: true,
+      error: null,
+    });
   });
 });
 
