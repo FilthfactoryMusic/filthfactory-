@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { liveKitRoomName, resolveLiveTransport } from "@/lib/live-transport";
+import { liveKitRoomName, resolveLiveTransport, runtimeGet, runtimeLiveEnv } from "@/lib/live-transport";
 
 export type LiveKitMint = {
   mode: "livekit";
@@ -8,18 +8,6 @@ export type LiveKitMint = {
   token: string;
   room: string;
 };
-
-function runtimeGet(name: string): string {
-  try {
-    const fn = new Function(
-      "k",
-      "try { return String((globalThis.process && globalThis.process.env && globalThis.process.env[k]) || ''); } catch (e) { return ''; }",
-    );
-    return String(fn(name) || "").trim();
-  } catch {
-    return "";
-  }
-}
 
 function normalizeLiveKitUrl(raw: string) {
   let url = raw.trim().replace(/^['"]|['"]$/g, "");
@@ -41,21 +29,8 @@ function readLiveKitEnv() {
   return { url, apiKey, apiSecret };
 }
 
-function runtimeEnv() {
-  return {
-    LIVE_TRANSPORT: runtimeGet("LIVE_TRANSPORT"),
-    LIVEKIT_URL: runtimeGet("LIVEKIT_URL"),
-    LIVEKIT_API_KEY: runtimeGet("LIVEKIT_API_KEY"),
-    LIVEKIT_API_SECRET: runtimeGet("LIVEKIT_API_SECRET"),
-    APP_URL: runtimeGet("APP_URL"),
-    VERCEL_ENV: runtimeGet("VERCEL_ENV"),
-    VERCEL_URL: runtimeGet("VERCEL_URL"),
-    VERCEL_PROJECT_PRODUCTION_URL: runtimeGet("VERCEL_PROJECT_PRODUCTION_URL"),
-  };
-}
-
 function assertLiveKitMode() {
-  if (resolveLiveTransport(runtimeEnv()) !== "livekit") throw new Error("LIVEKIT_DISABLED");
+  if (resolveLiveTransport(runtimeLiveEnv()) !== "livekit") throw new Error("LIVEKIT_DISABLED");
   return readLiveKitEnv();
 }
 
@@ -95,7 +70,7 @@ async function mintJwt(opts: {
 }
 
 export const getLiveTransport = createServerFn({ method: "GET" }).handler(async () => {
-  const mode = resolveLiveTransport(runtimeEnv());
+  const mode = resolveLiveTransport(runtimeLiveEnv());
   if (mode === "mesh") return { mode, configured: true as const };
   try {
     readLiveKitEnv();
@@ -113,6 +88,7 @@ export const mintLiveKitViewerToken = createServerFn({ method: "POST" })
     const room = liveKitRoomName(liveId);
     const live = await liveExists(liveId);
     if (!live) throw new Error("ENDED");
+    // Open join: anyone who opens the session may subscribe. Not a private mates room.
     const viewerId = data.viewerId.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64) || "anon";
     const token = await mintJwt({
       apiKey: creds.apiKey,

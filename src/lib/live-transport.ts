@@ -12,6 +12,32 @@ export function liveKitRoomName(liveId: string) {
   return `live_${liveId}`;
 }
 
+/** Read host env at request time. Vite must not inline these. */
+export function runtimeGet(name: string): string {
+  try {
+    const fn = new Function(
+      "k",
+      "try { return String((globalThis.process && globalThis.process.env && globalThis.process.env[k]) || ''); } catch (e) { return ''; }",
+    );
+    return String(fn(name) || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+export function runtimeLiveEnv(): Record<string, string | undefined> {
+  return {
+    LIVE_TRANSPORT: runtimeGet("LIVE_TRANSPORT"),
+    LIVEKIT_URL: runtimeGet("LIVEKIT_URL"),
+    LIVEKIT_API_KEY: runtimeGet("LIVEKIT_API_KEY"),
+    LIVEKIT_API_SECRET: runtimeGet("LIVEKIT_API_SECRET"),
+    APP_URL: runtimeGet("APP_URL"),
+    VERCEL_ENV: runtimeGet("VERCEL_ENV"),
+    VERCEL_URL: runtimeGet("VERCEL_URL"),
+    VERCEL_PROJECT_PRODUCTION_URL: runtimeGet("VERCEL_PROJECT_PRODUCTION_URL"),
+  };
+}
+
 export function liveKitConfigured(env: Record<string, string | undefined> = process.env) {
   const url = String(env["LIVEKIT_URL"] ?? "").trim();
   const key = String(env["LIVEKIT_API_KEY"] ?? "").trim();
@@ -21,7 +47,8 @@ export function liveKitConfigured(env: Record<string, string | undefined> = proc
 
 /**
  * LIVE_TRANSPORT=livekit|mesh wins.
- * Unset: preview/staging default to LiveKit; www/production (filthfactory.co.uk) stays mesh.
+ * Unset: preview/staging default to LiveKit; any Vercel production deploy stays mesh.
+ * Never default Production to livekit — that flip is an explicit env set after soak PASS.
  */
 export function resolveLiveTransport(
   env: Record<string, string | undefined> = process.env,
@@ -38,9 +65,7 @@ export function resolveLiveTransport(
   const stagingHint = /staging|preview/.test(hosts) || vercelEnv === "preview" || vercelEnv === "development";
   if (stagingHint) return "livekit";
 
-  const wwwProd =
-    vercelEnv === "production" && /(?:^|[/.])(?:www\.)?filthfactory\.co\.uk/.test(hosts);
-  if (wwwProd) return "mesh";
+  if (vercelEnv === "production") return "mesh";
 
   return "livekit";
 }
@@ -66,4 +91,11 @@ export function clientTransportPlan(info: LiveTransportInfo): {
   if (info.mode === "mesh") return { livekit: false, mesh: true, error: null };
   if (!info.configured) return { livekit: false, mesh: false, error: LIVEKIT_MISSING_MSG };
   return { livekit: true, mesh: false, error: null };
+}
+
+/** Host may create a booth row only when mesh, or when LiveKit is actually configured. */
+export function boothPublishAllowed(info: LiveTransportInfo): { ok: boolean; error: string | null } {
+  if (info.mode === "mesh") return { ok: true, error: null };
+  if (!info.configured) return { ok: false, error: LIVEKIT_MISSING_MSG };
+  return { ok: true, error: null };
 }

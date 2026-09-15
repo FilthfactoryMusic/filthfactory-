@@ -1,9 +1,13 @@
+import { useLiveProduct } from "@/hooks/use-live-transport";
+import { boothHonesty, payHonesty } from "@/lib/live-copy";
+
 export function HonestyBanner({ room }: { room: "booth" | "pay" | "stations" }) {
+  const { openJoin } = useLiveProduct();
   const copy =
     room === "booth"
-      ? "You go live on your own rights. Filthfactory does not hold a blanket PRS or PPL licence. Not legal advice."
+      ? boothHonesty(openJoin)
       : room === "pay"
-        ? "Membership is the booth. Listening stays free. Checkout is Stripe when it is on — never a fake till. Not legal advice."
+        ? payHonesty(openJoin)
         : "Station tiles only show Live or Listening when there is real audio or a working player. Dead desks stay off the board.";
 
   return (

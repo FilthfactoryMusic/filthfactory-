@@ -20,7 +20,8 @@ import { HonestyBanner } from "@/components/honesty-banner";
 import { LogoStage } from "@/components/logo-stage";
 import { publicHandle, writeHandle } from "@/lib/handle";
 import { rememberStreamKey, startHostRelay } from "@/lib/host-relay";
-import { useLiveTransport } from "@/hooks/use-live-transport";
+import { useLiveProduct } from "@/hooks/use-live-transport";
+import { boothFormLine, boothGateLine, LIVE_COMING_SOON, LIVE_GO_LIVE } from "@/lib/live-copy";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -94,13 +95,12 @@ function BoothMemberGate() {
 }
 
 function BoothGate() {
+  const { openJoin } = useLiveProduct();
   return (
     <div className="mx-auto max-w-sm py-6 text-center">
       <img src="/art/brand/logo.png" alt="" className="mx-auto size-28" />
-      <h1 className="mt-6 font-display text-3xl font-semibold uppercase tracking-wide">Go live in one tap</h1>
-      <p className="mt-2 text-sm text-muted">
-        Sign in with email, camera on, you're on air. Mixcloud ease — factory floor energy.
-      </p>
+      <h1 className="mt-6 font-display text-3xl font-semibold uppercase tracking-wide">The booth</h1>
+      <p className="mt-2 text-sm text-muted">{boothGateLine(openJoin)}</p>
       <div className="mt-4 text-left">
         <HonestyBanner room="booth" />
       </div>
@@ -109,7 +109,7 @@ function BoothGate() {
         search={{ redirect: "/booth" }}
         className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-sm bg-accent text-sm font-semibold text-accent-fg"
       >
-        Sign in to go live
+        {openJoin ? "Sign in to go live" : "Sign in"}
       </Link>
     </div>
   );
@@ -123,7 +123,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const stopLiveLocal = useLibrary((s) => s.stopLive);
   const ownLive = useLibrary((s) => s.ownLive);
   const host = useHostBroadcast(ownLive?.id ?? null);
-  const transport = useLiveTransport();
+  const transport = useLiveProduct();
   const setName = useLibrary((s) => s.setName);
   const playLive = usePlayer((s) => s.playLive);
   const stop = usePlayer((s) => s.stop);
@@ -233,6 +233,10 @@ function BoothStudio({ featured }: { featured: boolean }) {
   async function onLive(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (going) return;
+    if (transport.error) {
+      setLiveError(transport.error);
+      return;
+    }
     if (!liveRights) {
       setLiveError("Tick the rights box first.");
       return;
@@ -323,9 +327,13 @@ function BoothStudio({ featured }: { featured: boolean }) {
     <div>
       <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">The booth</h1>
       <p className="mt-1 max-w-xl text-sm text-muted">
-        {featured
-          ? "Featured: this broadcast will be advertised on Discover. Listeners hear your mic — keep the tab open."
-          : "Resident booth. Listeners hear your mic. Upgrade to Featured to advertise on the main feed."}
+        {transport.openJoin
+          ? featured
+            ? "Featured: this broadcast will be advertised on Discover. Anyone who joins gets the audio and video — keep the tab open."
+            : "Resident booth. Anyone who joins this session gets the audio and video. Upgrade to Featured to advertise on the main feed."
+          : transport.mesh
+            ? "This public site still uses the old booth link. Open-join live is coming soon — we will not sell it as live until it is proven."
+            : "The live booth is coming soon. We will not put a session on air until LiveKit is configured on this server."}
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
@@ -412,9 +420,11 @@ function BoothStudio({ featured }: { featured: boolean }) {
         <form onSubmit={onLive} className="rounded-sm border border-border bg-surface p-5">
           <div className="flex items-center gap-2">
             <Radio className="size-4 shrink-0 text-live" />
-            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide whitespace-nowrap">Go live</h2>
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide whitespace-nowrap">
+              {transport.error ? LIVE_COMING_SOON : LIVE_GO_LIVE}
+            </h2>
           </div>
-          <p className="mt-1 text-sm text-muted">Title it. One tap. You're on air.</p>
+          <p className="mt-1 text-sm text-muted">{boothFormLine(transport.openJoin, transport.mesh)}</p>
           <div className="mt-3">
             <HonestyBanner room="booth" />
           </div>
@@ -494,8 +504,13 @@ function BoothStudio({ featured }: { featured: boolean }) {
                   I have the rights to this broadcast. Filthfactory does not hold a blanket PRS or PPL licence.
                 </span>
               </label>
-              <Button type="submit" variant="live" className="mt-5 w-full h-14 text-base" disabled={going}>
-                {going ? "Going live…" : "Go live"}
+              <Button
+                type="submit"
+                variant="live"
+                className="mt-5 w-full h-14 text-base"
+                disabled={going || !transport.ready || Boolean(transport.error)}
+              >
+                {going ? "Going live…" : transport.error ? LIVE_COMING_SOON : LIVE_GO_LIVE}
               </Button>
               {liveError ? <p className="mt-2 text-sm text-live">{liveError}</p> : null}
             </>

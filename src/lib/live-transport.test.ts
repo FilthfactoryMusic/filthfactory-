@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  boothPublishAllowed,
   clientTransportPlan,
   liveKitConfigured,
   liveKitRoomName,
@@ -46,6 +47,26 @@ describe("resolveLiveTransport", () => {
       "mesh",
     );
   });
+  it("keeps any production deploy on mesh when LIVE_TRANSPORT is unset", () => {
+    assert.equal(resolveLiveTransport({ VERCEL_ENV: "production" }), "mesh");
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "production",
+        APP_URL: "https://filthfactory.vercel.app",
+      }),
+      "mesh",
+    );
+  });
+  it("does not default production to livekit — only an explicit flag flips it", () => {
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "production",
+        APP_URL: "https://www.filthfactory.co.uk",
+        LIVE_TRANSPORT: "livekit",
+      }),
+      "livekit",
+    );
+  });
   it("defaults local/preview sandboxes to livekit", () => {
     assert.equal(resolveLiveTransport({}), "livekit");
   });
@@ -61,6 +82,10 @@ describe("clientTransportPlan", () => {
       mesh: false,
       error: "LiveKit is not configured on this server.",
     });
+    assert.deepEqual(boothPublishAllowed(info), {
+      ok: false,
+      error: "LiveKit is not configured on this server.",
+    });
   });
   it("does not treat configured LiveKit as mesh", () => {
     const info = liveTransportInfo({
@@ -74,6 +99,7 @@ describe("clientTransportPlan", () => {
       mesh: false,
       error: null,
     });
+    assert.deepEqual(boothPublishAllowed(info), { ok: true, error: null });
   });
   it("never enables mesh when LiveKit is requested but unconfigured", () => {
     const preview = clientTransportPlan(
@@ -87,6 +113,10 @@ describe("clientTransportPlan", () => {
     assert.deepEqual(clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
       livekit: false,
       mesh: true,
+      error: null,
+    });
+    assert.deepEqual(boothPublishAllowed(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
+      ok: true,
       error: null,
     });
   });

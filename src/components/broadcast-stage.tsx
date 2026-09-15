@@ -6,11 +6,11 @@ import { LogoStage } from "@/components/logo-stage";
 import { getBoothStream, subscribeBoothStream } from "@/lib/booth-stream";
 
 function statusCopy(s: WatchStatus) {
-  if (s === "connecting") return "Connecting to the booth…";
-  if (s === "audio") return "Audio live — video still linking";
-  if (s === "blocked") return "Tap to listen";
+  if (s === "connecting") return "Joining the session…";
+  if (s === "audio") return "Audio is in — video still linking";
+  if (s === "blocked") return "Tap to join";
   if (s === "ended") return "This broadcast ended";
-  if (s === "full") return "Booth is full — try again in a minute";
+  if (s === "full") return "This old booth link is full — try again in a minute";
   return null;
 }
 
@@ -110,7 +110,7 @@ function ViewerStage({
   onNeedGesture?: () => void;
 }) {
   const { status, remote, videoRef, audioRef, error, unlock } = useWatchBroadcast(liveId, enabled);
-  const copy = error ?? (!enabled ? "Tap to listen" : statusCopy(status));
+  const copy = error ?? (!enabled ? "Tap to join" : statusCopy(status));
   const showVideo = Boolean(remote?.getVideoTracks().length);
   const onAir = status === "live" || status === "audio";
 
@@ -143,7 +143,7 @@ function ViewerStage({
           className="absolute inset-0 grid place-items-center bg-bg/50"
         >
           <span className="rounded-sm bg-live px-5 py-3 text-sm font-medium text-live-fg">
-            {error ? error : status === "blocked" || !enabled ? "Tap to listen" : copy}
+            {error ? error : status === "blocked" || !enabled ? "Tap to join" : copy}
           </span>
         </button>
       ) : null}

@@ -5,6 +5,7 @@ import { StealFlyer } from "@/components/steal-flyer";
 import { CITIES } from "@/lib/catalog";
 import { WORLD_LIVE } from "@/lib/feeds";
 import { formatGbp } from "@/lib/utils";
+import { LiveBoothCta } from "@/components/live-booth-cta";
 
 export const Route = createFileRoute("/open")({
   component: OpenTheFactory,
@@ -14,19 +15,19 @@ export const Route = createFileRoute("/open")({
       {
         name: "description",
         content:
-          "Garage, grime, bassline, 140, DnB, tech house. Free to listen. £5/month to go live. Gifts 50/50. 18+.",
+          "Garage, grime, bassline, 140, DnB, tech house. Free to listen. Live booth coming soon. 18+.",
       },
     ],
   }),
 });
 
-const DM = `You're playing the rooms that never got a publicist. Filthfactory is the UK booth — live in one tap, Resident £5/month. Factory Friday 10pm. I'll Boost you for 90 days if you go live weekly. Come through.`;
+const DM = `You're playing the rooms that never got a publicist. Filthfactory is the UK booth — free to listen, Resident £5/month for mix drops. Live audio and video is coming soon. Factory Friday 10pm. Come through.`;
 
 const CAPTIONS = [
   "Garage. Grime. Bassline. 140. DnB. Tech house. That's the room.",
   "Not a playlist. A booth.",
   "Gift the DJ. They keep half. We keep the lights on.",
-  "Kitchen, cellar, warehouse. We don't care. GO LIVE.",
+  "Kitchen, cellar, warehouse. We don't care. Join the session.",
   "If it's filthy it bangs!",
 ];
 
@@ -94,12 +95,7 @@ function OpenTheFactory() {
           </p>
           <p className="mt-2 font-display text-2xl uppercase tracking-wide text-fg">{left || "…"}</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <Link
-              to="/booth"
-              className="inline-flex h-11 items-center rounded-sm bg-live px-5 text-sm font-medium text-live-fg"
-            >
-              Go live
-            </Link>
+            <LiveBoothCta size="sm" />
             <Link
               to="/live"
               className="inline-flex h-11 items-center rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg"
@@ -179,7 +175,7 @@ function OpenTheFactory() {
         <div>
           <h2 className="font-display text-2xl font-semibold uppercase tracking-wide">DM a DJ tonight</h2>
           <p className="mt-2 text-sm text-muted">
-            Thirty captains. One message. Boost for 90 days if they go live weekly.
+            Thirty captains. One message. Mix drops and the booth — live A/V when it is proven.
           </p>
           <pre className="mt-4 whitespace-pre-wrap rounded-md border border-border bg-raised p-4 text-sm text-fg">
             {DM}

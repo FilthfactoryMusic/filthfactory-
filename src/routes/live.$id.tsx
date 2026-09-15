@@ -23,6 +23,8 @@ import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
 import { useLiveChat } from "@/lib/use-live-chat";
 import { publicHandle } from "@/lib/handle";
 import { stopHostRelay } from "@/lib/host-relay";
+import { useLiveProduct } from "@/hooks/use-live-transport";
+import { LIVE_OPEN_JOIN } from "@/lib/live-copy";
 
 export const Route = createFileRoute("/live/$id")({ component: LiveShowPage });
 
@@ -64,6 +66,7 @@ function LiveShowPage() {
   const [listeners, setListeners] = useState(show?.listeners ?? 0);
   const isHost = ownLive?.id === id || Boolean(user && show?.hostUserId === user.id);
   const booth = Boolean(show && isBoothBroadcast(show.id));
+  const { openJoin } = useLiveProduct();
   const embed = show?.embedUrl || embedFromWatch(show?.watchUrl) || null;
   const listening = now?.kind === "live" && now.id === show?.id && playing;
 
@@ -153,6 +156,9 @@ function LiveShowPage() {
             </p>
             <p className="mt-3 text-sm text-muted">{show.description}</p>
             {track ? <p className="mt-3 text-sm text-fg">Now playing: {track.title}</p> : null}
+            {booth && openJoin && !isHost ? (
+              <p className="mt-3 text-sm text-muted">{LIVE_OPEN_JOIN}</p>
+            ) : null}
             {show.credit ? <p className="mt-2 text-xs uppercase tracking-widest text-muted">{show.credit}</p> : null}
           </div>
         </div>

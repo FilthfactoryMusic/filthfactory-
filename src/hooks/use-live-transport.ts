@@ -60,3 +60,11 @@ export function useLiveTransport() {
     mesh,
   };
 }
+
+/** Open-join LiveKit is the only time we sell or claim live A/V. Mesh and missing keys stay Coming soon. */
+export function useLiveProduct() {
+  const t = useLiveTransport();
+  const openJoin = Boolean(t.ready && t.livekit && !t.error);
+  const comingSoon = !t.ready || !openJoin;
+  return { ...t, openJoin, comingSoon };
+}

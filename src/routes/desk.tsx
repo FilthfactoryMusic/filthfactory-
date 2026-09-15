@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BLOCKERS, LOOPS, WEEK, londonDay } from "@/lib/cos";
 import { loadOps } from "@/lib/merch-ops-api";
 import { Button } from "@/components/ui/button";
+import { LiveBoothCta } from "@/components/live-booth-cta";
 
 export const Route = createFileRoute("/desk")({ component: DeskPage });
 
@@ -38,11 +39,7 @@ function DeskPage() {
           <Link to="/ops">
             <Button size="sm">Merch Ops{pending != null ? ` · ${pending} waiting` : ""}</Button>
           </Link>
-          <Link to="/booth">
-            <Button size="sm" variant="live">
-              Go live
-            </Button>
-          </Link>
+          <LiveBoothCta size="sm" />
           <Link to="/charts">
             <Button size="sm" variant="outline">
               Friday crate

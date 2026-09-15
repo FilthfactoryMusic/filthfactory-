@@ -30,7 +30,7 @@ function ReleasesPage() {
       <p className="text-xs uppercase tracking-[0.25em] text-accent">The desk · 30s · one bag</p>
       <h1 className="mt-1 font-display text-5xl font-semibold uppercase tracking-wide md:text-6xl">NEW RELEASES</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
-        Last 90 days. Preview here. Buy the file once — WAV, MP3 or FLAC. No paying twice for the same cut. Then go live next door.
+        Last 90 days. Preview here. Buy the file once — WAV, MP3 or FLAC. No paying twice for the same cut. The booth is next door when live is proven.
       </p>
       <div className="mt-6 flex flex-wrap gap-2">
         {GENRE_CRATES.map((c) => (
