@@ -23,8 +23,6 @@ import { hasPlayableLiveMedia, hasTuneInAudio } from "@/lib/live-media";
 import { useLiveChat } from "@/lib/use-live-chat";
 import { publicHandle } from "@/lib/handle";
 import { stopHostRelay } from "@/lib/host-relay";
-import { useLiveProduct } from "@/hooks/use-live-transport";
-import { LIVE_OPEN_JOIN } from "@/lib/live-copy";
 
 export const Route = createFileRoute("/live/$id")({ component: LiveShowPage });
 
@@ -35,12 +33,31 @@ function LiveShowPage() {
   const communityLive = useLibrary((s) => s.communityLive);
   const { user } = useCurrentUserState();
   const [fetched, setFetched] = useState<LiveShow | null>(null);
+  const [looked, setLooked] = useState(false);
 
   useEffect(() => {
-    if (!id.startsWith("live-") && !id.startsWith("url-")) return;
-    void loadBoothLive({ data: { id } })
-      .then((row) => setFetched(row))
-      .catch(() => setFetched(null));
+    if (!id.startsWith("live-") && !id.startsWith("url-")) {
+      setLooked(true);
+      return;
+    }
+    let on = true;
+    const tick = () => {
+      void loadBoothLive({ data: { id } })
+        .then((row) => {
+          if (!on) return;
+          setFetched(row);
+          setLooked(true);
+        })
+        .catch(() => {
+          if (on) setLooked(true);
+        });
+    };
+    tick();
+    const t = window.setInterval(tick, 2000);
+    return () => {
+      on = false;
+      window.clearInterval(t);
+    };
   }, [id]);
 
   const show =
@@ -66,7 +83,6 @@ function LiveShowPage() {
   const [listeners, setListeners] = useState(show?.listeners ?? 0);
   const isHost = ownLive?.id === id || Boolean(user && show?.hostUserId === user.id);
   const booth = Boolean(show && isBoothBroadcast(show.id));
-  const { openJoin } = useLiveProduct();
   const embed = show?.embedUrl || embedFromWatch(show?.watchUrl) || null;
   const listening = now?.kind === "live" && now.id === show?.id && playing;
 
@@ -93,7 +109,14 @@ function LiveShowPage() {
   }, [seedChat]);
 
   if (!show) {
-    return <p className="text-muted">This broadcast has ended.</p>;
+    if (!looked) {
+      return <p className="text-muted">Opening the booth…</p>;
+    }
+    return (
+      <p className="text-muted">
+        This broadcast has ended. On the phone it must still say ON AIR, and this address must match the listen link exactly — copy, don't type.
+      </p>
+    );
   }
 
   const t = listening ? currentTime : liveOffsetSec(show);
@@ -156,9 +179,6 @@ function LiveShowPage() {
             </p>
             <p className="mt-3 text-sm text-muted">{show.description}</p>
             {track ? <p className="mt-3 text-sm text-fg">Now playing: {track.title}</p> : null}
-            {booth && openJoin && !isHost ? (
-              <p className="mt-3 text-sm text-muted">{LIVE_OPEN_JOIN}</p>
-            ) : null}
             {show.credit ? <p className="mt-2 text-xs uppercase tracking-widest text-muted">{show.credit}</p> : null}
           </div>
         </div>
