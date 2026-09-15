@@ -323,8 +323,8 @@ function BoothStudio({ featured }: { featured: boolean }) {
       <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">The booth</h1>
       <p className="mt-1 max-w-xl text-sm text-muted">
         {featured
-          ? "Featured: advertised on Discover. Tick rights, tap Go live, leave this page open. Xbox opens the listen link."
-          : "Tick rights, tap Go live, leave this page open. Xbox / laptop open the listen link — not the radio board."}
+          ? "Featured: advertised on Discover. Tick rights, tap Go live, leave this page open. Anyone with the listen link hears you."
+          : "Tick rights, tap Go live, leave this page open. Anyone with the listen link hears you — phone, laptop, tablet, TV."}
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
@@ -413,14 +413,14 @@ function BoothStudio({ featured }: { featured: boolean }) {
             <Radio className="size-4 shrink-0 text-live" />
             <h2 className="font-display text-2xl font-semibold uppercase tracking-wide whitespace-nowrap">Go live</h2>
           </div>
-          <p className="mt-1 text-sm text-muted">Tick rights. Tap Go live. Leave this page open. Xbox uses the listen link, not the radio board.</p>
+          <p className="mt-1 text-sm text-muted">Tick rights. Tap Go live. Leave this page open. Share the listen link — that is the broadcast.</p>
           <div className="mt-3">
             <HonestyBanner room="booth" />
           </div>
           {ownLive ? (
             <div className="mt-4">
               <p className="font-display text-lg font-semibold uppercase tracking-wide text-live">On air — leave this page open</p>
-              <p className="mt-2 text-sm text-muted">Xbox / laptop open this exact link:</p>
+              <p className="mt-2 text-sm text-muted">Anyone opens this link to hear you:</p>
               <p className="mt-2 break-all rounded-sm bg-bg px-3 py-2 font-mono text-sm text-fg">{watchUrl || `https://www.filthfactory.co.uk/live/${ownLive.id}`}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button

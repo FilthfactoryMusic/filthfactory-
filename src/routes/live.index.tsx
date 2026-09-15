@@ -76,7 +76,7 @@ function LivePage() {
       ) : null}
 
       <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Factory booths</h2>
-      <p className="mt-1 text-sm text-muted">Residents on Filthfactory right now. This is the one you watch on Xbox.</p>
+      <p className="mt-1 text-sm text-muted">Residents on Filthfactory right now. Open the room — that is the broadcast.</p>
       {factory.length ? (
         <div className="mt-4 grid gap-5 md:grid-cols-3">
           {factory.map((s) => (
