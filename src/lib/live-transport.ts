@@ -99,3 +99,26 @@ export function boothPublishAllowed(info: LiveTransportInfo): { ok: boolean; err
   if (!info.configured) return { ok: false, error: LIVEKIT_MISSING_MSG };
   return { ok: true, error: null };
 }
+
+/** Open join: public subscribe, no publish. Host grant stays separate. */
+export function liveKitViewerGrant(room: string) {
+  return {
+    roomJoin: true as const,
+    room,
+    roomCreate: false as const,
+    canPublish: false as const,
+    canSubscribe: true as const,
+    canPublishData: false as const,
+  };
+}
+
+export function liveKitHostGrant(room: string) {
+  return {
+    roomJoin: true as const,
+    room,
+    roomCreate: true as const,
+    canPublish: true as const,
+    canSubscribe: true as const,
+    canPublishData: true as const,
+  };
+}

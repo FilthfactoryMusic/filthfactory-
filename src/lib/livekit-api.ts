@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { liveKitRoomName, resolveLiveTransport, runtimeGet, runtimeLiveEnv } from "@/lib/live-transport";
+import {
+  liveKitHostGrant,
+  liveKitRoomName,
+  liveKitViewerGrant,
+  resolveLiveTransport,
+  runtimeGet,
+  runtimeLiveEnv,
+} from "@/lib/live-transport";
 
 export type LiveKitMint = {
   mode: "livekit";
@@ -48,9 +55,7 @@ async function mintJwt(opts: {
   apiSecret: string;
   identity: string;
   name: string;
-  room: string;
-  canPublish: boolean;
-  canSubscribe: boolean;
+  grant: ReturnType<typeof liveKitViewerGrant> | ReturnType<typeof liveKitHostGrant>;
 }) {
   const { AccessToken } = await import("livekit-server-sdk");
   const at = new AccessToken(opts.apiKey, opts.apiSecret, {
@@ -58,14 +63,7 @@ async function mintJwt(opts: {
     name: opts.name,
     ttl: "6h",
   });
-  at.addGrant({
-    roomJoin: true,
-    room: opts.room,
-    roomCreate: opts.canPublish,
-    canPublish: opts.canPublish,
-    canSubscribe: opts.canSubscribe,
-    canPublishData: opts.canPublish,
-  });
+  at.addGrant(opts.grant);
   return at.toJwt();
 }
 
@@ -95,9 +93,7 @@ export const mintLiveKitViewerToken = createServerFn({ method: "POST" })
       apiSecret: creds.apiSecret,
       identity: `viewer_${viewerId}`,
       name: "Listener",
-      room,
-      canPublish: false,
-      canSubscribe: true,
+      grant: liveKitViewerGrant(room),
     });
     return { mode: "livekit", url: creds.url, token, room };
   });
@@ -134,9 +130,7 @@ export const mintLiveKitHostToken = createServerFn({ method: "POST" })
       apiSecret: creds.apiSecret,
       identity: `host_${context.userId.slice(0, 48)}`,
       name,
-      room,
-      canPublish: true,
-      canSubscribe: true,
+      grant: liveKitHostGrant(room),
     });
     return { mode: "livekit", url: creds.url, token, room };
   });

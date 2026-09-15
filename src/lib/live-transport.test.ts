@@ -4,7 +4,9 @@ import {
   boothPublishAllowed,
   clientTransportPlan,
   liveKitConfigured,
+  liveKitHostGrant,
   liveKitRoomName,
+  liveKitViewerGrant,
   liveTransportInfo,
   resolveLiveTransport,
 } from "./live-transport.ts";
@@ -67,6 +69,28 @@ describe("resolveLiveTransport", () => {
       "livekit",
     );
   });
+  it("keeps www on mesh even when LiveKit Cloud keys are present", () => {
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "production",
+        APP_URL: "https://www.filthfactory.co.uk",
+        LIVEKIT_URL: "wss://x.livekit.cloud",
+        LIVEKIT_API_KEY: "k",
+        LIVEKIT_API_SECRET: "s",
+      }),
+      "mesh",
+    );
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "production",
+        APP_URL: "https://filthfactory.co.uk",
+        LIVEKIT_URL: "wss://x.livekit.cloud",
+        LIVEKIT_API_KEY: "k",
+        LIVEKIT_API_SECRET: "s",
+      }),
+      "mesh",
+    );
+  });
   it("defaults local/preview sandboxes to livekit", () => {
     assert.equal(resolveLiveTransport({}), "livekit");
   });
@@ -119,6 +143,29 @@ describe("clientTransportPlan", () => {
       ok: true,
       error: null,
     });
+  });
+});
+
+describe("liveKit grants", () => {
+  it("viewer is open join: subscribe only, no publish", () => {
+    assert.deepEqual(liveKitViewerGrant("live_abc"), {
+      roomJoin: true,
+      room: "live_abc",
+      roomCreate: false,
+      canPublish: false,
+      canSubscribe: true,
+      canPublishData: false,
+    });
+  });
+  it("host can publish; viewer cannot", () => {
+    const host = liveKitHostGrant("live_abc");
+    const viewer = liveKitViewerGrant("live_abc");
+    assert.equal(host.canPublish, true);
+    assert.equal(host.canSubscribe, true);
+    assert.equal(host.roomCreate, true);
+    assert.equal(viewer.canPublish, false);
+    assert.equal(viewer.canSubscribe, true);
+    assert.equal(viewer.roomCreate, false);
   });
 });
 
