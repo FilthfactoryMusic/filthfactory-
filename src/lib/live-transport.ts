@@ -45,3 +45,4 @@ export function liveTransportInfo(
 }
 
 export const LIVEKIT_MISSING_MSG = "LiveKit is not configured on this server.";
+export const LIVEKIT_CONNECT_MSG = "Can't reach the live room. Tap the listen link again.";
