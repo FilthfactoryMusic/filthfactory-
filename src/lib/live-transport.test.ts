@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import {
   boothPublishAllowed,
@@ -10,6 +13,30 @@ import {
   liveTransportInfo,
   resolveLiveTransport,
 } from "./live-transport.ts";
+
+const KEYS = {
+  LIVEKIT_URL: "wss://x.livekit.cloud",
+  LIVEKIT_API_KEY: "k",
+  LIVEKIT_API_SECRET: "s",
+} as const;
+
+function exportBlock(src: string, name: string) {
+  const start = src.indexOf(`export const ${name}`);
+  assert.ok(start >= 0, `missing export ${name}`);
+  const rest = src.slice(start + 1);
+  const nextConst = rest.search(/\nexport const /);
+  const nextFn = rest.search(/\nexport function /);
+  const cuts = [nextConst, nextFn].filter((n) => n >= 0);
+  const end = cuts.length ? start + 1 + Math.min(...cuts) : src.length;
+  return src.slice(start, end);
+}
+
+function serverFnChain(block: string) {
+  const i = block.indexOf("createServerFn");
+  const h = block.indexOf(".handler(");
+  assert.ok(i >= 0 && h > i, "expected createServerFn(...).handler");
+  return block.slice(i, h);
+}
 
 describe("liveKitRoomName", () => {
   it("prefixes liveId", () => {
@@ -33,28 +60,8 @@ describe("resolveLiveTransport", () => {
       "mesh",
     );
   });
-  it("defaults preview to livekit and fail-closes without keys", () => {
-    assert.equal(resolveLiveTransport({ VERCEL_ENV: "preview" }), "livekit");
-    const plan = clientTransportPlan(liveTransportInfo({ VERCEL_ENV: "preview" }));
-    assert.equal(plan.livekit, false);
-    assert.equal(plan.mesh, false);
-    assert.equal(plan.error, "LiveKit is not configured on this server.");
-  });
-  it("uses LiveKit on preview when Cloud keys exist — never mesh", () => {
-    const env = {
-      VERCEL_ENV: "preview",
-      LIVEKIT_URL: "wss://x.livekit.cloud",
-      LIVEKIT_API_KEY: "k",
-      LIVEKIT_API_SECRET: "s",
-    };
-    assert.equal(resolveLiveTransport(env), "livekit");
-    assert.deepEqual(clientTransportPlan(liveTransportInfo(env)), {
-      livekit: true,
-      mesh: false,
-      error: null,
-    });
-  });
-  it("keeps www production on mesh when unset", () => {
+  it("production unset without keys stays mesh", () => {
+    assert.equal(resolveLiveTransport({ VERCEL_ENV: "production" }), "mesh");
     assert.equal(
       resolveLiveTransport({
         VERCEL_ENV: "production",
@@ -62,9 +69,6 @@ describe("resolveLiveTransport", () => {
       }),
       "mesh",
     );
-  });
-  it("keeps any production deploy on mesh when LIVE_TRANSPORT is unset", () => {
-    assert.equal(resolveLiveTransport({ VERCEL_ENV: "production" }), "mesh");
     assert.equal(
       resolveLiveTransport({
         VERCEL_ENV: "production",
@@ -73,7 +77,25 @@ describe("resolveLiveTransport", () => {
       "mesh",
     );
   });
-  it("does not default production to livekit — only an explicit flag flips it", () => {
+  it("configured LiveKit selects livekit, including production/www", () => {
+    assert.equal(resolveLiveTransport({ ...KEYS }), "livekit");
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "production",
+        APP_URL: "https://www.filthfactory.co.uk",
+        ...KEYS,
+      }),
+      "livekit",
+    );
+    assert.equal(
+      resolveLiveTransport({
+        VERCEL_ENV: "preview",
+        ...KEYS,
+      }),
+      "livekit",
+    );
+  });
+  it("explicit LIVE_TRANSPORT=livekit still wins on production", () => {
     assert.equal(
       resolveLiveTransport({
         VERCEL_ENV: "production",
@@ -83,33 +105,12 @@ describe("resolveLiveTransport", () => {
       "livekit",
     );
   });
-  it("keeps www on mesh even when LiveKit Cloud keys are present", () => {
-    const env = {
-      VERCEL_ENV: "production",
-      APP_URL: "https://www.filthfactory.co.uk",
-      LIVEKIT_URL: "wss://x.livekit.cloud",
-      LIVEKIT_API_KEY: "k",
-      LIVEKIT_API_SECRET: "s",
-    };
-    assert.equal(resolveLiveTransport(env), "mesh");
-    assert.deepEqual(clientTransportPlan(liveTransportInfo(env)), {
-      livekit: false,
-      mesh: true,
-      error: null,
-    });
-    assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://filthfactory.co.uk",
-        LIVEKIT_URL: "wss://x.livekit.cloud",
-        LIVEKIT_API_KEY: "k",
-        LIVEKIT_API_SECRET: "s",
-      }),
-      "mesh",
-    );
+  it("unset flag and missing keys resolve to mesh (preview and local)", () => {
+    assert.equal(resolveLiveTransport({}), "mesh");
+    assert.equal(resolveLiveTransport({ VERCEL_ENV: "preview" }), "mesh");
   });
-  it("defaults local/preview sandboxes to livekit", () => {
-    assert.equal(resolveLiveTransport({}), "livekit");
+  it("LIVE_TRANSPORT=mesh wins even when Cloud keys exist", () => {
+    assert.equal(resolveLiveTransport({ LIVE_TRANSPORT: "mesh", ...KEYS }), "mesh");
   });
 });
 
@@ -131,9 +132,7 @@ describe("clientTransportPlan", () => {
   it("does not treat configured LiveKit as mesh", () => {
     const info = liveTransportInfo({
       LIVE_TRANSPORT: "livekit",
-      LIVEKIT_URL: "wss://x.livekit.cloud",
-      LIVEKIT_API_KEY: "k",
-      LIVEKIT_API_SECRET: "s",
+      ...KEYS,
     });
     assert.deepEqual(clientTransportPlan(info), {
       livekit: true,
@@ -144,13 +143,27 @@ describe("clientTransportPlan", () => {
   });
   it("never enables mesh when LiveKit is requested but unconfigured", () => {
     const preview = clientTransportPlan(
-      liveTransportInfo({ VERCEL_ENV: "preview" }),
+      liveTransportInfo({ VERCEL_ENV: "preview", LIVE_TRANSPORT: "livekit" }),
     );
     assert.equal(preview.mesh, false);
     assert.equal(preview.livekit, false);
     assert.equal(preview.error, "LiveKit is not configured on this server.");
+
+    const flagged = clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "livekit" }));
+    assert.equal(flagged.mesh, false);
+    assert.equal(flagged.livekit, false);
   });
-  it("keeps mesh only when LIVE_TRANSPORT=mesh", () => {
+  it("preview with Cloud keys is livekit, never mesh", () => {
+    const plan = clientTransportPlan(
+      liveTransportInfo({ VERCEL_ENV: "preview", ...KEYS }),
+    );
+    assert.deepEqual(plan, { livekit: true, mesh: false, error: null });
+    assert.deepEqual(boothPublishAllowed(liveTransportInfo({ VERCEL_ENV: "preview", ...KEYS })), {
+      ok: true,
+      error: null,
+    });
+  });
+  it("keeps mesh only when mode is mesh", () => {
     assert.deepEqual(clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
       livekit: false,
       mesh: true,
@@ -180,9 +193,12 @@ describe("liveKit grants", () => {
     assert.equal(host.canPublish, true);
     assert.equal(host.canSubscribe, true);
     assert.equal(host.roomCreate, true);
+    assert.equal(host.canPublishData, true);
+    assert.equal(host.roomJoin, true);
     assert.equal(viewer.canPublish, false);
     assert.equal(viewer.canSubscribe, true);
     assert.equal(viewer.roomCreate, false);
+    assert.equal(viewer.canPublishData, false);
   });
 });
 
@@ -199,13 +215,27 @@ describe("liveKitConfigured", () => {
     );
   });
   it("is true when url, key and secret are set", () => {
-    assert.equal(
-      liveKitConfigured({
-        LIVEKIT_URL: "wss://x.livekit.cloud",
-        LIVEKIT_API_KEY: "k",
-        LIVEKIT_API_SECRET: "s",
-      }),
-      true,
-    );
+    assert.equal(liveKitConfigured({ ...KEYS }), true);
+  });
+});
+
+describe("anonymous viewer mint stays public", () => {
+  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "livekit-api.ts"), "utf8");
+
+  it("exports LIVEKIT_VIEWER_MINT_REQUIRES_AUTH = false", () => {
+    assert.match(src, /export const LIVEKIT_VIEWER_MINT_REQUIRES_AUTH = false as const/);
+  });
+
+  it("mintLiveKitViewerToken has no authMiddleware", () => {
+    const chain = serverFnChain(exportBlock(src, "mintLiveKitViewerToken"));
+    assert.doesNotMatch(chain, /authMiddleware/);
+    assert.doesNotMatch(chain, /\.middleware\s*\(/);
+    assert.match(exportBlock(src, "mintLiveKitViewerToken"), /liveKitViewerGrant/);
+  });
+
+  it("mintLiveKitHostToken stays behind authMiddleware", () => {
+    const chain = serverFnChain(exportBlock(src, "mintLiveKitHostToken"));
+    assert.match(chain, /authMiddleware/);
+    assert.match(exportBlock(src, "mintLiveKitHostToken"), /liveKitHostGrant/);
   });
 });

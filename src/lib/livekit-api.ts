@@ -78,6 +78,9 @@ export const getLiveTransport = createServerFn({ method: "GET" }).handler(async 
   }
 });
 
+/** Test hook: anonymous viewer mint. Do not attach authMiddleware to mintLiveKitViewerToken. */
+export const LIVEKIT_VIEWER_MINT_REQUIRES_AUTH = false as const;
+
 export const mintLiveKitViewerToken = createServerFn({ method: "POST" })
   .validator((d: { liveId: string; viewerId: string }) => d)
   .handler(async ({ data }): Promise<LiveKitMint> => {
