@@ -420,6 +420,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
           {ownLive ? (
             <div className="mt-4">
               <p className="font-display text-lg font-semibold uppercase tracking-wide text-live">On air — leave this page open</p>
+              <p className="mt-2 text-sm text-live">Keep the screen on. Locking the phone or switching apps kills the mic.</p>
               <p className="mt-2 text-sm text-muted">Anyone opens this link to hear you:</p>
               <p className="mt-2 break-all rounded-sm bg-bg px-3 py-2 font-mono text-sm text-fg">{watchUrl || `https://www.filthfactory.co.uk/live/${ownLive.id}`}</p>
               <div className="mt-4 flex flex-wrap gap-2">

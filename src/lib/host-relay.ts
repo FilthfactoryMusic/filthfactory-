@@ -100,6 +100,17 @@ function arm(liveId: string, stream: MediaStream | null) {
   slot.ctx = ctx;
   slot.proc = proc;
   slot.src = src;
+  try {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.gain.value = 0.00008;
+    osc.frequency.value = 18;
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start();
+  } catch {
+    /* keep-alive tone optional */
+  }
 }
 
 export function startHostRelay(liveId: string) {
