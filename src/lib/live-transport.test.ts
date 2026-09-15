@@ -75,6 +75,14 @@ describe("clientTransportPlan", () => {
       error: null,
     });
   });
+  it("never enables mesh when LiveKit is requested but unconfigured", () => {
+    const preview = clientTransportPlan(
+      liveTransportInfo({ VERCEL_ENV: "preview" }),
+    );
+    assert.equal(preview.mesh, false);
+    assert.equal(preview.livekit, false);
+    assert.equal(preview.error, "LiveKit is not configured on this server.");
+  });
   it("keeps mesh only when LIVE_TRANSPORT=mesh", () => {
     assert.deepEqual(clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
       livekit: false,

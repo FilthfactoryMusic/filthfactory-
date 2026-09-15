@@ -20,6 +20,7 @@ import { HonestyBanner } from "@/components/honesty-banner";
 import { LogoStage } from "@/components/logo-stage";
 import { publicHandle, writeHandle } from "@/lib/handle";
 import { rememberStreamKey, startHostRelay } from "@/lib/host-relay";
+import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export const Route = createFileRoute("/booth")({ component: BoothPage });
 
@@ -122,6 +123,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const stopLiveLocal = useLibrary((s) => s.stopLive);
   const ownLive = useLibrary((s) => s.ownLive);
   const host = useHostBroadcast(ownLive?.id ?? null);
+  const transport = useLiveTransport();
   const setName = useLibrary((s) => s.setName);
   const playLive = usePlayer((s) => s.playLive);
   const stop = usePlayer((s) => s.stop);
@@ -255,7 +257,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
       });
       const streamKey = "streamKey" in show ? String((show as { streamKey?: string }).streamKey ?? "") : "";
       if (streamKey) rememberStreamKey(show.id, streamKey);
-      startHostRelay(show.id);
+      if (transport.mesh) startHostRelay(show.id);
       startLiveLocal(show);
       playLive(show.id);
       void navigate({ to: "/live/$id", params: { id: show.id } });
