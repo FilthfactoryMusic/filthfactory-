@@ -141,6 +141,23 @@ function BoothStudio({ featured }: { featured: boolean }) {
   const [dropRights, setDropRights] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
   const [watchUrl, setWatchUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  function listenLink(id: string) {
+    return `https://www.filthfactory.co.uk/live/${id}`;
+  }
+
+  async function copyListen(id: string) {
+    const url = listenLink(id);
+    setWatchUrl(url);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 4000);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   const displayName = publicHandle(user);
   const photo = user?.profileImageUrl ?? null;
@@ -259,7 +276,9 @@ function BoothStudio({ featured }: { featured: boolean }) {
       startHostRelay(show.id);
       startLiveLocal(show);
       playLive(show.id);
-      setWatchUrl(`${window.location.origin}/live/${show.id}`);
+      const url = listenLink(show.id);
+      setWatchUrl(url);
+      void copyListen(show.id);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.includes("MEMBERSHIP")) {
@@ -421,18 +440,27 @@ function BoothStudio({ featured }: { featured: boolean }) {
             <div className="mt-4">
               <p className="font-display text-lg font-semibold uppercase tracking-wide text-live">On air — leave this page open</p>
               <p className="mt-2 text-sm text-live">Keep the screen on. Locking the phone or switching apps kills the mic.</p>
-              <p className="mt-2 text-sm text-muted">Anyone opens this link to hear you:</p>
-              <p className="mt-2 break-all rounded-sm bg-bg px-3 py-2 font-mono text-sm text-fg">{watchUrl || `https://www.filthfactory.co.uk/live/${ownLive.id}`}</p>
+              <p className="mt-2 text-sm text-muted">Listen link — copied. Send this to anyone:</p>
+              <p className="mt-2 break-all rounded-sm bg-bg px-3 py-2 font-mono text-sm text-fg">{watchUrl || listenLink(ownLive.id)}</p>
+              {copied ? <p className="mt-2 text-sm text-live">Copied. Paste it in their top address bar.</p> : null}
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button type="button" variant="live" className="h-12" onClick={() => void copyListen(ownLive.id)}>
+                  {copied ? "Copied" : "Copy listen link"}
+                </Button>
                 <Button
                   type="button"
-                  variant="live"
+                  variant="outline"
+                  className="h-12"
                   onClick={() => {
-                    const url = watchUrl || `${window.location.origin}/live/${ownLive.id}`;
-                    void navigator.clipboard?.writeText(url);
+                    const url = listenLink(ownLive.id);
+                    if (navigator.share) {
+                      void navigator.share({ title: "Filthfactory live", url, text: url });
+                    } else {
+                      void copyListen(ownLive.id);
+                    }
                   }}
                 >
-                  Copy listen link
+                  Share
                 </Button>
                 <Button type="button" variant="outline" asChild>
                   <Link to="/live/$id" params={{ id: ownLive.id }}>
