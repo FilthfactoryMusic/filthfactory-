@@ -148,64 +148,54 @@ function useWatchMesh(
   }, [liveId, enabled]);
 
   const playerRef = useRef<HTMLAudioElement | null>(null);
+  const unlockCtx = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!liveId || !enabled) return;
-    const player = new Audio();
-    player.autoplay = true;
-    player.preload = "auto";
-    player.muted = false;
-    player.volume = 1;
-    player.setAttribute("playsinline", "true");
-    playerRef.current = player;
-    if (audioRef.current) {
-      audioRef.current.muted = false;
-      audioRef.current.volume = 1;
-    }
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AC();
+    unlockCtx.current = ctx;
+    void ctx.resume().catch(() => {});
+    const gain = ctx.createGain();
+    gain.gain.value = 1;
+    gain.connect(ctx.destination);
+    let nextAt = 0;
     let dead = false;
     let afterSeq = 0;
-    const blobs: Blob[] = [];
-    let blobPlaying = false;
     const id = liveId;
+    const seen = new Set<number>();
 
-    function sink() {
-      return audioRef.current ?? player;
-    }
-
-    function playBlobQueue() {
-      if (blobPlaying || !blobs.length || dead) return;
-      blobPlaying = true;
-      const blob = blobs.shift()!;
-      const url = URL.createObjectURL(blob);
-      const el = sink();
-      el.srcObject = null;
-      el.src = url;
-      el.muted = false;
-      el.volume = 1;
-      el.onplaying = () => setStatus("audio");
-      void el.play().then(() => setStatus("audio")).catch(() => {
-        blobPlaying = false;
-        setStatus("blocked");
-      });
-      el.onended = () => {
-        URL.revokeObjectURL(url);
-        blobPlaying = false;
-        playBlobQueue();
-      };
+    async function playWav(buf: ArrayBuffer) {
+      try {
+        const copy = buf.slice(0);
+        const decoded = await ctx.decodeAudioData(copy);
+        if (dead) return;
+        const src = ctx.createBufferSource();
+        src.buffer = decoded;
+        src.connect(gain);
+        const now = ctx.currentTime;
+        if (nextAt < now + 0.05) nextAt = now + 0.05;
+        src.start(nextAt);
+        nextAt += decoded.duration;
+        setStatus("audio");
+      } catch {
+        /* skip a bad slice, keep the stream */
+      }
     }
 
     async function tickChunks() {
       if (dead) return;
+      void ctx.resume().catch(() => {});
       try {
         const rows = await pullBoothChunks({ data: { liveId: id, afterSeq } });
         for (const row of rows) {
-          afterSeq = row.seq;
-          const buf = b64ToBuf(row.data);
-          blobs.push(new Blob([buf], { type: row.mime || "audio/wav" }));
-          playBlobQueue();
+          if (seen.has(row.seq)) continue;
+          seen.add(row.seq);
+          afterSeq = Math.max(afterSeq, row.seq);
+          await playWav(b64ToBuf(row.data));
         }
       } catch {
-        /* keep pulling the website */
+        /* keep pulling */
       }
     }
 
@@ -214,18 +204,19 @@ function useWatchMesh(
     return () => {
       dead = true;
       window.clearInterval(poll);
-      player.pause();
-      player.removeAttribute("src");
-      playerRef.current = null;
+      void ctx.close().catch(() => {});
+      unlockCtx.current = null;
     };
   }, [liveId, enabled]);
 
   function unlock() {
+    const ctx = unlockCtx.current;
+    if (ctx) void ctx.resume().then(() => setStatus("audio")).catch(() => setStatus("blocked"));
     const a = audioRef.current ?? playerRef.current;
     if (a) {
       a.muted = false;
       a.volume = 1;
-      void a.play().then(() => setStatus("audio")).catch(() => setStatus("blocked"));
+      void a.play().catch(() => {});
     }
   }
 

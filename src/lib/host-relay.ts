@@ -5,7 +5,7 @@ import { postBoothChunk } from "@/lib/stream-api";
 
 const KEY = (id: string) => `ff-stream:${id}`;
 const TARGET_RATE = 16000;
-const SLICE_SEC = 2;
+const SLICE_SEC = 1;
 
 export function rememberStreamKey(liveId: string, key: string) {
   try {
@@ -116,7 +116,6 @@ function arm(liveId: string, stream: MediaStream | null) {
 export function startHostRelay(liveId: string) {
   if (run?.liveId === liveId && !run.dead) {
     void run.ctx?.resume().catch(() => {});
-    arm(liveId, getBoothStream());
     return;
   }
   stopHostRelay();
@@ -144,7 +143,6 @@ export function startHostRelay(liveId: string) {
   current.vis = () => {
     if (document.visibilityState === "visible") {
       void current.ctx?.resume().catch(() => {});
-      arm(liveId, getBoothStream());
       void grabWake(current);
     }
   };
