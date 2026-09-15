@@ -43,7 +43,10 @@ export function RepresentShare(props: Props) {
   const [busy, setBusy] = useState(false);
 
   function pageUrl() {
-    return typeof window === "undefined" ? "https://www.filthfactory.co.uk" : window.location.href;
+    if (typeof window === "undefined") return "https://www.filthfactory.co.uk";
+    const path = window.location.pathname + window.location.search;
+    if (path.startsWith("/live/")) return `https://www.filthfactory.co.uk${path}`;
+    return window.location.href;
   }
 
   function text() {

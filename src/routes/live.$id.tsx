@@ -217,6 +217,18 @@ function LiveShowPage() {
             artwork={show.artwork || "/art/brand/logo-stamp.png"}
             live={show.status === "live"}
           />
+          {booth ? (
+            <button
+              type="button"
+              className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg"
+              onClick={() => {
+                const url = `https://www.filthfactory.co.uk/live/${show.id}`;
+                void navigator.clipboard.writeText(url).catch(() => {});
+              }}
+            >
+              Copy listen link
+            </button>
+          ) : null}
           <span className="flex h-11 items-center text-sm text-muted tabular-nums">
             {formatCount(Math.max(1, listeners))} listening
           </span>
