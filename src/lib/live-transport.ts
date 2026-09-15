@@ -46,17 +46,28 @@ export function liveKitConfigured(env: Record<string, string | undefined> = proc
 }
 
 /**
- * Keys present → LiveKit (including www).
- * LIVE_TRANSPORT=mesh forces mesh.
- * Never return livekit without keys — that bricks the booth.
+ * LIVE_TRANSPORT=livekit|mesh wins.
+ * Unset: preview/staging default to LiveKit; any Vercel production deploy stays mesh.
+ * Never default Production to livekit — that flip is an explicit env set after soak PASS.
+ * Missing keys still fail closed (no mesh fallback) when the mode is livekit.
  */
 export function resolveLiveTransport(
   env: Record<string, string | undefined> = process.env,
 ): LiveTransportMode {
   const flag = env["LIVE_TRANSPORT"]?.trim().toLowerCase();
+  if (flag === "livekit") return "livekit";
   if (flag === "mesh") return "mesh";
-  if (liveKitConfigured(env)) return "livekit";
-  return "mesh";
+
+  const hosts = [env.APP_URL, env.VERCEL_PROJECT_PRODUCTION_URL, env.VERCEL_URL]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const vercelEnv = env.VERCEL_ENV ?? "";
+  const stagingHint =
+    /staging|preview/.test(hosts) || vercelEnv === "preview" || vercelEnv === "development";
+  if (stagingHint) return "livekit";
+  if (vercelEnv === "production") return "mesh";
+  return "livekit";
 }
 
 export function liveTransportInfo(
