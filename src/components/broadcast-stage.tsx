@@ -127,12 +127,7 @@ function ViewerStage({
           {onAir ? <LogoStage label={`${title} · audio`} /> : <img src={artwork} alt="" className="aspect-video w-full object-cover" />}
         </div>
       ) : null}
-      <audio ref={audioRef} autoPlay playsInline controls className="absolute bottom-0 left-0 right-0 z-10 h-10 w-full bg-bg/80" />
-      {onAir ? (
-        <div className="absolute left-3 top-3">
-          <LiveDot />
-        </div>
-      ) : null}
+      <audio ref={audioRef} autoPlay playsInline controls className="relative z-30 mt-2 h-12 w-full bg-bg" />
       {copy ? (
         <button
           type="button"
@@ -140,7 +135,7 @@ function ViewerStage({
             unlock();
             onNeedGesture?.();
           }}
-          className="absolute inset-0 grid place-items-center bg-bg/50"
+          className="absolute inset-x-0 top-0 z-20 grid h-[70%] place-items-center bg-bg/40"
         >
           <span className="rounded-sm bg-live px-5 py-3 text-sm font-medium text-live-fg">
             {error ? error : status === "blocked" || !enabled ? "Tap to listen" : copy}
