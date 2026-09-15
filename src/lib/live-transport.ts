@@ -12,32 +12,6 @@ export function liveKitRoomName(liveId: string) {
   return `live_${liveId}`;
 }
 
-/** Read host env at request time. Vite must not inline these. */
-export function runtimeGet(name: string): string {
-  try {
-    const fn = new Function(
-      "k",
-      "try { return String((globalThis.process && globalThis.process.env && globalThis.process.env[k]) || ''); } catch (e) { return ''; }",
-    );
-    return String(fn(name) || "").trim();
-  } catch {
-    return "";
-  }
-}
-
-export function runtimeLiveEnv(): Record<string, string | undefined> {
-  return {
-    LIVE_TRANSPORT: runtimeGet("LIVE_TRANSPORT"),
-    LIVEKIT_URL: runtimeGet("LIVEKIT_URL"),
-    LIVEKIT_API_KEY: runtimeGet("LIVEKIT_API_KEY"),
-    LIVEKIT_API_SECRET: runtimeGet("LIVEKIT_API_SECRET"),
-    APP_URL: runtimeGet("APP_URL"),
-    VERCEL_ENV: runtimeGet("VERCEL_ENV"),
-    VERCEL_URL: runtimeGet("VERCEL_URL"),
-    VERCEL_PROJECT_PRODUCTION_URL: runtimeGet("VERCEL_PROJECT_PRODUCTION_URL"),
-  };
-}
-
 export function liveKitConfigured(env: Record<string, string | undefined> = process.env) {
   const url = String(env["LIVEKIT_URL"] ?? "").trim();
   const key = String(env["LIVEKIT_API_KEY"] ?? "").trim();
@@ -47,8 +21,8 @@ export function liveKitConfigured(env: Record<string, string | undefined> = proc
 
 /**
  * LIVE_TRANSPORT=livekit|mesh wins.
- * Unset: preview/staging default to LiveKit; any Vercel production deploy stays mesh.
- * Never default Production to livekit — that flip is an explicit env set after soak PASS.
+ * If LiveKit keys exist, use LiveKit — including www.filthfactory.co.uk.
+ * Mesh is the fallback when keys are missing (same-WiFi only, not a real broadcast).
  */
 export function resolveLiveTransport(
   env: Record<string, string | undefined> = process.env,
@@ -56,18 +30,8 @@ export function resolveLiveTransport(
   const flag = env["LIVE_TRANSPORT"]?.trim().toLowerCase();
   if (flag === "livekit") return "livekit";
   if (flag === "mesh") return "mesh";
-
-  const hosts = [env.APP_URL, env.VERCEL_PROJECT_PRODUCTION_URL, env.VERCEL_URL]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  const vercelEnv = env.VERCEL_ENV ?? "";
-  const stagingHint = /staging|preview/.test(hosts) || vercelEnv === "preview" || vercelEnv === "development";
-  if (stagingHint) return "livekit";
-
-  if (vercelEnv === "production") return "mesh";
-
-  return "livekit";
+  if (liveKitConfigured(env)) return "livekit";
+  return "mesh";
 }
 
 export function liveTransportInfo(
@@ -81,45 +45,3 @@ export function liveTransportInfo(
 }
 
 export const LIVEKIT_MISSING_MSG = "LiveKit is not configured on this server.";
-export const LIVEKIT_CONNECT_MSG = "LiveKit connect failed.";
-
-/** LiveKit never falls back to mesh/openrelay. Missing env fails closed. */
-export function clientTransportPlan(info: LiveTransportInfo): {
-  livekit: boolean;
-  mesh: boolean;
-  error: string | null;
-} {
-  if (info.mode === "mesh") return { livekit: false, mesh: true, error: null };
-  if (!info.configured) return { livekit: false, mesh: false, error: LIVEKIT_MISSING_MSG };
-  return { livekit: true, mesh: false, error: null };
-}
-
-/** Host may create a booth row only when mesh, or when LiveKit is actually configured. */
-export function boothPublishAllowed(info: LiveTransportInfo): { ok: boolean; error: string | null } {
-  if (info.mode === "mesh") return { ok: true, error: null };
-  if (!info.configured) return { ok: false, error: LIVEKIT_MISSING_MSG };
-  return { ok: true, error: null };
-}
-
-/** Open join: public subscribe, no publish. Host grant stays separate. */
-export function liveKitViewerGrant(room: string) {
-  return {
-    roomJoin: true as const,
-    room,
-    roomCreate: false as const,
-    canPublish: false as const,
-    canSubscribe: true as const,
-    canPublishData: false as const,
-  };
-}
-
-export function liveKitHostGrant(room: string) {
-  return {
-    roomJoin: true as const,
-    room,
-    roomCreate: true as const,
-    canPublish: true as const,
-    canSubscribe: true as const,
-    canPublishData: true as const,
-  };
-}

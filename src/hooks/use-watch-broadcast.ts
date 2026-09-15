@@ -10,14 +10,18 @@ import {
 } from "@/lib/stream-api";
 import { getViewerId } from "@/lib/viewer-id";
 import { registerWatchEl } from "@/lib/watch-media";
+import { useLiveTransport } from "@/hooks/use-live-transport";
+import { useWatchLiveKit } from "@/hooks/use-watch-livekit";
 import type { WatchStatus } from "@/hooks/watch-status";
 
 export type { WatchStatus };
 
 export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
+  const transport = useLiveTransport();
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  // Website WAV is the broadcast. LiveKit is not the listen path.
+  const livekitOn = enabled && transport.livekit;
+  const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
   const mesh = useWatchMesh(liveId, enabled, videoRef, audioRef);
 
   useEffect(() => {
@@ -25,6 +29,20 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     if (!node) return;
     return registerWatchEl(node);
   }, []);
+
+  const livekitReady =
+    livekitOn && !livekit.error && (livekit.status === "live" || livekit.status === "audio");
+
+  if (livekitReady) {
+    return {
+      status: livekit.status as WatchStatus,
+      remote: livekit.remote,
+      videoRef,
+      audioRef,
+      error: null as string | null,
+      unlock: livekit.unlock,
+    };
+  }
 
   return {
     status: mesh.status,
