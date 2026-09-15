@@ -22,8 +22,7 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const livekitOn = enabled && transport.livekit;
   const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
-  const meshOn = enabled && transport.mesh;
-  const mesh = useWatchMesh(liveId, meshOn, videoRef, audioRef);
+  const mesh = useWatchMesh(liveId, enabled, videoRef, audioRef);
 
   useEffect(() => {
     const node = videoRef.current;
@@ -37,24 +36,24 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
     return registerWatchEl(node);
   }, []);
 
-  if (transport.mesh) {
+  if (livekitOn && !livekit.error && (livekit.status === "live" || livekit.status === "audio")) {
     return {
-      status: mesh.status,
-      remote: mesh.remote,
+      status: livekit.status as WatchStatus,
+      remote: livekit.remote,
       videoRef,
       audioRef,
       error: null as string | null,
-      unlock: mesh.unlock,
+      unlock: livekit.unlock,
     };
   }
 
   return {
-    status: (transport.error ? "ended" : livekit.status) as WatchStatus,
-    remote: livekit.remote,
+    status: mesh.status,
+    remote: mesh.remote,
     videoRef,
     audioRef,
-    error: transport.error ?? livekit.error ?? null,
-    unlock: livekit.unlock,
+    error: null as string | null,
+    unlock: mesh.unlock,
   };
 }
 
@@ -177,24 +176,15 @@ function useWatchMesh(
     let dead = false;
     let afterSeq = 0;
     let mime = "";
-    let ms: MediaSource | null = null;
-    let sb: SourceBuffer | null = null;
-    const queue: ArrayBuffer[] = [];
     const blobs: Blob[] = [];
     let blobPlaying = false;
     const id = liveId;
 
     player.setAttribute("playsinline", "true");
     player.setAttribute("webkit-playsinline", "true");
-
-    function pump() {
-      if (!sb || sb.updating || !queue.length) return;
-      try {
-        sb.appendBuffer(queue.shift()!);
-      } catch {
-        queue.length = 0;
-      }
-    }
+    player.muted = false;
+    player.volume = 1;
+    player.autoplay = true;
 
     function playBlobQueue() {
       if (blobPlaying || !blobs.length || dead) return;
@@ -203,7 +193,8 @@ function useWatchMesh(
       const url = URL.createObjectURL(blob);
       player.srcObject = null;
       player.src = url;
-      void player.play().then(() => setStatus((s) => (s === "connecting" || s === "blocked" ? "audio" : s))).catch(() => {
+      player.onplaying = () => setStatus("audio");
+      void player.play().then(() => setStatus("audio")).catch(() => {
         blobPlaying = false;
         setStatus("blocked");
       });
@@ -214,29 +205,6 @@ function useWatchMesh(
       };
     }
 
-    function attachMse(nextMime: string) {
-      const ok =
-        "MediaSource" in window &&
-        (MediaSource.isTypeSupported(nextMime) || MediaSource.isTypeSupported(`${nextMime}; codecs="opus"`));
-      if (!ok) return false;
-      ms = new MediaSource();
-      player.srcObject = null;
-      player.src = URL.createObjectURL(ms);
-      ms.addEventListener("sourceopen", () => {
-        if (!ms) return;
-        try {
-          sb = ms.addSourceBuffer(nextMime);
-          sb.mode = "sequence";
-          sb.addEventListener("updateend", pump);
-          pump();
-        } catch {
-          sb = null;
-        }
-      });
-      void player.play().catch(() => setStatus("blocked"));
-      return true;
-    }
-
     async function tickChunks() {
       if (dead) return;
       try {
@@ -244,20 +212,9 @@ function useWatchMesh(
         for (const row of rows) {
           afterSeq = row.seq;
           const buf = b64ToBuf(row.data);
-          if (!mime) {
-            mime = row.mime;
-            if (!attachMse(mime)) {
-              blobs.push(new Blob([buf], { type: mime }));
-              playBlobQueue();
-            }
-            setStatus((s) => (s === "connecting" ? "audio" : s));
-          } else if (sb) {
-            queue.push(buf);
-            pump();
-          } else {
-            blobs.push(new Blob([buf], { type: mime || row.mime }));
-            playBlobQueue();
-          }
+          mime = row.mime || mime;
+          blobs.push(new Blob([buf], { type: mime || row.mime || "audio/webm" }));
+          playBlobQueue();
         }
       } catch {
         /* keep pulling the website */
@@ -269,11 +226,6 @@ function useWatchMesh(
     return () => {
       dead = true;
       window.clearInterval(poll);
-      try {
-        if (ms && ms.readyState === "open") ms.endOfStream();
-      } catch {
-        /* ignore */
-      }
     };
   }, [liveId, enabled]);
 

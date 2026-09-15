@@ -3,6 +3,7 @@ import { bufToB64, pickRecorderMime } from "@/lib/broadcast-ice";
 import { postBoothChunk } from "@/lib/stream-api";
 
 const KEY = (id: string) => `ff-stream:${id}`;
+const SLICE_MS = 2000;
 
 export function rememberStreamKey(liveId: string, key: string) {
   try {
@@ -20,10 +21,27 @@ export function readStreamKey(liveId: string) {
   }
 }
 
-type Run = { liveId: string; rec: MediaRecorder | null; dead: boolean; unsub: () => void; seq: number };
+type Run = {
+  liveId: string;
+  rec: MediaRecorder | null;
+  dead: boolean;
+  unsub: () => void;
+  seq: number;
+  timer: number | null;
+};
 
 let run: Run | null = null;
 
+function postFile(liveId: string, seq: number, mime: string, buf: ArrayBuffer) {
+  const data = bufToB64(buf);
+  if (data.length > 180_000) return Promise.resolve();
+  const payload = { liveId, seq, mime, data, streamKey: readStreamKey(liveId) };
+  return postBoothChunk({ data: payload }).catch(() =>
+    new Promise((r) => setTimeout(r, 400)).then(() => postBoothChunk({ data: payload }).catch(() => {})),
+  );
+}
+
+/** Stop/start so every blob is a full playable file (Xbox / Edge cannot play 400ms clusters). */
 function arm(liveId: string, stream: MediaStream | null) {
   if (!run || run.liveId !== liveId || run.dead) return;
   try {
@@ -31,47 +49,49 @@ function arm(liveId: string, stream: MediaStream | null) {
   } catch {
     /* ignore */
   }
+  if (run.timer != null) {
+    window.clearTimeout(run.timer);
+    run.timer = null;
+  }
   run.rec = null;
-  if (!stream?.getAudioTracks().length) return;
-  const mime = pickRecorderMime(stream);
-  if (!mime) return;
+  const audioTracks = stream?.getAudioTracks().filter((t) => t.readyState === "live" && t.enabled) ?? [];
+  if (!audioTracks.length) return;
+  const audioOnly = new MediaStream(audioTracks);
+  const mime = pickRecorderMime(audioOnly) || "audio/webm";
   const slot = run;
-  function send(ev: BlobEvent, useMime: string) {
-    if (!ev.data.size || slot.dead) return;
-    const n = ++slot.seq;
-    void ev.data
-      .arrayBuffer()
-      .then((buf) => {
-        const data = bufToB64(buf);
-        if (data.length > 180_000) return;
-        const payload = { liveId, seq: n, mime: useMime, data, streamKey: readStreamKey(liveId) };
-        const sendOnce = () => postBoothChunk({ data: payload });
-        return sendOnce().catch(() => new Promise((r) => setTimeout(r, 400)).then(sendOnce));
-      })
-      .catch(() => {});
-  }
-  try {
-    const rec = new MediaRecorder(stream, {
-      mimeType: mime,
-      audioBitsPerSecond: 96_000,
-      videoBitsPerSecond: 250_000,
-    });
-    rec.ondataavailable = (ev) => send(ev, mime);
-    rec.start(400);
-    run.rec = rec;
-  } catch {
-    /* try audio-only */
+
+  function cycle() {
+    if (!run || run !== slot || slot.dead) return;
+    let rec: MediaRecorder;
     try {
-      const audioOnly = new MediaStream(stream.getAudioTracks());
-      const audioMime = pickRecorderMime(audioOnly) || "audio/webm";
-      const rec = new MediaRecorder(audioOnly, { mimeType: audioMime, audioBitsPerSecond: 96_000 });
-      rec.ondataavailable = (ev) => send(ev, audioMime);
-      rec.start(400);
-      run.rec = rec;
+      rec = new MediaRecorder(audioOnly, { mimeType: mime, audioBitsPerSecond: 96_000 });
     } catch {
-      /* device cannot record */
+      try {
+        rec = new MediaRecorder(audioOnly);
+      } catch {
+        return;
+      }
     }
+    rec.ondataavailable = (ev) => {
+      if (!ev.data.size || slot.dead) return;
+      const n = ++slot.seq;
+      const type = ev.data.type || rec.mimeType || mime;
+      void ev.data.arrayBuffer().then((buf) => postFile(liveId, n, type, buf));
+    };
+    rec.start();
+    slot.rec = rec;
+    slot.timer = window.setTimeout(() => {
+      try {
+        rec.stop();
+      } catch {
+        /* ignore */
+      }
+      slot.timer = null;
+      cycle();
+    }, SLICE_MS);
   }
+
+  cycle();
 }
 
 /** Phone → website. Survives navigating from booth to the live page. */
@@ -81,7 +101,7 @@ export function startHostRelay(liveId: string) {
     return;
   }
   stopHostRelay();
-  const current: Run = { liveId, rec: null, dead: false, unsub: () => {}, seq: 0 };
+  const current: Run = { liveId, rec: null, dead: false, unsub: () => {}, seq: 0, timer: null };
   run = current;
   current.unsub = subscribeBoothStream((s) => arm(liveId, s));
   arm(liveId, getBoothStream());
@@ -90,6 +110,7 @@ export function startHostRelay(liveId: string) {
 export function stopHostRelay() {
   if (!run) return;
   run.dead = true;
+  if (run.timer != null) window.clearTimeout(run.timer);
   try {
     run.rec?.stop();
   } catch {
