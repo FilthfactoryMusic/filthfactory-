@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { HonestyBanner } from "@/components/honesty-banner";
 import { BrandedText } from "@/components/brand-mark";
 import { LiveCard } from "@/components/live-card";
@@ -9,7 +9,6 @@ import { useLibrary } from "@/lib/library-store";
 import { usePlayer } from "@/lib/player-store";
 import { useMyBlocks } from "@/lib/use-blocks";
 import { useJustLive } from "@/lib/use-just-live";
-import { LiveBoothCta } from "@/components/live-booth-cta";
 
 export const Route = createFileRoute("/live/")({ component: LivePage });
 
@@ -28,8 +27,14 @@ function formatWhen(iso?: string) {
 function LivePage() {
   const community = useCommunityLive();
   const blocked = useMyBlocks();
+  const factory = community.filter(
+    (s) =>
+      (s.id.startsWith("live-") || s.id.startsWith("url-")) &&
+      !blocked.has(s.djId) &&
+      !blocked.has(s.hostUserId),
+  );
   const live = mergeLiveNow(community).filter(
-    (s) => !blocked.has(s.djId) && !blocked.has(s.hostUserId),
+    (s) => !blocked.has(s.djId) && !blocked.has(s.hostUserId) && !s.id.startsWith("live-") && !s.id.startsWith("url-"),
   );
   const upcoming = liveUpcoming();
   const ownLive = useLibrary((s) => s.ownLive);
@@ -42,10 +47,12 @@ function LivePage() {
         <div>
           <h1 className="font-display text-4xl font-semibold uppercase tracking-wide">On air</h1>
           <p className="mt-1 text-sm text-muted">
-            <BrandedText text="Rinse, Flex, Groove London, Thames Delta, Radio Respect. Anyone can join a Filthfactory booth room — no mates-only lock." />
+            <BrandedText text="Factory booths first. Then Rinse, Flex, Groove London, Thames Delta, Radio Respect." />
           </p>
         </div>
-        <LiveBoothCta size="sm" className="shrink-0" />
+        <Link to="/booth" className="inline-flex h-11 items-center rounded-md bg-live px-4 text-sm font-medium text-live-fg">
+          Go live
+        </Link>
       </div>
       <div className="mt-4">
         <HonestyBanner room="stations" />
@@ -68,7 +75,21 @@ function LivePage() {
         </div>
       ) : null}
 
-      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">On air</h2>
+      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Factory booths</h2>
+      <p className="mt-1 text-sm text-muted">Residents on Filthfactory right now. This is the one you watch on Xbox.</p>
+      {factory.length ? (
+        <div className="mt-4 grid gap-5 md:grid-cols-3">
+          {factory.map((s) => (
+            <LiveCard key={s.id} show={s} />
+          ))}
+        </div>
+      ) : (
+        <p className="mt-4 rounded-sm border border-border bg-raised px-4 py-6 text-sm text-muted">
+          Nobody on the factory booth. When you tap Go live on the phone, the room lands here in a few seconds — tap the card, then tap to listen.
+        </p>
+      )}
+
+      <h2 className="mt-10 font-display text-2xl font-semibold uppercase tracking-wide">Stations</h2>
       <div className="mt-4 grid gap-5 md:grid-cols-3">
         {live.map((s) => (
           <LiveCard key={s.id} show={s} />

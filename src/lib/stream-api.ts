@@ -159,6 +159,7 @@ export const postBoothChunk = createServerFn({ method: "POST" })
       `
     )[0];
     if (!live) throw new Error("ENDED");
+    await sql`update booth_lives set last_seen = now() where id = ${data.liveId}`;
     await sql`
       insert into booth_chunks (live_id, seq, mime, data)
       values (${data.liveId}, ${data.seq}, ${data.mime}, ${data.data})

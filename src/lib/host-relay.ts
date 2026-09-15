@@ -44,9 +44,9 @@ function arm(liveId: string, stream: MediaStream | null) {
       .then((buf) => {
         const data = bufToB64(buf);
         if (data.length > 180_000) return;
-        return postBoothChunk({
-          data: { liveId, seq: n, mime: useMime, data, streamKey: readStreamKey(liveId) },
-        });
+        const payload = { liveId, seq: n, mime: useMime, data, streamKey: readStreamKey(liveId) };
+        const sendOnce = () => postBoothChunk({ data: payload });
+        return sendOnce().catch(() => new Promise((r) => setTimeout(r, 400)).then(sendOnce));
       })
       .catch(() => {});
   }

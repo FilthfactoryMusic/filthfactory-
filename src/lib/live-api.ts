@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { genreToEngine } from "@/lib/catalog";
-import { boothPublishAllowed, liveTransportInfo, runtimeLiveEnv } from "@/lib/live-transport";
 import { hashString } from "@/lib/utils";
 import type { EngineGenre, LiveShow, Mix } from "@/lib/types";
 
@@ -119,13 +118,24 @@ function mixFromRow(row: MixRow): Mix {
 export const listBoothLives = createServerFn({ method: "GET" }).handler(async () => {
   const { getSql } = await import("@/lib/db");
   const sql = await getSql();
-  const rows = await sql<LiveRow>`
-    select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
-    from booth_lives
-    order by featured desc, started_at desc
-    limit 24
-  `;
-  return rows.map(liveFromRow);
+  try {
+    const rows = await sql<LiveRow>`
+      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
+      from booth_lives
+      where coalesce(last_seen, started_at) > now() - interval '3 minutes'
+      order by featured desc, started_at desc
+      limit 24
+    `;
+    return rows.map(liveFromRow);
+  } catch {
+    const rows = await sql<LiveRow>`
+      select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
+      from booth_lives
+      order by featured desc, started_at desc
+      limit 24
+    `;
+    return rows.map(liveFromRow);
+  }
 });
 
 export const startBoothLive = createServerFn({ method: "POST" })
@@ -135,8 +145,6 @@ export const startBoothLive = createServerFn({ method: "POST" })
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     if (!data.rightsConfirmed) throw new Error("RIGHTS_REQUIRED");
-    const publish = boothPublishAllowed(liveTransportInfo(runtimeLiveEnv()));
-    if (!publish.ok) throw new Error(publish.error ?? "LIVEKIT_NOT_CONFIGURED");
     let sub = (
       await sql<{ plan: string; status: string }>`
         select plan, status from subscriptions where user_id = ${context.userId}
@@ -157,14 +165,25 @@ export const startBoothLive = createServerFn({ method: "POST" })
     const displayName = data.displayName.trim() || "Resident";
     const streamKey = `${context.userId.slice(0, 8)}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     await sql`delete from booth_lives where user_id = ${context.userId}`;
-    await sql`
-      insert into booth_lives (
-        id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured, stream_key
-      ) values (
-        ${id}, ${context.userId}, ${displayName}, ${data.photo ?? null}, ${title}, ${genre},
-        ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, ${data.hasCamera}, 1, ${featured}, ${streamKey}
-      )
-    `;
+    try {
+      await sql`
+        insert into booth_lives (
+          id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured, stream_key
+        ) values (
+          ${id}, ${context.userId}, ${displayName}, ${data.photo ?? null}, ${title}, ${genre},
+          ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, ${data.hasCamera}, 1, ${featured}, ${streamKey}
+        )
+      `;
+    } catch {
+      await sql`
+        insert into booth_lives (
+          id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, featured
+        ) values (
+          ${id}, ${context.userId}, ${displayName}, ${data.photo ?? null}, ${title}, ${genre},
+          ${data.city ?? "UK"}, ${data.citySlug ?? "london"}, ${engine}, 132, ${seed}, ${data.hasCamera}, 1, ${featured}
+        )
+      `;
+    }
     const rows = await sql<LiveRow>`
       select id, user_id, display_name, photo, title, genre, city, city_slug, engine, bpm, seed, has_camera, listeners, started_at, featured, watch_url, embed_url, source
       from booth_lives where id = ${id}
