@@ -33,12 +33,26 @@ describe("resolveLiveTransport", () => {
       "mesh",
     );
   });
-  it("defaults preview/staging to livekit", () => {
+  it("defaults preview to livekit and fail-closes without keys", () => {
     assert.equal(resolveLiveTransport({ VERCEL_ENV: "preview" }), "livekit");
-    assert.equal(
-      resolveLiveTransport({ APP_URL: "https://staging.example.com", VERCEL_ENV: "production" }),
-      "livekit",
-    );
+    const plan = clientTransportPlan(liveTransportInfo({ VERCEL_ENV: "preview" }));
+    assert.equal(plan.livekit, false);
+    assert.equal(plan.mesh, false);
+    assert.equal(plan.error, "LiveKit is not configured on this server.");
+  });
+  it("uses LiveKit on preview when Cloud keys exist — never mesh", () => {
+    const env = {
+      VERCEL_ENV: "preview",
+      LIVEKIT_URL: "wss://x.livekit.cloud",
+      LIVEKIT_API_KEY: "k",
+      LIVEKIT_API_SECRET: "s",
+    };
+    assert.equal(resolveLiveTransport(env), "livekit");
+    assert.deepEqual(clientTransportPlan(liveTransportInfo(env)), {
+      livekit: true,
+      mesh: false,
+      error: null,
+    });
   });
   it("keeps www production on mesh when unset", () => {
     assert.equal(
@@ -70,16 +84,19 @@ describe("resolveLiveTransport", () => {
     );
   });
   it("keeps www on mesh even when LiveKit Cloud keys are present", () => {
-    assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://www.filthfactory.co.uk",
-        LIVEKIT_URL: "wss://x.livekit.cloud",
-        LIVEKIT_API_KEY: "k",
-        LIVEKIT_API_SECRET: "s",
-      }),
-      "mesh",
-    );
+    const env = {
+      VERCEL_ENV: "production",
+      APP_URL: "https://www.filthfactory.co.uk",
+      LIVEKIT_URL: "wss://x.livekit.cloud",
+      LIVEKIT_API_KEY: "k",
+      LIVEKIT_API_SECRET: "s",
+    };
+    assert.equal(resolveLiveTransport(env), "mesh");
+    assert.deepEqual(clientTransportPlan(liveTransportInfo(env)), {
+      livekit: false,
+      mesh: true,
+      error: null,
+    });
     assert.equal(
       resolveLiveTransport({
         VERCEL_ENV: "production",
