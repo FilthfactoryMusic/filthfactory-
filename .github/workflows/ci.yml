@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: "22"
       - run: npm run test:live
+        env:
+          LIVE_TRANSPORT: ""
+          LIVEKIT_URL: ""
+          LIVEKIT_API_KEY: ""
+          LIVEKIT_API_SECRET: ""
 
   smoke-live:
     name: smoke:live (HTTP, skip if blocked)

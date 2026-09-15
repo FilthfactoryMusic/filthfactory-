@@ -20,6 +20,23 @@ const KEYS = {
   LIVEKIT_API_SECRET: "s",
 } as const;
 
+/** Plain JSON env — no process.env prototype, no TS object-literal surprises in CI. */
+function box(overrides: Record<string, string | undefined> = {}) {
+  return JSON.parse(
+    JSON.stringify({
+      LIVE_TRANSPORT: "",
+      LIVEKIT_URL: "",
+      LIVEKIT_API_KEY: "",
+      LIVEKIT_API_SECRET: "",
+      APP_URL: "",
+      VERCEL_ENV: "",
+      VERCEL_URL: "",
+      VERCEL_PROJECT_PRODUCTION_URL: "",
+      ...overrides,
+    }),
+  ) as Record<string, string | undefined>;
+}
+
 function exportBlock(src: string, name: string) {
   const start = src.indexOf(`export const ${name}`);
   assert.ok(start >= 0, `missing export ${name}`);
@@ -49,74 +66,60 @@ describe("liveKitRoomName", () => {
 
 describe("resolveLiveTransport", () => {
   it("honors LIVE_TRANSPORT=livekit", () => {
-    assert.equal(resolveLiveTransport({ LIVE_TRANSPORT: "livekit" }), "livekit");
+    const env = box({ LIVE_TRANSPORT: "livekit" });
+    assert.equal(env.LIVE_TRANSPORT, "livekit");
+    assert.equal(
+      resolveLiveTransport(env),
+      "livekit",
+      `arg=${JSON.stringify(env)} processFlag=${process.env.LIVE_TRANSPORT ?? ""}`,
+    );
   });
   it("honors LIVE_TRANSPORT=mesh", () => {
-    assert.equal(
-      resolveLiveTransport({
-        LIVE_TRANSPORT: "mesh",
-        VERCEL_ENV: "preview",
-      }),
-      "mesh",
-    );
+    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "mesh", VERCEL_ENV: "preview" })), "mesh");
   });
   it("production unset without keys stays mesh", () => {
-    assert.equal(resolveLiveTransport({ VERCEL_ENV: "production" }), "mesh");
+    assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "production" })), "mesh");
     assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://www.filthfactory.co.uk",
-      }),
+      resolveLiveTransport(box({ VERCEL_ENV: "production", APP_URL: "https://www.filthfactory.co.uk" })),
       "mesh",
     );
     assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://filthfactory.vercel.app",
-      }),
+      resolveLiveTransport(box({ VERCEL_ENV: "production", APP_URL: "https://filthfactory.vercel.app" })),
       "mesh",
     );
   });
   it("configured LiveKit selects livekit, including production/www", () => {
-    assert.equal(resolveLiveTransport({ ...KEYS }), "livekit");
+    assert.equal(resolveLiveTransport(box({ ...KEYS })), "livekit");
     assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://www.filthfactory.co.uk",
-        ...KEYS,
-      }),
+      resolveLiveTransport(box({ VERCEL_ENV: "production", APP_URL: "https://www.filthfactory.co.uk", ...KEYS })),
       "livekit",
     );
-    assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "preview",
-        ...KEYS,
-      }),
-      "livekit",
-    );
+    assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "preview", ...KEYS })), "livekit");
   });
   it("explicit LIVE_TRANSPORT=livekit still wins on production", () => {
     assert.equal(
-      resolveLiveTransport({
-        VERCEL_ENV: "production",
-        APP_URL: "https://www.filthfactory.co.uk",
-        LIVE_TRANSPORT: "livekit",
-      }),
+      resolveLiveTransport(
+        box({
+          VERCEL_ENV: "production",
+          APP_URL: "https://www.filthfactory.co.uk",
+          LIVE_TRANSPORT: "livekit",
+        }),
+      ),
       "livekit",
     );
   });
   it("unset flag and missing keys resolve to mesh (preview and local)", () => {
-    assert.equal(resolveLiveTransport({}), "mesh");
-    assert.equal(resolveLiveTransport({ VERCEL_ENV: "preview" }), "mesh");
+    assert.equal(resolveLiveTransport(box()), "mesh");
+    assert.equal(resolveLiveTransport(box({ VERCEL_ENV: "preview" })), "mesh");
   });
   it("LIVE_TRANSPORT=mesh wins even when Cloud keys exist", () => {
-    assert.equal(resolveLiveTransport({ LIVE_TRANSPORT: "mesh", ...KEYS }), "mesh");
+    assert.equal(resolveLiveTransport(box({ LIVE_TRANSPORT: "mesh", ...KEYS })), "mesh");
   });
 });
 
 describe("clientTransportPlan", () => {
   it("fails closed when LiveKit is on and keys are missing", () => {
-    const info = liveTransportInfo({ LIVE_TRANSPORT: "livekit" });
+    const info = liveTransportInfo(box({ LIVE_TRANSPORT: "livekit" }));
     assert.equal(info.mode, "livekit");
     assert.equal(info.configured, false);
     assert.deepEqual(clientTransportPlan(info), {
@@ -130,10 +133,7 @@ describe("clientTransportPlan", () => {
     });
   });
   it("does not treat configured LiveKit as mesh", () => {
-    const info = liveTransportInfo({
-      LIVE_TRANSPORT: "livekit",
-      ...KEYS,
-    });
+    const info = liveTransportInfo(box({ LIVE_TRANSPORT: "livekit", ...KEYS }));
     assert.deepEqual(clientTransportPlan(info), {
       livekit: true,
       mesh: false,
@@ -143,33 +143,31 @@ describe("clientTransportPlan", () => {
   });
   it("never enables mesh when LiveKit is requested but unconfigured", () => {
     const preview = clientTransportPlan(
-      liveTransportInfo({ VERCEL_ENV: "preview", LIVE_TRANSPORT: "livekit" }),
+      liveTransportInfo(box({ VERCEL_ENV: "preview", LIVE_TRANSPORT: "livekit" })),
     );
     assert.equal(preview.mesh, false);
     assert.equal(preview.livekit, false);
     assert.equal(preview.error, "LiveKit is not configured on this server.");
 
-    const flagged = clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "livekit" }));
+    const flagged = clientTransportPlan(liveTransportInfo(box({ LIVE_TRANSPORT: "livekit" })));
     assert.equal(flagged.mesh, false);
     assert.equal(flagged.livekit, false);
   });
   it("preview with Cloud keys is livekit, never mesh", () => {
-    const plan = clientTransportPlan(
-      liveTransportInfo({ VERCEL_ENV: "preview", ...KEYS }),
-    );
+    const plan = clientTransportPlan(liveTransportInfo(box({ VERCEL_ENV: "preview", ...KEYS })));
     assert.deepEqual(plan, { livekit: true, mesh: false, error: null });
-    assert.deepEqual(boothPublishAllowed(liveTransportInfo({ VERCEL_ENV: "preview", ...KEYS })), {
+    assert.deepEqual(boothPublishAllowed(liveTransportInfo(box({ VERCEL_ENV: "preview", ...KEYS }))), {
       ok: true,
       error: null,
     });
   });
   it("keeps mesh only when mode is mesh", () => {
-    assert.deepEqual(clientTransportPlan(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
+    assert.deepEqual(clientTransportPlan(liveTransportInfo(box({ LIVE_TRANSPORT: "mesh" }))), {
       livekit: false,
       mesh: true,
       error: null,
     });
-    assert.deepEqual(boothPublishAllowed(liveTransportInfo({ LIVE_TRANSPORT: "mesh" })), {
+    assert.deepEqual(boothPublishAllowed(liveTransportInfo(box({ LIVE_TRANSPORT: "mesh" }))), {
       ok: true,
       error: null,
     });
