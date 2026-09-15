@@ -194,18 +194,29 @@ function useWatchMesh(
         const now = ctx.currentTime;
         if (nextAt < now + 0.05) nextAt = now + 0.05;
         src.start(nextAt);
-        nextAt += decoded.duration;
+        nextAt += Math.max(0.2, decoded.duration - 0.04);
         setStatus("audio");
       } catch {
         /* skip a bad slice, keep the stream */
       }
     }
 
+    let quiet = 0;
     async function tickChunks() {
       if (dead) return;
       void ctx.resume().catch(() => {});
       try {
         const rows = await pullBoothChunks({ data: { liveId: id, afterSeq } });
+        if (!rows.length) {
+          quiet += 1;
+          if (quiet >= 6) {
+            afterSeq = Math.max(0, afterSeq - 8);
+            seen.clear();
+            quiet = 0;
+          }
+        } else {
+          quiet = 0;
+        }
         for (const row of rows) {
           if (seen.has(row.seq)) continue;
           seen.add(row.seq);
