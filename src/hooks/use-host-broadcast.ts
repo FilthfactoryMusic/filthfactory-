@@ -13,10 +13,17 @@ import { useLiveTransport } from "@/hooks/use-live-transport";
 
 export function useHostBroadcast(liveId: string | null) {
   const transport = useLiveTransport();
-  // Production LiveKit keys currently mint invalid tokens. WAV/mesh is the path that reaches tablets.
-  const livekit = useHostLiveKit(liveId, false);
+  const [lkOff, setLkOff] = useState(false);
+  const livekit = useHostLiveKit(liveId, Boolean(transport.livekit && !lkOff));
   const livekitDown = Boolean(livekit.error);
   const mesh = useHostMesh(liveId);
+
+  useEffect(() => {
+    if (!livekit.error) return;
+    if (/invalid token|not configured|MISSING|DISABLED|LIVEKIT/i.test(livekit.error)) {
+      setLkOff(true);
+    }
+  }, [livekit.error]);
 
   useEffect(() => {
     if (!liveId) return;
@@ -27,8 +34,8 @@ export function useHostBroadcast(liveId: string | null) {
   }, [liveId]);
 
   return {
-    viewers: transport.livekit && !livekitDown ? livekit.viewers : mesh.viewers,
-    error: livekitDown ? null : (transport.error ?? livekit.error ?? null),
+    viewers: transport.livekit && !livekitDown && !lkOff ? livekit.viewers : mesh.viewers,
+    error: livekitDown || lkOff ? null : (transport.error ?? livekit.error ?? null),
   };
 }
 

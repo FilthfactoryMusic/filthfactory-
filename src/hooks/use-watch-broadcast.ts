@@ -20,7 +20,7 @@ export function useWatchBroadcast(liveId: string | null, enabled: boolean) {
   const transport = useLiveTransport();
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const livekitOn = false;
+  const livekitOn = Boolean(enabled && transport.livekit);
   const livekit = useWatchLiveKit(liveId, livekitOn, videoRef, audioRef);
   const mesh = useWatchMesh(liveId, enabled, videoRef, audioRef);
 
