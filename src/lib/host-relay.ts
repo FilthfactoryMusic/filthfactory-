@@ -4,8 +4,9 @@ import { downsample, floatToWav } from "@/lib/pcm-wav";
 import { postBoothChunk } from "@/lib/stream-api";
 
 const KEY = (id: string) => `ff-stream:${id}`;
-const TARGET_RATE = 16000;
-const SLICE_SEC = 0.75;
+/** Native-ish rate so mixes don't sound like a phone call. */
+const TARGET_RATE = 44100;
+const SLICE_SEC = 0.4;
 
 const memKeys = new Map<string, string>();
 
@@ -37,19 +38,91 @@ type Run = {
   proc: ScriptProcessorNode | null;
   src: MediaStreamAudioSourceNode | null;
   keep: number | null;
+  frames: number | null;
   vis: (() => void) | null;
   wake: WakeLockSentinel | null;
+  hv: HTMLVideoElement | null;
 };
 
 let run: Run | null = null;
 
 function postFile(liveId: string, seq: number, mime: string, buf: ArrayBuffer) {
   const data = bufToB64(buf);
-  if (!data.length || data.length > 180_000) return Promise.resolve();
+  if (!data.length || data.length > 350_000) return Promise.resolve();
   const payload = { liveId, seq, mime, data, streamKey: readStreamKey(liveId) };
   return postBoothChunk({ data: payload }).catch(() =>
     new Promise((r) => setTimeout(r, 400)).then(() => postBoothChunk({ data: payload }).catch(() => {})),
   );
+}
+
+function mixDown(ev: AudioProcessingEvent) {
+  const l = ev.inputBuffer.getChannelData(0);
+  const n = l.length;
+  const out = new Float32Array(n);
+  if (ev.inputBuffer.numberOfChannels < 2) {
+    out.set(l);
+    return out;
+  }
+  const r = ev.inputBuffer.getChannelData(1);
+  for (let i = 0; i < n; i++) out[i] = ((l[i] ?? 0) + (r[i] ?? 0)) * 0.5;
+  return out;
+}
+
+function lift(pcm: Float32Array) {
+  for (let i = 0; i < pcm.length; i++) {
+    const s = (pcm[i] ?? 0) * 1.45;
+    pcm[i] = s > 1 ? 1 : s < -1 ? -1 : s;
+  }
+  return pcm;
+}
+
+function jpegFrom(video: HTMLVideoElement): ArrayBuffer | null {
+  if (!video.videoWidth) return null;
+  const c = document.createElement("canvas");
+  const w = 480;
+  const h = Math.max(270, Math.round((video.videoHeight / Math.max(1, video.videoWidth)) * w));
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d");
+  if (!g) return null;
+  g.drawImage(video, 0, 0, w, h);
+  let q = 0.58;
+  let url = c.toDataURL("image/jpeg", q);
+  while (url.length > 160_000 && q > 0.28) {
+    q -= 0.08;
+    url = c.toDataURL("image/jpeg", q);
+  }
+  const b64 = url.split(",")[1];
+  if (!b64) return null;
+  const raw = atob(b64);
+  const buf = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+  return buf.buffer;
+}
+
+function armVideo(liveId: string, stream: MediaStream | null) {
+  if (!run || run.dead) return;
+  const vt = stream?.getVideoTracks().find((t) => t.readyState === "live");
+  if (!vt) return;
+  if (!run.hv) {
+    const hv = document.createElement("video");
+    hv.muted = true;
+    hv.playsInline = true;
+    hv.setAttribute("playsinline", "");
+    hv.setAttribute("autoplay", "");
+    run.hv = hv;
+  }
+  run.hv.srcObject = new MediaStream([vt]);
+  void run.hv.play().catch(() => {});
+  if (run.frames != null) return;
+  const slot = run;
+  run.frames = window.setInterval(() => {
+    if (!slot || slot.dead || !slot.hv) return;
+    const buf = jpegFrom(slot.hv);
+    if (!buf || buf.byteLength < 400) return;
+    const n = ++slot.seq;
+    void postFile(liveId, n, "image/jpeg", buf);
+  }, 200);
 }
 
 function arm(liveId: string, stream: MediaStream | null) {
@@ -64,6 +137,7 @@ function arm(liveId: string, stream: MediaStream | null) {
   run.proc = null;
   run.src = null;
   run.ctx = null;
+  armVideo(liveId, stream);
   const track = stream?.getAudioTracks().find((t) => t.readyState === "live" && t.enabled);
   if (!track) return;
   const slot = run;
@@ -72,7 +146,8 @@ function arm(liveId: string, stream: MediaStream | null) {
   const ctx = new AC();
   void ctx.resume().catch(() => {});
   const src = ctx.createMediaStreamSource(audio);
-  const proc = ctx.createScriptProcessor(4096, 1, 1);
+  const ch = Math.min(2, Math.max(1, audio.getAudioTracks()[0] ? 2 : 1));
+  const proc = ctx.createScriptProcessor(4096, ch, ch);
   const mute = ctx.createGain();
   mute.gain.value = 0;
   const pending: Float32Array[] = [];
@@ -80,8 +155,8 @@ function arm(liveId: string, stream: MediaStream | null) {
   const need = Math.floor(ctx.sampleRate * SLICE_SEC);
   proc.onaudioprocess = (ev) => {
     if (slot.dead) return;
-    const input = ev.inputBuffer.getChannelData(0);
-    pending.push(new Float32Array(input));
+    const input = mixDown(ev);
+    pending.push(input);
     count += input.length;
     if (count < need) return;
     let total = 0;
@@ -94,8 +169,9 @@ function arm(liveId: string, stream: MediaStream | null) {
     }
     pending.length = 0;
     count = 0;
-    const slim = downsample(merged, ctx.sampleRate, TARGET_RATE);
-    const wav = floatToWav(slim, TARGET_RATE);
+    const rate = Math.min(ctx.sampleRate, TARGET_RATE);
+    const slim = lift(downsample(merged, ctx.sampleRate, rate));
+    const wav = floatToWav(slim, rate);
     const n = ++slot.seq;
     void postFile(liveId, n, "audio/wav", wav);
   };
@@ -133,8 +209,10 @@ export function startHostRelay(liveId: string) {
     proc: null,
     src: null,
     keep: null,
+    frames: null,
     vis: null,
     wake: null,
+    hv: null,
   };
   run = current;
   current.unsub = subscribeBoothStream((s) => arm(liveId, s));
@@ -142,8 +220,10 @@ export function startHostRelay(liveId: string) {
   current.keep = window.setInterval(() => {
     if (current.dead) return;
     void current.ctx?.resume().catch(() => {});
-    const t = getBoothStream()?.getAudioTracks()[0];
-    if (t && t.readyState !== "live") arm(liveId, getBoothStream());
+    const s = getBoothStream();
+    const t = s?.getAudioTracks()[0];
+    if (t && t.readyState !== "live") arm(liveId, s);
+    void current.hv?.play().catch(() => {});
   }, 2000);
   current.vis = () => {
     if (document.visibilityState === "visible") {
@@ -168,9 +248,16 @@ export function stopHostRelay() {
   if (!run) return;
   run.dead = true;
   if (run.keep != null) window.clearInterval(run.keep);
+  if (run.frames != null) window.clearInterval(run.frames);
   if (run.vis) document.removeEventListener("visibilitychange", run.vis);
   try {
     void run.wake?.release();
+  } catch {
+    /* ignore */
+  }
+  try {
+    run.hv?.pause();
+    run.hv = null;
   } catch {
     /* ignore */
   }

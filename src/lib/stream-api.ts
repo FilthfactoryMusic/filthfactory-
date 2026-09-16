@@ -148,7 +148,7 @@ export const pullBoothSignals = createServerFn({ method: "POST" })
 export const postBoothChunk = createServerFn({ method: "POST" })
   .validator((d: { liveId: string; seq: number; mime: string; data: string; streamKey?: string }) => d)
   .handler(async ({ data }) => {
-    if (data.data.length > 180_000) throw new Error("CHUNK_TOO_LARGE");
+    if (data.data.length > 350_000) throw new Error("CHUNK_TOO_LARGE");
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     const key = (data.streamKey ?? "").trim();

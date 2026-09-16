@@ -183,6 +183,23 @@ function useWatchMesh(
     const id = liveId;
     const seen = new Set<number>();
 
+    const canvas = document.createElement("canvas");
+    canvas.width = 480;
+    canvas.height = 270;
+    const g = canvas.getContext("2d");
+    let picture: MediaStream | null = null;
+    try {
+      picture = canvas.captureStream(6);
+      const v = videoRef.current;
+      if (v && picture) {
+        v.srcObject = picture;
+        v.muted = true;
+        void v.play().catch(() => {});
+      }
+    } catch {
+      picture = null;
+    }
+
     async function playWav(buf: ArrayBuffer) {
       try {
         const copy = buf.slice(0);
@@ -192,13 +209,28 @@ function useWatchMesh(
         src.buffer = decoded;
         src.connect(gain);
         const now = ctx.currentTime;
-        if (nextAt < now + 0.05) nextAt = now + 0.05;
+        if (nextAt < now + 0.02) nextAt = now + 0.02;
         src.start(nextAt);
-        nextAt += Math.max(0.2, decoded.duration - 0.04);
-        setStatus("audio");
+        nextAt += decoded.duration;
+        setStatus((s) => (s === "live" ? "live" : "audio"));
       } catch {
         /* skip a bad slice, keep the stream */
       }
+    }
+
+    function drawJpeg(buf: ArrayBuffer) {
+      if (!g) return;
+      const blob = new Blob([buf], { type: "image/jpeg" });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        g.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        if (picture) setRemote(picture);
+        setStatus("live");
+      };
+      img.onerror = () => URL.revokeObjectURL(url);
+      img.src = url;
     }
 
     let quiet = 0;
@@ -209,8 +241,8 @@ function useWatchMesh(
         const rows = await pullBoothChunks({ data: { liveId: id, afterSeq } });
         if (!rows.length) {
           quiet += 1;
-          if (quiet >= 6) {
-            afterSeq = Math.max(0, afterSeq - 8);
+          if (quiet >= 16) {
+            afterSeq = Math.max(0, afterSeq - 4);
             seen.clear();
             quiet = 0;
           }
@@ -221,22 +253,25 @@ function useWatchMesh(
           if (seen.has(row.seq)) continue;
           seen.add(row.seq);
           afterSeq = Math.max(afterSeq, row.seq);
-          await playWav(b64ToBuf(row.data));
+          const buf = b64ToBuf(row.data);
+          if (String(row.mime || "").startsWith("image/")) drawJpeg(buf);
+          else await playWav(buf);
         }
       } catch {
         /* keep pulling */
       }
     }
 
-    const poll = window.setInterval(() => void tickChunks(), 400);
+    const poll = window.setInterval(() => void tickChunks(), 280);
     void tickChunks();
     return () => {
       dead = true;
       window.clearInterval(poll);
       void ctx.close().catch(() => {});
       unlockCtx.current = null;
+      picture?.getTracks().forEach((t) => t.stop());
     };
-  }, [liveId, enabled]);
+  }, [liveId, enabled, videoRef]);
 
   function unlock() {
     const ctx = unlockCtx.current;

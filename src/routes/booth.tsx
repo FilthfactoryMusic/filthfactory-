@@ -184,9 +184,13 @@ function BoothStudio({ featured }: { featured: boolean }) {
   }, []);
 
   async function audioConstraints(): Promise<MediaTrackConstraints> {
-    const raw: MediaTrackConstraints = leadIn
-      ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 } }
-      : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    const raw: MediaTrackConstraints = {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+      channelCount: { ideal: leadIn ? 2 : 1 },
+      sampleRate: { ideal: 48000 },
+    };
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((d) => d.kind === "audioinput");
