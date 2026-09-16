@@ -84,8 +84,6 @@ export const SPOOF_MERCH: MerchSku[] = [
   { id: "spoof-adihash-black", name: "Adihash tee", blurb: "Three bars.", pence: 2000, image: `/art/merch/spoof-adihash-white.jpg?v=${V}`, kind: "tee", color: "White", swatch: "#f4f4f0" },
 ];
 
-export const DROP_SHOT = "/art/merch/drop.jpg";
-
 export function allMerch() {
   return [...CLASH_MERCH, ...FACTORY_MERCH, ...CAMO_MERCH, ...SPOOF_MERCH];
 }
