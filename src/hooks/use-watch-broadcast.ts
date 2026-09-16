@@ -189,11 +189,12 @@ function useWatchMesh(
     const g = canvas.getContext("2d");
     let picture: MediaStream | null = null;
     try {
-      picture = canvas.captureStream(6);
+      picture = canvas.captureStream(8);
       const v = videoRef.current;
       if (v && picture) {
         v.srcObject = picture;
         v.muted = true;
+        v.playsInline = true;
         void v.play().catch(() => {});
       }
     } catch {
@@ -221,52 +222,67 @@ function useWatchMesh(
     function drawJpeg(buf: ArrayBuffer) {
       if (!g) return;
       const blob = new Blob([buf], { type: "image/jpeg" });
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        g.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        if (picture) setRemote(picture);
-        setStatus("live");
-      };
-      img.onerror = () => URL.revokeObjectURL(url);
-      img.src = url;
+      void createImageBitmap(blob)
+        .then((bmp) => {
+          if (dead) {
+            bmp.close();
+            return;
+          }
+          g.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+          bmp.close();
+          if (picture) setRemote(picture);
+          setStatus("live");
+          void videoRef.current?.play().catch(() => {});
+        })
+        .catch(() => {
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload = () => {
+            g.drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            if (picture) setRemote(picture);
+            setStatus("live");
+          };
+          img.onerror = () => URL.revokeObjectURL(url);
+          img.src = url;
+        });
     }
 
-    let quiet = 0;
+    let inflight = false;
     async function tickChunks() {
-      if (dead) return;
+      if (dead || inflight) return;
+      inflight = true;
       void ctx.resume().catch(() => {});
       try {
         const rows = await pullBoothChunks({ data: { liveId: id, afterSeq } });
-        if (!rows.length) {
-          quiet += 1;
-          if (quiet >= 16) {
-            afterSeq = Math.max(0, afterSeq - 4);
-            seen.clear();
-            quiet = 0;
-          }
-        } else {
-          quiet = 0;
-        }
+        const pics: ArrayBuffer[] = [];
+        const sounds: ArrayBuffer[] = [];
         for (const row of rows) {
           if (seen.has(row.seq)) continue;
           seen.add(row.seq);
           afterSeq = Math.max(afterSeq, row.seq);
           const buf = b64ToBuf(row.data);
-          if (String(row.mime || "").startsWith("image/")) drawJpeg(buf);
-          else await playWav(buf);
+          if (String(row.mime || "").startsWith("image/")) pics.push(buf);
+          else sounds.push(buf);
         }
+        for (const pic of pics) drawJpeg(pic);
+        for (const wav of sounds) void playWav(wav);
       } catch {
         /* keep pulling */
+      } finally {
+        inflight = false;
       }
     }
 
-    const poll = window.setInterval(() => void tickChunks(), 280);
+    const poll = window.setInterval(() => void tickChunks(), 220);
+    const keepVid = window.setInterval(() => {
+      void videoRef.current?.play().catch(() => {});
+    }, 2000);
     void tickChunks();
     return () => {
       dead = true;
       window.clearInterval(poll);
+      window.clearInterval(keepVid);
       void ctx.close().catch(() => {});
       unlockCtx.current = null;
       picture?.getTracks().forEach((t) => t.stop());

@@ -79,16 +79,16 @@ function lift(pcm: Float32Array) {
 function jpegFrom(video: HTMLVideoElement): ArrayBuffer | null {
   if (!video.videoWidth) return null;
   const c = document.createElement("canvas");
-  const w = 480;
-  const h = Math.max(270, Math.round((video.videoHeight / Math.max(1, video.videoWidth)) * w));
+  const w = 360;
+  const h = Math.max(202, Math.round((video.videoHeight / Math.max(1, video.videoWidth)) * w));
   c.width = w;
   c.height = h;
   const g = c.getContext("2d");
   if (!g) return null;
   g.drawImage(video, 0, 0, w, h);
-  let q = 0.58;
+  let q = 0.48;
   let url = c.toDataURL("image/jpeg", q);
-  while (url.length > 160_000 && q > 0.28) {
+  while (url.length > 90_000 && q > 0.26) {
     q -= 0.08;
     url = c.toDataURL("image/jpeg", q);
   }
@@ -116,13 +116,17 @@ function armVideo(liveId: string, stream: MediaStream | null) {
   void run.hv.play().catch(() => {});
   if (run.frames != null) return;
   const slot = run;
+  let jpegBusy = false;
   run.frames = window.setInterval(() => {
-    if (!slot || slot.dead || !slot.hv) return;
+    if (!slot || slot.dead || !slot.hv || jpegBusy) return;
     const buf = jpegFrom(slot.hv);
     if (!buf || buf.byteLength < 400) return;
+    jpegBusy = true;
     const n = ++slot.seq;
-    void postFile(liveId, n, "image/jpeg", buf);
-  }, 200);
+    void postFile(liveId, n, "image/jpeg", buf).finally(() => {
+      jpegBusy = false;
+    });
+  }, 340);
 }
 
 function arm(liveId: string, stream: MediaStream | null) {

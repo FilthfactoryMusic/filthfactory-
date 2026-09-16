@@ -180,7 +180,7 @@ export const pullBoothChunks = createServerFn({ method: "POST" })
       select seq, mime, data from booth_chunks
       where live_id = ${data.liveId} and seq > ${data.afterSeq}
       order by seq asc
-      limit 24
+      limit 40
     `;
     return rows;
   });
