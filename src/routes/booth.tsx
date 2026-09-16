@@ -15,6 +15,7 @@ import { useMyBilling } from "@/lib/use-billing";
 import { useHostBroadcast } from "@/hooks/use-host-broadcast";
 import { SimulcastPanel } from "@/components/simulcast-panel";
 import { UrlGatewayPanel } from "@/components/url-gateway-panel";
+import { FactoryLoop } from "@/components/factory-loop";
 import { ObsDesk } from "@/components/obs-desk";
 import { HonestyBanner } from "@/components/honesty-banner";
 import { LogoStage } from "@/components/logo-stage";
@@ -548,6 +549,7 @@ function BoothStudio({ featured }: { featured: boolean }) {
       </div>
 
       <SimulcastPanel liveId={ownLive?.id} />
+      <FactoryLoop canSet />
       <UrlGatewayPanel />
       <ObsDesk liveId={ownLive?.id} />
 
