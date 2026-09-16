@@ -1,0 +1,44 @@
+# LiveKit booth CI. No secrets. No Vercel/LiveKit console logins.
+#
+# Required: npm run test:live (transport + grants + public viewer mint + smoke unit).
+# HTTP smoke (npm run smoke:live) hits SMOKE_BASE_URL without credentials.
+# Network / Preview SSO → skip (exit 0). Honesty failure → fail.
+# Override target with repo variable SMOKE_BASE_URL (Preview URL).
+# Full `npm test` still includes template grok tests that are red on this repo;
+# this workflow does not gate on those.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-live:
+    name: test:live
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm run test:live
+        env:
+          LIVE_TRANSPORT: ""
+          LIVEKIT_URL: ""
+          LIVEKIT_API_KEY: ""
+          LIVEKIT_API_SECRET: ""
+
+  smoke-live:
+    name: smoke:live (HTTP, skip if blocked)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Preview / production HTTP smoke
+        env:
+          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}
+        run: npm run smoke:live
