@@ -40,7 +40,7 @@ export function parseLoopUrl(raw: string): LoopPlay | null {
     if (p.length < 2) return null;
     return {
       kind: "mixcloud",
-      src: `https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=0&feed=${encodeURIComponent(p + "/")}`,
+      src: `https://www.mixcloud.com/widget/iframe/?hide_cover=1&mini=1&light=0&autoplay=0&feed=${encodeURIComponent(p + "/")}`,
       watch: `https://www.mixcloud.com${p}/`,
     };
   }

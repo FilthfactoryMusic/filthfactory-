@@ -22,7 +22,7 @@ export const setStationLoop = createServerFn({ method: "POST" })
   .validator((d: { url: string; title?: string }) => d)
   .handler(async ({ data }) => {
     const parsed = parseLoopUrl(data.url);
-    if (!parsed) throw new Error("LOOP_URL_BAD");
+    if (!parsed || parsed.kind === "youtube") throw new Error("LOOP_URL_BAD");
     const title = (data.title ?? "Filthfactory 24/7").trim().slice(0, 80) || "Filthfactory 24/7";
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
