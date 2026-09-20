@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { parseLoopUrl } from "@/lib/factory-loop";
+import { DEFAULT_LOOP_TITLE, DEFAULT_LOOP_URL, parseLoopUrl } from "@/lib/factory-loop";
 
 export const getStationLoop = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -10,10 +10,10 @@ export const getStationLoop = createServerFn({ method: "GET" }).handler(async ()
       select url, title from station_loop where id = 'main'
     `;
     const row = rows[0];
-    if (!row?.url) return { url: "", title: "Filthfactory 24/7" };
-    return { url: row.url, title: row.title || "Filthfactory 24/7" };
+    if (!row?.url) return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
+    return { url: row.url, title: row.title || DEFAULT_LOOP_TITLE };
   } catch {
-    return { url: "", title: "Filthfactory 24/7" };
+    return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
   }
 });
 
@@ -23,7 +23,7 @@ export const setStationLoop = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const parsed = parseLoopUrl(data.url);
     if (!parsed || parsed.kind === "youtube") throw new Error("LOOP_URL_BAD");
-    const title = (data.title ?? "Filthfactory 24/7").trim().slice(0, 80) || "Filthfactory 24/7";
+    const title = (data.title ?? DEFAULT_LOOP_TITLE).trim().slice(0, 80) || DEFAULT_LOOP_TITLE;
     const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     await sql`

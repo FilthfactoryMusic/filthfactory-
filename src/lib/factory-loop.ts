@@ -1,12 +1,31 @@
-/** 24/7 station loop. Host the 6-hour file on YouTube (unlisted) or Mixcloud — not on Vercel. */
+/** 24/7 station loop. Audio/mp4 on Dropbox or Mixcloud — not YouTube embeds. */
 
-export type LoopKind = "youtube" | "mixcloud" | "audio" | null;
+export type LoopKind = "youtube" | "mixcloud" | "audio" | "clip" | null;
 
 export type LoopPlay = {
   kind: LoopKind;
   src: string;
   watch: string;
 };
+
+export const DEFAULT_LOOP_URL =
+  "https://www.dropbox.com/scl/fi/100cqtu4y5ion9054avtf/db955bec9fb63c9bf19fe0da88a268ba.mp4?rlkey=7op7y1q57hfuucchysh42k2ek&dl=1";
+
+export const DEFAULT_LOOP_TITLE = "Filthfactory 24/7";
+
+function withDropboxDl(href: string) {
+  try {
+    const u = new URL(href);
+    const host = u.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "dropbox.com" || host.endsWith(".dropbox.com")) {
+      u.searchParams.set("dl", "1");
+      u.searchParams.delete("st");
+    }
+    return u.toString();
+  } catch {
+    return href;
+  }
+}
 
 export function parseLoopUrl(raw: string): LoopPlay | null {
   const text = raw.trim();
@@ -20,9 +39,16 @@ export function parseLoopUrl(raw: string): LoopPlay | null {
   if (u.protocol !== "https:" && u.protocol !== "http:") return null;
   const host = u.hostname.replace(/^www\./, "").toLowerCase();
   const path = u.pathname.toLowerCase();
+  const src = withDropboxDl(u.href);
 
-  if (/\.(mp3|m4a|aac|ogg|wav|flac)(\?|$)/i.test(path) || /\.(mp3|m4a|aac|ogg|wav)(\?|$)/i.test(u.search)) {
-    return { kind: "audio", src: u.href, watch: u.href };
+  if (/\.(mp3|m4a|aac|ogg|wav|flac)(\?|$)/i.test(path)) {
+    return { kind: "audio", src, watch: src };
+  }
+  if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(path)) {
+    return { kind: "clip", src, watch: src };
+  }
+  if (host === "dropbox.com" || host.endsWith(".dropbox.com") || host.endsWith("dropboxusercontent.com")) {
+    return { kind: "clip", src, watch: src };
   }
 
   if (host === "youtu.be") {
