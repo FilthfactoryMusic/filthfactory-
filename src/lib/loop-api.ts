@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { DEFAULT_LOOP_TITLE, DEFAULT_LOOP_URL, parseLoopUrl } from "@/lib/factory-loop";
 
+function usable(url: string) {
+  const p = parseLoopUrl(url);
+  return p?.kind === "audio" || p?.kind === "clip" ? p.src : "";
+}
+
 export const getStationLoop = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const { getSql } = await import("@/lib/db");
@@ -10,9 +15,9 @@ export const getStationLoop = createServerFn({ method: "GET" }).handler(async ()
       select url, title from station_loop where id = 'main'
     `;
     const row = rows[0];
-    if (!row?.url || row.url.includes(".mp4") || row.url.includes("dropbox.com"))
-      return { url: DEFAULT_LOOP_URL, title: row?.title || DEFAULT_LOOP_TITLE };
-    return { url: row.url, title: row.title || DEFAULT_LOOP_TITLE };
+    const src = usable(row?.url || "");
+    if (src) return { url: src, title: row?.title || DEFAULT_LOOP_TITLE };
+    return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
   } catch {
     return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
   }

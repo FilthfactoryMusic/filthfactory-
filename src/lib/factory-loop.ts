@@ -47,9 +47,15 @@ export function parseLoopUrl(raw: string): LoopPlay | null {
   if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(path)) {
     return { kind: "clip", src, watch: src };
   }
-  if (host === "dropbox.com" || host.endsWith(".dropbox.com") || host.endsWith("dropboxusercontent.com")) {
-    return { kind: "clip", src, watch: src };
+  if (host === "github.com" || host.endsWith("githubusercontent.com")) {
+    if (/\.(mp3|m4a|aac|ogg|wav|flac|mp4)(\?|$)/i.test(path)) {
+      return { kind: path.endsWith(".mp4") ? "clip" : "audio", src, watch: src };
+    }
   }
+  if (host === "dropbox.com" || host.endsWith(".dropbox.com") || host.endsWith("dropboxusercontent.com")) {
+    return { kind: path.includes(".m4a") || path.includes(".mp3") ? "audio" : "clip", src, watch: src };
+  }
+
 
   if (host === "youtu.be") {
     const id = u.pathname.replace(/^\//, "").slice(0, 11);

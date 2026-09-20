@@ -16,8 +16,8 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [on, setOn] = useState(false);
-  const play = parseLoopUrl(url);
-  const src = play?.kind === "audio" || play?.kind === "clip" ? play.src : "";
+  const play = parseLoopUrl(url) || parseLoopUrl(DEFAULT_LOOP_URL);
+  const src = play?.kind === "audio" || play?.kind === "clip" ? play.src : DEFAULT_LOOP_URL;
   const hasAudio = Boolean(src) || play?.kind === "mixcloud";
 
   useEffect(() => {
@@ -100,18 +100,25 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
         </span>
       </button>
       {src ? (
-        <audio
-          ref={audioRef}
-          className="mt-3 w-full"
-          controls
-          loop
-          playsInline
-          preload="auto"
-          controlsList="nodownload"
-        >
-          <source src={src} type="audio/mp4" />
-          <source src={src} type="audio/aac" />
-        </audio>
+        <>
+          <audio
+            ref={audioRef}
+            className="mt-3 w-full"
+            src={src}
+            controls
+            loop
+            playsInline
+            preload="auto"
+          />
+          <video
+            className="sr-only"
+            src={src}
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden
+          />
+        </>
       ) : play?.kind === "mixcloud" ? (
         <iframe
           title={title}
