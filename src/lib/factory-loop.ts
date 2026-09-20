@@ -9,7 +9,7 @@ export type LoopPlay = {
 };
 
 export const DEFAULT_LOOP_URL =
-  "https://www.dropbox.com/scl/fi/100cqtu4y5ion9054avtf/db955bec9fb63c9bf19fe0da88a268ba.m4a?rlkey=7op7y1q57hfuucchysh42k2ek&dl=1";
+  "https://github.com/FilthfactoryMusic/filthfactory-/releases/download/loop-v1/filthfactory-24-7.m4a";
 
 export const DEFAULT_LOOP_TITLE = "Filthfactory 24/7";
 

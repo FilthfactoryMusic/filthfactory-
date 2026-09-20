@@ -10,7 +10,6 @@ import { LogoStage } from "@/components/logo-stage";
 export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
   const user = useCurrentUser();
   const audioRef = useRef<HTMLAudioElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [url, setUrl] = useState(DEFAULT_LOOP_URL);
   const [title, setTitle] = useState(DEFAULT_LOOP_TITLE);
   const [draft, setDraft] = useState(DEFAULT_LOOP_URL);
@@ -18,8 +17,8 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
   const [err, setErr] = useState<string | null>(null);
   const [on, setOn] = useState(false);
   const play = parseLoopUrl(url);
-  const hasAudio = play?.kind === "audio" || play?.kind === "clip" || play?.kind === "mixcloud";
-  const blockedYt = play?.kind === "youtube";
+  const src = play?.kind === "audio" || play?.kind === "clip" ? play.src : "";
+  const hasAudio = Boolean(src) || play?.kind === "mixcloud";
 
   useEffect(() => {
     void getStationLoop()
@@ -32,25 +31,34 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
   }, []);
 
   useEffect(() => {
-    const el = play?.kind === "clip" ? videoRef.current : audioRef.current;
+    const el = audioRef.current;
     if (!el) return;
     el.loop = true;
     const mark = () => setOn(!el.paused);
+    const fail = () => setErr("Couldn't start. Use the play triangle on the bar under the stamp.");
     el.addEventListener("play", mark);
     el.addEventListener("pause", mark);
+    el.addEventListener("playing", mark);
     el.addEventListener("ended", mark);
+    el.addEventListener("error", fail);
     return () => {
       el.removeEventListener("play", mark);
       el.removeEventListener("pause", mark);
+      el.removeEventListener("playing", mark);
       el.removeEventListener("ended", mark);
+      el.removeEventListener("error", fail);
     };
-  }, [play?.kind, play?.src]);
+  }, [src]);
 
   function toggle() {
-    const el = play?.kind === "clip" ? videoRef.current : audioRef.current;
+    const el = audioRef.current;
     if (!el) return;
-    if (el.paused) void el.play().catch(() => setErr("Tap play on the bar if the phone blocked autoplay."));
-    else el.pause();
+    setErr(null);
+    if (el.paused) {
+      void el.play().catch(() => {
+        setErr("Tap the play triangle on the bar under the stamp.");
+      });
+    } else el.pause();
   }
 
   async function onSet(e: FormEvent) {
@@ -74,32 +82,36 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
         {hasAudio ? <LiveDot /> : <p className="text-xs uppercase tracking-[0.25em] text-live">24/7</p>}
         <h2 className="font-display text-2xl font-semibold uppercase tracking-wide">{title}</h2>
       </div>
-      <p className="mt-1 max-w-2xl text-sm text-muted">Audio on loop. Logo spins. Tap the stamp to play.</p>
+      <p className="mt-1 max-w-2xl text-sm text-muted">Audio on loop. Logo spins. Tap PLAY, then the stamp keeps turning.</p>
       <button
         type="button"
         onClick={toggle}
         className="relative mt-4 block w-full overflow-hidden rounded-sm bg-black text-left"
         aria-label={on ? "Pause loop" : "Play loop"}
       >
-        <LogoStage label={on ? "On air · audio" : "Tap to play"} />
+        <LogoStage label={on ? "On air · audio" : "Tap PLAY"} />
         {hasAudio ? (
           <div className="absolute left-3 top-3">
             <LiveDot />
           </div>
         ) : null}
+        <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-sm bg-live px-6 py-2 font-display text-lg font-semibold uppercase tracking-[0.2em] text-live-fg">
+          {on ? "Pause" : "Play"}
+        </span>
       </button>
-      {play?.kind === "audio" ? (
-        <audio ref={audioRef} className="mt-3 w-full" src={play.src} controls loop preload="metadata" />
-      ) : play?.kind === "clip" ? (
-        <video
-          ref={videoRef}
-          className="mt-3 h-12 w-full bg-black object-cover"
-          src={play.src}
+      {src ? (
+        <audio
+          ref={audioRef}
+          className="mt-3 w-full"
           controls
           loop
           playsInline
-          preload="metadata"
-        />
+          preload="auto"
+          controlsList="nodownload"
+        >
+          <source src={src} type="audio/mp4" />
+          <source src={src} type="audio/aac" />
+        </audio>
       ) : play?.kind === "mixcloud" ? (
         <iframe
           title={title}
@@ -107,18 +119,16 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
           className="mt-3 h-16 w-full rounded-sm bg-black"
           allow="autoplay; encrypted-media"
         />
-      ) : blockedYt ? (
-        <p className="mt-3 text-sm text-muted">YouTube blocked that video on other sites. Use Dropbox, Mixcloud or mp3.</p>
       ) : (
         <p className="mt-3 text-sm text-muted">Nothing on the loop yet.</p>
       )}
+      {err ? <p className="mt-2 text-sm text-live">{err}</p> : null}
       {canSet && user ? (
         <form onSubmit={(e) => void onSet(e)} className="mt-4 grid gap-2">
           <label className="text-sm text-muted">
-            Loop URL (Dropbox / Mixcloud / mp3)
+            Loop URL
             <Input className="mt-1" value={draft} onChange={(e) => setDraft(e.target.value)} />
           </label>
-          {err ? <p className="text-sm text-live">{err}</p> : null}
           <Button type="submit" disabled={busy || !draft.trim()} className="w-fit uppercase">
             {busy ? "Saving…" : "Put on loop"}
           </Button>
