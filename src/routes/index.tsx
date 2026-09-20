@@ -82,8 +82,8 @@ function Home() {
                 filthfactory.co.uk
               </span>
             </h1>
-            <p className="mx-auto mt-4 max-w-md font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted md:mx-0">
-              The download shops packed up. The crate didn't. Garage, grime, bassline, 140, DnB, tech house. Tap a room. Fiver a month to go live.
+            <p className="mx-auto mt-4 max-w-xl font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted md:mx-0">
+              The DJ's streaming site — D&B · UKG · 140 · house · tech · trance & more. Tap your favourite station & listen free. Stream your own sets — £5 a month.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 md:items-start">
               <Link

@@ -349,9 +349,32 @@
   }
 }
 
-.ff-logo-spin {
-  animation: ff-logo-spin 48s linear infinite;
+.ff-drip-eq {
+  border-top: 1px solid #2a2a2a;
 }
+
+.ff-drip {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: ff-drip-hang 3.6s ease-in-out infinite;
+}
+
+@keyframes ff-drip-hang {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-drip {
+    animation: none;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
@@ -362,6 +385,9 @@
   .stamp-cdj-platter,
   .ff-word,
   .ff-logo-spin {
+    animation: none;
+  }
+  .ff-drip {
     animation: none;
   }
   .stamp-cdj-deck {

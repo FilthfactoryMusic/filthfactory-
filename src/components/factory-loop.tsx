@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LiveDot } from "@/components/live-dot";
 import { LogoStage } from "@/components/logo-stage";
+import { DripEq } from "@/components/drip-eq";
 
 export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
   const user = useCurrentUser();
@@ -35,18 +36,15 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
     if (!el) return;
     el.loop = true;
     const mark = () => setOn(!el.paused);
-    const fail = () => setErr("Couldn't start. Use the play triangle on the bar under the stamp.");
     el.addEventListener("play", mark);
     el.addEventListener("pause", mark);
     el.addEventListener("playing", mark);
     el.addEventListener("ended", mark);
-    el.addEventListener("error", fail);
     return () => {
       el.removeEventListener("play", mark);
       el.removeEventListener("pause", mark);
       el.removeEventListener("playing", mark);
       el.removeEventListener("ended", mark);
-      el.removeEventListener("error", fail);
     };
   }, [src]);
 
@@ -54,11 +52,8 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
     const el = audioRef.current;
     if (!el) return;
     setErr(null);
-    if (el.paused) {
-      void el.play().catch(() => {
-        setErr("Tap the play triangle on the bar under the stamp.");
-      });
-    } else el.pause();
+    if (el.paused) void el.play().catch(() => setErr(null));
+    else el.pause();
   }
 
   async function onSet(e: FormEvent) {
@@ -70,7 +65,7 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
       setUrl(row.url);
       setTitle(row.title);
     } catch {
-      setErr("Need Mixcloud, Dropbox, mp3/m4a or mp4. YouTube embeds are blocked. Sign in first.");
+      setErr("Need Mixcloud, Dropbox, mp3/m4a or mp4. Sign in first.");
     } finally {
       setBusy(false);
     }
@@ -78,18 +73,23 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
 
   return (
     <section className="mt-10 border border-border bg-surface p-5">
-      <div className="flex items-center gap-3">
-        {hasAudio ? <LiveDot /> : <p className="text-xs uppercase tracking-[0.25em] text-live">24/7</p>}
-        <h2 className="font-display text-2xl font-semibold uppercase tracking-wide">{title}</h2>
+      <div className="flex flex-wrap items-center gap-3">
+        {hasAudio ? <LiveDot /> : null}
+        <h2 className="min-w-0">
+          <span className="sr-only">{title}</span>
+          <img src="/art/brand/word-graff.png?v=graff1" alt="" className="h-8 w-auto sm:h-10" />
+        </h2>
       </div>
-      <p className="mt-1 max-w-2xl text-sm text-muted">Audio on loop. Logo spins. Tap PLAY, then the stamp keeps turning.</p>
+      <p className="mt-2 max-w-2xl font-display text-sm font-semibold uppercase leading-relaxed tracking-wide text-muted">
+        The last Filthfactory live recorded featuring regular guest DJs & takeovers — playing 24hrs a day.
+      </p>
       <button
         type="button"
         onClick={toggle}
         className="relative mt-4 block w-full overflow-hidden rounded-sm bg-black text-left"
         aria-label={on ? "Pause loop" : "Play loop"}
       >
-        <LogoStage label={on ? "On air · audio" : "Tap PLAY"} />
+        <LogoStage label={on ? "On air" : "Play"} />
         {hasAudio ? (
           <div className="absolute left-3 top-3">
             <LiveDot />
@@ -101,23 +101,8 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
       </button>
       {src ? (
         <>
-          <audio
-            ref={audioRef}
-            className="mt-3 w-full"
-            src={src}
-            controls
-            loop
-            playsInline
-            preload="auto"
-          />
-          <video
-            className="sr-only"
-            src={src}
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden
-          />
+          <audio ref={audioRef} className="sr-only" src={src} loop playsInline preload="auto" />
+          <DripEq />
         </>
       ) : play?.kind === "mixcloud" ? (
         <iframe
@@ -126,16 +111,14 @@ export function FactoryLoop({ canSet = false }: { canSet?: boolean }) {
           className="mt-3 h-16 w-full rounded-sm bg-black"
           allow="autoplay; encrypted-media"
         />
-      ) : (
-        <p className="mt-3 text-sm text-muted">Nothing on the loop yet.</p>
-      )}
-      {err ? <p className="mt-2 text-sm text-live">{err}</p> : null}
+      ) : null}
       {canSet && user ? (
         <form onSubmit={(e) => void onSet(e)} className="mt-4 grid gap-2">
           <label className="text-sm text-muted">
             Loop URL
             <Input className="mt-1" value={draft} onChange={(e) => setDraft(e.target.value)} />
           </label>
+          {err ? <p className="text-sm text-live">{err}</p> : null}
           <Button type="submit" disabled={busy || !draft.trim()} className="w-fit uppercase">
             {busy ? "Saving…" : "Put on loop"}
           </Button>
