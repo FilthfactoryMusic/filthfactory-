@@ -10,7 +10,7 @@ export const getStationLoop = createServerFn({ method: "GET" }).handler(async ()
       select url, title from station_loop where id = 'main'
     `;
     const row = rows[0];
-    if (!row?.url) return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
+    if (!row?.url || row.url.includes(".mp4")) return { url: DEFAULT_LOOP_URL, title: row?.title || DEFAULT_LOOP_TITLE };
     return { url: row.url, title: row.title || DEFAULT_LOOP_TITLE };
   } catch {
     return { url: DEFAULT_LOOP_URL, title: DEFAULT_LOOP_TITLE };
